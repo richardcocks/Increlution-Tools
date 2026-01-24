@@ -513,6 +513,35 @@
   }
 }
 
+/* Empty Favourites State */
+.empty-favourites-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 60px 20px;
+  text-align: center;
+  color: var(--color-text-secondary);
+  gap: 8px;
+}
+
+.empty-favourites-state p {
+  margin: 0;
+}
+
+.empty-favourites-state .link-button {
+  background: none;
+  border: none;
+  color: #1976d2;
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: inherit;
+  padding: 0;
+}
+
+.empty-favourites-state .link-button:hover {
+  color: #1565c0;
+}
+
 /* Print styles */
 @media print {
   .chapter-tabs {
