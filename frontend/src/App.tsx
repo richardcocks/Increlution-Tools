@@ -599,7 +599,7 @@ function App() {
   return (
     <div className="app">
       <div className="app-header">
-        <Link to="/loadouts" className="app-title">Increlution Automation Editor</Link>
+        <Link to="/loadouts" className="app-title">Loadout Manager for Increlution</Link>
         <div className="user-info">
           <span className="user-email">{user?.username}</span>
           <button className="help-button" onClick={() => { setPendingDelete(null); navigate('/help'); }} title="Help">

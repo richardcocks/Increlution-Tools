@@ -16,7 +16,7 @@ export function LandingPage() {
   return (
     <div className="landing-page">
       <div className="landing-hero">
-        <h1 className="landing-title">Increlution Automation Editor</h1>
+        <h1 className="landing-title">Loadout Manager for Increlution</h1>
         <p className="landing-subtitle">
           Visually configure your automation priorities for all actions in Increlution.
           Create, organize, and share loadouts with ease.

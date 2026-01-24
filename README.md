@@ -1,4 +1,4 @@
-# Increlution Automation Editor
+# Loadout Manager for Increlution
 
 A visual editor for managing automation loadouts in the [Increlution](https://store.steampowered.com/app/1593350/Increlution/) incremental game. Configure automation priorities for Jobs, Construction, and Exploration actions across all chapters, then export directly to your game.
 

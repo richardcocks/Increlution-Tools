@@ -1,4 +1,4 @@
-# Caddy configuration for Increlution Automation Editor
+# Caddy configuration for Loadout Manager for Increlution
 # Add this to your existing Caddyfile or use as standalone
 
 automations.eterm.uk {

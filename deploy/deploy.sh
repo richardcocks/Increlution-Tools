@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-# Increlution Automation Editor - Deployment Script
+# Loadout Manager for Increlution - Deployment Script
 # Run this script on your Linux server
 
 APP_NAME="increlution-editor"
@@ -9,7 +9,7 @@ APP_DIR="/opt/$APP_NAME"
 DATA_DIR="/var/lib/$APP_NAME"
 SERVICE_USER="www-data"
 
-echo "=== Deploying Increlution Automation Editor ==="
+echo "=== Deploying Loadout Manager for Increlution ==="
 
 # Create directories
 echo "Creating directories..."
@@ -31,7 +31,7 @@ sudo chmod +x "$APP_DIR/IncrelutionAutomationEditor.Api"
 echo "Creating systemd service..."
 sudo tee /etc/systemd/system/$APP_NAME.service > /dev/null << 'EOF'
 [Unit]
-Description=Increlution Automation Editor
+Description=Loadout Manager for Increlution
 After=network.target
 
 [Service]
