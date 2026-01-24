@@ -41,7 +41,7 @@ public class AppLimits
     public int ApiRateLimitReplenishSeconds { get; set; } = 10;   // replenish period (20 tokens per 10s = 120/min sustained)
     public int ApiRateLimitQueueLimit { get; set; } = 20;         // queue when bucket empty
 
-    // Rate limiting - Public endpoints (shared loadouts)
+    // Rate limiting - Public endpoints for anonymous users (shared loadouts)
     public int PublicRateLimitPermitCount { get; set; } = 30;     // requests allowed
     public int PublicRateLimitWindowSeconds { get; set; } = 60;   // per time window
     public int PublicRateLimitQueueLimit { get; set; } = 5;       // allow some queuing
