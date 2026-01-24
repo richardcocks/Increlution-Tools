@@ -505,10 +505,11 @@ app.MapPut("/api/settings", async (UserSettings settings, ClaimsPrincipal user, 
     if (appUser == null)
         return Results.NotFound();
 
-    appUser.Settings = System.Text.Json.JsonSerializer.Serialize(settings);
+    var sanitizedSettings = settings.Sanitized();
+    appUser.Settings = System.Text.Json.JsonSerializer.Serialize(sanitizedSettings);
     await identityDb.SaveChangesAsync();
 
-    return Results.Ok(settings);
+    return Results.Ok(sanitizedSettings);
 })
 .RequireAuthorization()
 .WithName("UpdateSettings");

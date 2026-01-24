@@ -1,4 +1,22 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace IncrelutionAutomationEditor.Api.DTOs;
+
+/// <summary>
+/// Valid theme preference values
+/// </summary>
+public static class ThemePreferences
+{
+    public const string System = "system";
+    public const string Dark = "dark";
+    public const string Light = "light";
+
+    private static readonly HashSet<string> ValidValues = new() { System, Dark, Light };
+
+    public static bool IsValid(string? value) => value != null && ValidValues.Contains(value);
+
+    public static string Sanitize(string? value) => IsValid(value) ? value! : System;
+}
 
 /// <summary>
 /// User settings for the automation editor
@@ -39,5 +57,14 @@ public record UserSettings
     /// <summary>
     /// Theme preference: "system" (default), "dark", or "light"
     /// </summary>
-    public string ThemePreference { get; init; } = "system";
+    [StringLength(10)]
+    public string ThemePreference { get; init; } = ThemePreferences.System;
+
+    /// <summary>
+    /// Returns a copy of the settings with validated/sanitized values
+    /// </summary>
+    public UserSettings Sanitized() => this with
+    {
+        ThemePreference = ThemePreferences.Sanitize(ThemePreference)
+    };
 }
