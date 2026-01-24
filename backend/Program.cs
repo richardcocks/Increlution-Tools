@@ -12,6 +12,7 @@ using IncrelutionAutomationEditor.Api.Utils;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.OutputCaching;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -107,7 +108,7 @@ builder.Services.AddRateLimiter(options =>
         limiterOptions.AutoReplenishment = true;
     });
 
-    // Public endpoints - moderate limit for anonymous access
+    // Public endpoints - tighter limit for anonymous users only
     options.AddSlidingWindowLimiter("public", limiterOptions =>
     {
         limiterOptions.PermitLimit = rateLimitConfig.PublicRateLimitPermitCount;
@@ -115,6 +116,39 @@ builder.Services.AddRateLimiter(options =>
         limiterOptions.SegmentsPerWindow = 4;
         limiterOptions.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
         limiterOptions.QueueLimit = rateLimitConfig.PublicRateLimitQueueLimit;
+    });
+
+    // Public-or-API: Uses "api" limits for authenticated users, "public" limits for anonymous
+    options.AddPolicy("public-or-api", context =>
+    {
+        var isAuthenticated = context.User?.Identity?.IsAuthenticated ?? false;
+        if (isAuthenticated)
+        {
+            // Authenticated users get generous token bucket limits
+            var userId = context.User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "unknown";
+            return RateLimitPartition.GetTokenBucketLimiter($"user:{userId}", _ => new TokenBucketRateLimiterOptions
+            {
+                TokenLimit = rateLimitConfig.ApiRateLimitTokenLimit,
+                TokensPerPeriod = rateLimitConfig.ApiRateLimitTokensPerPeriod,
+                ReplenishmentPeriod = TimeSpan.FromSeconds(rateLimitConfig.ApiRateLimitReplenishSeconds),
+                QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                QueueLimit = rateLimitConfig.ApiRateLimitQueueLimit,
+                AutoReplenishment = true
+            });
+        }
+        else
+        {
+            // Anonymous users get tighter sliding window limits by IP
+            var clientIp = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+            return RateLimitPartition.GetSlidingWindowLimiter($"anon:{clientIp}", _ => new SlidingWindowRateLimiterOptions
+            {
+                PermitLimit = rateLimitConfig.PublicRateLimitPermitCount,
+                Window = TimeSpan.FromSeconds(rateLimitConfig.PublicRateLimitWindowSeconds),
+                SegmentsPerWindow = 4,
+                QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                QueueLimit = rateLimitConfig.PublicRateLimitQueueLimit
+            });
+        }
     });
 
     // Global fallback policy using client IP (token bucket for burst tolerance)
@@ -173,6 +207,22 @@ builder.Services.AddCors(options =>
 builder.Services.AddOpenApi();
 builder.Services.AddAuthorization();
 
+// Add output caching for static game data and shared loadouts
+builder.Services.AddOutputCache(options =>
+{
+    // Cache game data for 1 hour (it never changes at runtime)
+    options.AddPolicy("GameData", policy => policy
+        .Expire(TimeSpan.FromHours(1))
+        .Tag("gamedata"));
+
+    // Cache shared loadouts for 5 minutes
+    // Tagged with "shared-loadouts" for bulk eviction when loadouts are updated
+    options.AddPolicy("SharedLoadout", policy => policy
+        .Expire(TimeSpan.FromMinutes(5))
+        .SetVaryByRouteValue("token")
+        .Tag("shared-loadouts"));
+});
+
 var app = builder.Build();
 
 // Apply pending migrations on startup
@@ -210,6 +260,7 @@ app.UseCors("AllowFrontend");
 app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseOutputCache();
 
 // Serve static files (frontend) in production
 if (!app.Environment.IsDevelopment())
@@ -577,7 +628,8 @@ app.MapGet("/api/actions", (GameDataService gameData) =>
 {
     return gameData.GetAllActions();
 })
-.RequireRateLimiting("public")
+.RequireRateLimiting("public-or-api")
+.CacheOutput("GameData")
 .WithName("GetActions");
 
 // GET /api/skills - Get all skills (from in-memory data)
@@ -585,7 +637,8 @@ app.MapGet("/api/skills", (GameDataService gameData) =>
 {
     return gameData.GetAllSkills();
 })
-.RequireRateLimiting("public")
+.RequireRateLimiting("public-or-api")
+.CacheOutput("GameData")
 .WithName("GetSkills");
 
 // === Protected Endpoints ===
@@ -930,6 +983,7 @@ app.MapPut("/api/loadout/action", async (
     UpdateActionRequest request,
     ClaimsPrincipal user,
     AppDbContext db,
+    IOutputCacheStore cacheStore,
     AppLimits limits) =>
 {
     var userId = GetUserId(user);
@@ -974,6 +1028,9 @@ app.MapPut("/api/loadout/action", async (
     loadout.UpdatedAt = DateTime.UtcNow;
     await db.SaveChangesAsync();
 
+    // Invalidate all cached shared loadouts (since we can't tag by individual loadout ID)
+    await cacheStore.EvictByTagAsync("shared-loadouts", default);
+
     return Results.Ok();
 })
 .RequireAuthorization()
@@ -984,7 +1041,8 @@ app.MapPut("/api/loadouts/{id}/name", async (
     int id,
     UpdateLoadoutNameRequest request,
     ClaimsPrincipal user,
-    AppDbContext db) =>
+    AppDbContext db,
+    IOutputCacheStore cacheStore) =>
 {
     var userId = GetUserId(user);
     var loadout = await db.Loadouts.FirstOrDefaultAsync(l => l.Id == id && l.UserId == userId);
@@ -997,6 +1055,9 @@ app.MapPut("/api/loadouts/{id}/name", async (
     loadout.Name = request.Name.Trim();
     loadout.UpdatedAt = DateTime.UtcNow;
     await db.SaveChangesAsync();
+
+    // Invalidate all cached shared loadouts
+    await cacheStore.EvictByTagAsync("shared-loadouts", default);
 
     return Results.Ok(loadout);
 })
@@ -1029,6 +1090,7 @@ app.MapPost("/api/loadouts/{id}/import", async (
     ImportLoadoutRequest request,
     ClaimsPrincipal user,
     AppDbContext db,
+    IOutputCacheStore cacheStore,
     AppLimits limits) =>
 {
     var userId = GetUserId(user);
@@ -1061,6 +1123,9 @@ app.MapPost("/api/loadouts/{id}/import", async (
     loadout.SetData(request.Data);
     loadout.UpdatedAt = DateTime.UtcNow;
     await db.SaveChangesAsync();
+
+    // Invalidate all cached shared loadouts
+    await cacheStore.EvictByTagAsync("shared-loadouts", default);
 
     return Results.Ok();
 })
@@ -1296,7 +1361,7 @@ app.MapDelete("/api/shares/{shareId}", async (int shareId, ClaimsPrincipal user,
 .RequireAuthorization()
 .WithName("RevokeShare");
 
-// GET /api/share/{token} - View shared loadout (public)
+// GET /api/share/{token} - View shared loadout (public, cached)
 app.MapGet("/api/share/{token}", async (
     string token,
     AppDbContext db,
@@ -1335,7 +1400,8 @@ app.MapGet("/api/share/{token}", async (
         ownerName
     ));
 })
-.RequireRateLimiting("public")
+.RequireRateLimiting("public-or-api")
+.CacheOutput("SharedLoadout")
 .WithName("GetSharedLoadout");
 
 // POST /api/share/{token}/save - Save to "Others' Loadouts"

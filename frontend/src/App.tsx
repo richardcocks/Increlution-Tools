@@ -338,8 +338,9 @@ function App() {
     setPendingDelete(null)
     setViewingShareToken(null)  // Clear shared view when creating new loadout
     // Update URL to /loadouts if we're not already there
+    // Use queueMicrotask to ensure state updates are committed before navigation
     if (location.pathname !== '/loadouts') {
-      navigate('/loadouts')
+      queueMicrotask(() => navigate('/loadouts'))
     }
     try {
       const loadout = await api.createLoadout('Loadout', folderId)
@@ -406,8 +407,9 @@ function App() {
     setPendingDelete(null)
     setViewingShareToken(null)  // Clear shared view when selecting folder
     // Update URL to /loadouts if we're not already there
+    // Use queueMicrotask to ensure state updates are committed before navigation
     if (location.pathname !== '/loadouts') {
-      navigate('/loadouts')
+      queueMicrotask(() => navigate('/loadouts'))
     }
   }
 
@@ -417,8 +419,9 @@ function App() {
     setPendingDelete(null)
     setViewingShareToken(null)  // Clear shared view when selecting own loadout
     // Update URL to /loadouts if we're not already there
+    // Use queueMicrotask to ensure state updates are committed before navigation
     if (location.pathname !== '/loadouts') {
-      navigate('/loadouts')
+      queueMicrotask(() => navigate('/loadouts'))
     }
   }
 
