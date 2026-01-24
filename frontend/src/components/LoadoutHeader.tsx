@@ -146,14 +146,14 @@ const LoadoutHeader = forwardRef<LoadoutHeaderHandle, LoadoutHeaderProps>(({ loa
           <button
             onClick={handlePasteImport}
             className="loadout-button"
-            title="Import from clipboard (Ctrl+V)"
+            title="Paste loadout data exported from Increlution (Ctrl+V)"
             disabled={loadout.isProtected}
           >
-            <i className="fas fa-clipboard"></i> Import (Paste)
+            <i className="fas fa-clipboard"></i> Paste from Game
           </button>
         )}
-        <button onClick={onExportClipboard} className="loadout-button" title="Export to clipboard">
-          <i className="fas fa-copy"></i> Export (Clipboard)
+        <button onClick={onExportClipboard} className="loadout-button" title="Copy loadout data to paste into Increlution">
+          <i className="fas fa-copy"></i> Copy for Game
         </button>
         <button
           onClick={() => setShowShareModal(true)}

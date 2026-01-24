@@ -191,9 +191,10 @@ export function EmbeddedSharedLoadout({ token, onClose }: EmbeddedSharedLoadoutP
           <button
             className="embedded-action-button secondary"
             onClick={handleExportClipboard}
+            title="Copy loadout data to paste into Increlution"
           >
             <i className="fas fa-copy" />
-            Copy to Clipboard
+            Copy for Game
           </button>
         </div>
       </div>
