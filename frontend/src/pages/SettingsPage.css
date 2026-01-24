@@ -4,7 +4,7 @@
   height: 100%;
   width: 100%;
   flex: 1;
-  background: white;
+  background: var(--color-bg-base);
 }
 
 .settings-header {
@@ -13,7 +13,7 @@
   justify-content: center;
   gap: 16px;
   padding: 16px 20px;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid var(--color-border-default);
   flex-shrink: 0;
 }
 
@@ -35,18 +35,18 @@
   align-items: center;
   gap: 8px;
   background: none;
-  border: 1px solid #ddd;
+  border: 1px solid var(--color-border-strong);
   border-radius: 4px;
   padding: 8px 12px;
   font-size: 14px;
-  color: #333;
+  color: var(--color-text-primary);
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .back-button:hover {
-  background: #f5f5f5;
-  border-color: #bbb;
+  background: var(--color-bg-muted);
+  border-color: var(--color-border-default);
 }
 
 .settings-content {
@@ -68,13 +68,13 @@
 .settings-section h3 {
   margin: 0 0 12px 0;
   font-size: 16px;
-  color: #333;
+  color: var(--color-text-primary);
 }
 
 .section-description {
   margin: 0 0 12px 0;
   font-size: 14px;
-  color: #666;
+  color: var(--color-text-secondary);
 }
 
 .radio-group {
@@ -94,7 +94,7 @@
 .radio-label,
 .checkbox-label {
   font-size: 14px;
-  color: #333;
+  color: var(--color-text-primary);
 }
 
 .radio-option input,
@@ -113,22 +113,23 @@
 
 .quick-action-btn {
   padding: 6px 12px;
-  background: #f5f5f5;
-  border: 1px solid #ddd;
+  background: var(--color-bg-muted);
+  border: 1px solid var(--color-border-strong);
   border-radius: 4px;
   font-size: 12px;
+  color: var(--color-text-primary);
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .quick-action-btn:hover {
-  background: #e0e0e0;
-  border-color: #bbb;
+  background: var(--color-bg-subtle);
+  border-color: var(--color-border-default);
 }
 
 /* Skills table layout */
 .skills-table {
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--color-border-default);
   border-radius: 4px;
   overflow: hidden;
 }
@@ -137,15 +138,16 @@
   display: grid;
   grid-template-columns: 1fr repeat(3, 80px);
   gap: 0;
-  background: #f5f5f5;
-  border-bottom: 1px solid #e0e0e0;
+  background: var(--color-bg-muted);
+  border-bottom: 1px solid var(--color-border-default);
   font-weight: 500;
   font-size: 13px;
+  color: var(--color-text-primary);
 }
 
 .skill-name-header {
   padding: 10px 12px;
-  border-right: 1px solid #e0e0e0;
+  border-right: 1px solid var(--color-border-default);
 }
 
 .action-type-header {
@@ -154,7 +156,7 @@
   justify-content: center;
   padding: 10px 4px;
   text-align: center;
-  border-right: 1px solid #e0e0e0;
+  border-right: 1px solid var(--color-border-default);
   font-size: 12px;
 }
 
@@ -171,7 +173,7 @@
   display: grid;
   grid-template-columns: 1fr repeat(3, 80px);
   gap: 0;
-  border-bottom: 1px solid #e8e8e8;
+  border-bottom: 1px solid var(--color-border-subtle);
 }
 
 .skill-row:last-child {
@@ -179,7 +181,7 @@
 }
 
 .skill-row:hover {
-  background: #fafafa;
+  background: var(--color-bg-elevated);
 }
 
 .skill-info {
@@ -187,13 +189,13 @@
   align-items: center;
   gap: 10px;
   padding: 8px 12px;
-  border-right: 1px solid #e8e8e8;
+  border-right: 1px solid var(--color-border-subtle);
 }
 
 .skill-info i {
   width: 20px;
   text-align: center;
-  color: #666;
+  color: var(--color-text-secondary);
 }
 
 .skill-name {
@@ -205,7 +207,7 @@
   align-items: center;
   justify-content: center;
   padding: 4px;
-  border-right: 1px solid #e8e8e8;
+  border-right: 1px solid var(--color-border-subtle);
   cursor: default;
 }
 
@@ -218,7 +220,7 @@
 }
 
 .skill-unset-icon {
-  color: #999;
+  color: var(--color-text-muted);
   font-size: 16px;
 }
 
@@ -250,8 +252,8 @@
 }
 
 .chapter-badge.locked {
-  background: #e0e0e0;
-  color: #999;
+  background: var(--color-bg-subtle);
+  color: var(--color-text-muted);
 }
 
 .chapter-badge i {
@@ -276,10 +278,11 @@
 
 .unlock-chapter-select select {
   padding: 8px 12px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--color-input-border);
   border-radius: 4px;
   font-size: 14px;
-  background: white;
+  background: var(--color-input-bg);
+  color: var(--color-text-primary);
   cursor: pointer;
 }
 
@@ -296,18 +299,20 @@
 .unlock-input-row input {
   flex: 1;
   padding: 10px 12px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--color-input-border);
   border-radius: 4px;
   font-size: 14px;
+  background: var(--color-input-bg);
+  color: var(--color-text-primary);
 }
 
 .unlock-input-row input:focus {
   outline: none;
-  border-color: #2196f3;
+  border-color: var(--color-input-focus-border);
 }
 
 .unlock-input-row input:disabled {
-  background: #f5f5f5;
+  background: var(--color-bg-muted);
 }
 
 .unlock-input-row button {
@@ -378,13 +383,13 @@
   margin: 0 0 4px 0;
   font-size: 14px;
   font-weight: 600;
-  color: #333;
+  color: var(--color-text-primary);
 }
 
 .danger-zone-description {
   margin: 0;
   font-size: 13px;
-  color: #666;
+  color: var(--color-text-secondary);
 }
 
 .delete-account-button {
@@ -403,4 +408,47 @@
 .delete-account-button:hover {
   background: #dc2626;
   color: white;
+}
+
+/* Danger Zone - Dark Mode */
+[data-theme="dark"] .settings-section.danger-zone {
+  border-top-color: #7f1d1d;
+}
+
+[data-theme="dark"] .danger-zone-content {
+  background: #450a0a;
+  border-color: #7f1d1d;
+}
+
+[data-theme="dark"] .delete-account-button {
+  background: transparent;
+}
+
+/* Theme Select */
+.theme-select-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.theme-select-group label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+.theme-select {
+  padding: 8px 12px;
+  border: 1px solid var(--color-input-border);
+  border-radius: 4px;
+  font-size: 14px;
+  background: var(--color-input-bg);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  min-width: 200px;
+}
+
+.theme-select:focus {
+  outline: none;
+  border-color: var(--color-input-focus-border);
 }

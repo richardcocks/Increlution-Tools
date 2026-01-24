@@ -2,12 +2,12 @@
   display: flex;
   flex-direction: column;
   height: 100vh;
-  background: #f5f5f5;
+  background: var(--color-bg-muted);
 }
 
 .shared-loadout-header {
-  background: white;
-  border-bottom: 1px solid #e0e0e0;
+  background: var(--color-bg-base);
+  border-bottom: 1px solid var(--color-border-default);
   padding: 20px 24px;
 }
 
@@ -26,7 +26,7 @@
 .shared-loadout-title h1 {
   margin: 0;
   font-size: 24px;
-  color: #333;
+  color: var(--color-text-primary);
 }
 
 .shared-badge {
@@ -46,7 +46,7 @@
   align-items: center;
   gap: 16px;
   font-size: 14px;
-  color: #666;
+  color: var(--color-text-secondary);
 }
 
 .shared-loadout-owner {
@@ -84,12 +84,12 @@
 }
 
 .shared-action-button.secondary {
-  background: #e5e7eb;
-  color: #374151;
+  background: var(--color-bg-subtle);
+  color: var(--color-text-primary);
 }
 
 .shared-action-button.secondary:hover {
-  background: #d1d5db;
+  background: var(--color-border-default);
 }
 
 /* Prominent copy button for anonymous users */
@@ -118,7 +118,7 @@
 .shared-loadout-content {
   max-width: 1200px;
   margin: 0 auto;
-  background: white;
+  background: var(--color-bg-base);
   border-radius: 8px;
   padding: 20px;
 }
@@ -137,6 +137,12 @@
   font-size: 14px;
 }
 
+[data-theme="dark"] .read-only-notice {
+  background: #422006;
+  border-color: #92400e;
+  color: #fcd34d;
+}
+
 .read-only-notice i {
   font-size: 16px;
 }
@@ -153,9 +159,18 @@
   margin-bottom: 20px;
 }
 
+[data-theme="dark"] .login-prompt {
+  background: #0c4a6e;
+  border-color: #0369a1;
+}
+
 .login-prompt-text {
   flex: 1;
   color: #0369a1;
+}
+
+[data-theme="dark"] .login-prompt-text {
+  color: #7dd3fc;
 }
 
 .login-prompt-button {
@@ -182,6 +197,7 @@
   height: 100vh;
   text-align: center;
   padding: 40px;
+  background: var(--color-bg-base);
 }
 
 .shared-loadout-error i {
@@ -192,12 +208,12 @@
 
 .shared-loadout-error h1 {
   font-size: 24px;
-  color: #333;
+  color: var(--color-text-primary);
   margin: 0 0 12px 0;
 }
 
 .shared-loadout-error p {
-  color: #666;
+  color: var(--color-text-secondary);
   margin: 0 0 24px 0;
 }
 
@@ -221,12 +237,17 @@
   align-items: center;
   justify-content: center;
   height: 100vh;
+  background: var(--color-bg-base);
 }
 
 .shared-loadout-loading i {
   font-size: 48px;
   color: #1976d2;
   margin-bottom: 16px;
+}
+
+.shared-loadout-loading p {
+  color: var(--color-text-secondary);
 }
 
 /* Type headers for read-only view */
@@ -241,10 +262,10 @@
   margin: 0;
   font-size: 16px;
   font-weight: 600;
-  color: #333;
+  color: var(--color-text-primary);
   text-align: center;
   padding: 8px;
-  background: #f9fafb;
+  background: var(--color-bg-muted);
   border-radius: 4px;
 }
 
@@ -272,14 +293,14 @@
   right: 0;
   top: 50%;
   height: 1px;
-  background: #e5e7eb;
+  background: var(--color-border-default);
 }
 
 .shared-chapter-separator-label {
-  background: white;
+  background: var(--color-bg-base);
   padding: 0 16px;
   position: relative;
-  color: #666;
+  color: var(--color-text-secondary);
   font-weight: 500;
 }
 
