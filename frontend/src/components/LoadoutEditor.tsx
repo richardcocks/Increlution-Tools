@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useCallback, useImperativeHandle, forwardRef, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import type { IncrelutionAction, Loadout, AutomationLevel, LoadoutData } from '../types/models';
 import { ActionType } from '../types/models';
 import { api } from '../services/api';
@@ -33,6 +34,7 @@ const LoadoutEditor = forwardRef<LoadoutEditorHandle, LoadoutEditorProps>(({ loa
   const [searchFilter, setSearchFilter] = useState('');
   const { showToast } = useToast();
   const { settings, favouriteActionsSet, unlockedChaptersSet } = useSettings();
+  const navigate = useNavigate();
   const headerRef = useRef<LoadoutHeaderHandle>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   // Track previous values when locking actions, so unlock can restore them
@@ -302,6 +304,83 @@ const LoadoutEditor = forwardRef<LoadoutEditorHandle, LoadoutEditorProps>(({ loa
     }
   }, [getAutomationLevel, settings.defaultSkillPriorities, updateAutomationLevel]);
 
+  // Get all actions for a given scope
+  const getActionsForScope = useCallback((scope: number | 'all' | 'fav'): IncrelutionAction[] => {
+    if (scope === 'fav') {
+      return actions.filter(a => favouriteActionsSet.has(a.id) && unlockedChaptersSet.has(a.chapter));
+    }
+    if (scope === 'all') {
+      return actions.filter(a => unlockedChaptersSet.has(a.chapter));
+    }
+    return actions.filter(a => a.chapter === scope && unlockedChaptersSet.has(a.chapter));
+  }, [actions, favouriteActionsSet, unlockedChaptersSet]);
+
+  // Bulk lock/unlock all actions in a scope
+  const bulkToggleLock = useCallback(async (scope: number | 'all' | 'fav') => {
+    if (!loadout || !loadoutId) return;
+
+    const scopeActions = getActionsForScope(scope);
+    if (scopeActions.length === 0) return;
+
+    // Check if any action is unlocked (non-null)
+    const anyUnlocked = scopeActions.some(action => {
+      const typeData = loadout.data[action.type];
+      if (!typeData) return false;
+      const level = typeData[action.originalId];
+      return level !== undefined && level !== null;
+    });
+
+    // Build new data
+    const newData: LoadoutData = {
+      0: { ...loadout.data[0] },
+      1: { ...loadout.data[1] },
+      2: { ...loadout.data[2] }
+    };
+
+    for (const action of scopeActions) {
+      const actionKey = `${action.type}:${action.originalId}`;
+
+      if (anyUnlocked) {
+        // Lock: save current value, remove from data
+        const currentLevel = newData[action.type]?.[action.originalId];
+        if (currentLevel !== undefined && currentLevel !== null) {
+          previousValuesRef.current.set(actionKey, currentLevel);
+        }
+        delete newData[action.type][action.originalId];
+      } else {
+        // Unlock: restore previous or default
+        let restoreValue = previousValuesRef.current.get(actionKey);
+        if (restoreValue === undefined) {
+          const skillKey = makeSkillActionKey(action.skillId, action.type);
+          restoreValue = settings.defaultSkillPriorities[skillKey] ?? 0;
+        }
+        previousValuesRef.current.delete(actionKey);
+        newData[action.type][action.originalId] = restoreValue;
+      }
+    }
+
+    // Optimistic update
+    const previousData = loadout.data;
+    setLoadout(prev => prev ? { ...prev, data: newData } : prev);
+
+    try {
+      await api.importLoadout(loadoutId, newData);
+      showToast(anyUnlocked ? `Locked ${scopeActions.length} actions` : `Unlocked ${scopeActions.length} actions`, 'success');
+    } catch {
+      showToast('Failed to update actions', 'error');
+      setLoadout(prev => prev ? { ...prev, data: previousData } : prev);
+    }
+  }, [loadout, loadoutId, getActionsForScope, settings.defaultSkillPriorities, showToast]);
+
+  const handleChapterClick = useCallback((e: React.MouseEvent, chapter: number | 'all' | 'fav') => {
+    if (e.ctrlKey || e.metaKey) {
+      e.preventDefault();
+      bulkToggleLock(chapter);
+    } else {
+      setActiveChapter(chapter);
+    }
+  }, [bulkToggleLock]);
+
   const updateLoadoutName = async (name: string) => {
     if (!loadout || !loadoutId) return;
 
@@ -461,13 +540,15 @@ const LoadoutEditor = forwardRef<LoadoutEditorHandle, LoadoutEditorProps>(({ loa
       <div className="chapter-tabs">
         <button
           className={`chapter-tab chapter-tab-all ${activeChapter === 'all' ? 'active' : ''} ${chaptersWithMatches && chaptersWithMatches.size === 0 ? 'faded' : ''}`}
-          onClick={() => setActiveChapter('all')}
+          onClick={(e) => handleChapterClick(e, 'all')}
+          title="All chapters (Ctrl+click to lock/unlock all)"
         >
           All
         </button>
         <button
           className={`chapter-tab chapter-tab-fav ${activeChapter === 'fav' ? 'active' : ''} ${favouriteActionsSet.size === 0 ? 'faded' : ''}`}
-          onClick={() => setActiveChapter('fav')}
+          onClick={(e) => handleChapterClick(e, 'fav')}
+          title="Favourites (Ctrl+click to lock/unlock all)"
         >
           <i className="fas fa-star" />
         </button>
@@ -477,7 +558,8 @@ const LoadoutEditor = forwardRef<LoadoutEditorHandle, LoadoutEditorProps>(({ loa
             <button
               key={chapterNumber}
               className={`chapter-tab ${activeChapter === chapterNumber ? 'active' : ''} ${!hasMatches ? 'faded' : ''}`}
-              onClick={() => setActiveChapter(chapterNumber)}
+              onClick={(e) => handleChapterClick(e, chapterNumber)}
+              title={`Chapter ${chapterNumber + 1} (Ctrl+click to lock/unlock)`}
             >
               {chapterNumber + 1}
             </button>
@@ -491,6 +573,20 @@ const LoadoutEditor = forwardRef<LoadoutEditorHandle, LoadoutEditorProps>(({ loa
         <h2 className="type-heading">Construction</h2>
         <h2 className="type-heading">Exploration</h2>
       </div>
+
+      {/* Empty Favourites State */}
+      {isFavView && favouriteActionsSet.size === 0 && (
+        <div className="empty-favourites-state">
+          <p>You haven't added any favourite actions yet.</p>
+          <p>
+            Visit the{' '}
+            <button className="link-button" onClick={() => navigate('/favourites')}>
+              Favourites page
+            </button>{' '}
+            to mark actions for quick access.
+          </p>
+        </div>
+      )}
 
       {/* All/Fav Chapters View */}
       {(isAllView || isFavView) && sortedChapters.map(chapterNumber => {

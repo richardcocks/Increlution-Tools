@@ -6,6 +6,7 @@ A visual editor for managing automation loadouts in the [Increlution](https://st
 
 - **Visual Automation Wheel**: Click to increase, right-click to decrease automation levels (Off/Low/Regular/High/Top)
 - **Lock Actions**: Ctrl+click to exclude actions from export (uses game defaults)
+- **Bulk Lock/Unlock**: Ctrl+click chapter tabs to lock/unlock all actions at once
 - **Chapter Tabs**: Quickly navigate between chapters
 - **Folder Organization**: Organize loadouts in folders with drag-and-drop
 - **Import/Export**:
@@ -15,6 +16,7 @@ A visual editor for managing automation loadouts in the [Increlution](https://st
 - **Chapter Progress**: Unlock chapters by proving you've reached them (prevents spoilers)
 - **Favourites**: Save and quickly access favourite loadout configurations
 - **Default Priorities**: Configure default skill priorities for new loadouts
+- **Dark Mode**: Light, dark, or system theme preference
 - **Multi-user Support**: Each user has their own isolated loadouts
 
 ## Quick Start
@@ -80,6 +82,7 @@ Open http://localhost:5173 in your browser.
    - **Right-click**: Decrease level
    - **Ctrl+click (wheel)**: Set to maximum/minimum
    - **Ctrl+click (row)**: Lock/unlock (locked actions are excluded from export)
+   - **Ctrl+click (chapter tab)**: Bulk lock/unlock all actions in that chapter
 
 ### Import from Game
 1. In Increlution, press F1 (or Esc -> Automations) to open the Automations screen

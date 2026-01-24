@@ -123,8 +123,16 @@ Visual gauge replacing dropdown for setting automation levels:
 - **Right-click**: Decrease level
 - **Ctrl+Click (wheel)**: Set to maximum (Top) or minimum (Off)
 - **Ctrl+Click (row)**: Toggle lock (null) - excludes from export
+- **Ctrl+Click (chapter tab)**: Bulk lock/unlock all actions in that chapter (or All/Fav scope)
 
 State uses React `useState` with optimistic updates - UI updates immediately, API calls in background, reverts on error.
+
+### Favourites System
+Users can mark actions as favourites from the Favourites page (`/favourites`). Favourite actions appear in the Fav tab in the LoadoutEditor for quick access.
+
+- **FavouritesPage**: Grid of all actions grouped by chapter, click to toggle favourite status
+- **Fav tab**: Shows only favourite actions across all chapters
+- **Empty state**: When no favourites are set, shows helpful message with link to Favourites page
 
 ### Import/Export
 - **Export (Clipboard)**: Copies loadout JSON to clipboard (filtered by user's unlocked chapters)
@@ -153,6 +161,16 @@ Chapters 2-11 are locked by default to prevent spoilers. Users unlock chapters b
 
 - **SettingsContext**: Provides `unlockedChaptersSet` to all components
 - Chapter filtering applied to: exports, imports, new loadout defaults, share creation
+
+### Dark Mode / Theme System
+Users can choose between light, dark, or system theme preference. The setting persists server-side in `UserSettings.themePreference`.
+
+- **ThemePreference**: `'system' | 'dark' | 'light'` - stored in user settings
+- **ThemeContext**: Provides `themePreference`, `effectiveTheme`, `setThemePreference`, and `cycleTheme`
+- **Implementation**: Sets `data-theme` attribute on `<html>` element, CSS uses `[data-theme="dark"]` selectors
+- **System detection**: Uses `prefers-color-scheme` media query, listens for changes when preference is `'system'`
+- **FOUC prevention**: Theme preference cached in localStorage and applied in `index.html` before React loads
+- **Cycling**: Header button cycles through system → dark → light → system
 
 ## API Endpoints
 
@@ -219,7 +237,7 @@ Chapters 2-11 are locked by default to prevent spoilers. Users unlock chapters b
 
 **SavedShares**: `Id`, `UserId`, `LoadoutShareId` (FK), `SavedAt` - tracks which shares a user has saved to "Others' Loadouts"
 
-**UserSettings**: `Id`, `UserId`, `InvertMouse`, `ApplyDefaultsOnImport`, `DefaultSkillPriorities` (JSON), `UnlockedChapters` (JSON array)
+**UserSettings**: `Id`, `UserId`, `InvertMouse`, `ApplyDefaultsOnImport`, `DefaultSkillPriorities` (JSON), `UnlockedChapters` (JSON array), `ThemePreference` (system/dark/light)
 
 Each user gets their own root folder on first login.
 
