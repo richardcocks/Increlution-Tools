@@ -7,7 +7,14 @@ set -e
 #   inactive:  Deploy to whichever environment is NOT currently active (default)
 
 STATE_FILE="/var/lib/increlution-editor/active-environment"
-PUBLISH_DIR="${PUBLISH_DIR:-./publish}"
+# Look for publish folder - check current dir first, then home
+if [ -d "./publish" ]; then
+    PUBLISH_DIR="./publish"
+elif [ -d "$HOME/publish" ]; then
+    PUBLISH_DIR="$HOME/publish"
+else
+    PUBLISH_DIR="${PUBLISH_DIR:-./publish}"
+fi
 
 # Determine target environment
 get_active() {

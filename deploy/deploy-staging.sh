@@ -52,6 +52,7 @@ Environment=Discord__ClientSecret=YOUR_DISCORD_CLIENT_SECRET_HERE
 NoNewPrivileges=true
 ProtectSystem=strict
 ProtectHome=true
+PrivateTmp=true
 ReadWritePaths=/var/lib/increlution-editor-staging
 
 [Install]

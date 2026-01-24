@@ -50,6 +50,7 @@ Environment=Discord__ClientSecret=SET_VIA_SYSTEMCTL_EDIT
 NoNewPrivileges=true
 ProtectSystem=strict
 ProtectHome=true
+PrivateTmp=true
 ReadWritePaths=/var/lib/increlution-editor
 
 [Install]
@@ -79,6 +80,7 @@ Environment=Discord__ClientSecret=SET_VIA_SYSTEMCTL_EDIT
 NoNewPrivileges=true
 ProtectSystem=strict
 ProtectHome=true
+PrivateTmp=true
 ReadWritePaths=/var/lib/increlution-editor
 
 [Install]
