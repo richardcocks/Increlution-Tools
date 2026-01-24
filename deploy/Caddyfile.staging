@@ -1,0 +1,16 @@
+# Caddy configuration for Staging environment
+# Add this block to your existing Caddyfile
+
+staging.automations.eterm.uk {
+    # Reverse proxy to the staging .NET application
+    reverse_proxy localhost:5001
+
+    # Enable compression
+    encode gzip zstd
+
+    # Logging
+    log {
+        output file /var/log/caddy/staging.automations.eterm.uk.log
+        format json
+    }
+}
