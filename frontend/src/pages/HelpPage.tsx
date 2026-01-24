@@ -34,6 +34,10 @@ export function HelpPage({ onClose }: { onClose: () => void }) {
               <span className="shortcut-desc">Toggle lock (locked actions use game defaults)</span>
             </div>
             <div className="shortcut-row">
+              <span className="shortcut-key">Ctrl + Click (tab)</span>
+              <span className="shortcut-desc">Bulk lock/unlock all actions in that chapter</span>
+            </div>
+            <div className="shortcut-row">
               <span className="shortcut-key">Ctrl + V</span>
               <span className="shortcut-desc">Import loadout from clipboard</span>
             </div>

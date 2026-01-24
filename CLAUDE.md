@@ -123,8 +123,16 @@ Visual gauge replacing dropdown for setting automation levels:
 - **Right-click**: Decrease level
 - **Ctrl+Click (wheel)**: Set to maximum (Top) or minimum (Off)
 - **Ctrl+Click (row)**: Toggle lock (null) - excludes from export
+- **Ctrl+Click (chapter tab)**: Bulk lock/unlock all actions in that chapter (or All/Fav scope)
 
 State uses React `useState` with optimistic updates - UI updates immediately, API calls in background, reverts on error.
+
+### Favourites System
+Users can mark actions as favourites from the Favourites page (`/favourites`). Favourite actions appear in the Fav tab in the LoadoutEditor for quick access.
+
+- **FavouritesPage**: Grid of all actions grouped by chapter, click to toggle favourite status
+- **Fav tab**: Shows only favourite actions across all chapters
+- **Empty state**: When no favourites are set, shows helpful message with link to Favourites page
 
 ### Import/Export
 - **Export (Clipboard)**: Copies loadout JSON to clipboard (filtered by user's unlocked chapters)
