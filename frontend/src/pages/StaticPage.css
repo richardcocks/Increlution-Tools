@@ -1,0 +1,39 @@
+.static-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex: 1;
+  background-color: #1a1b26;
+  padding: 2rem;
+}
+
+.static-page-content {
+  background-color: #24283b;
+  padding: 2rem;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 600px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.static-page-content h1 {
+  color: #c0caf5;
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+}
+
+.static-page-content p {
+  color: #a9b1d6;
+  line-height: 1.6;
+  margin-bottom: 1rem;
+}
+
+.static-page-content a {
+  color: #7aa2f7;
+  text-decoration: none;
+}
+
+.static-page-content a:hover {
+  text-decoration: underline;
+}

@@ -1,0 +1,784 @@
+{
+    "0": {
+        "id": 0,
+        "name": "Wooden cart",
+        "skillId": 2,
+        "requiredProgress": "20000",
+        "automationRequirement": 5,
+        "requiredResources": {
+            "0": {
+                "itemId": 0,
+                "amount": "10"
+            }
+        },
+        "inventorySize": "5",
+        "tooltip": "Increases your <i class='far fa-trailer'></i> inventory capacity by 5"
+    },
+    "1": {
+        "id": 1,
+        "name": "Wooden hut",
+        "skillId": 2,
+        "requiredProgress": "40000",
+        "automationRequirement": 6,
+        "requiredResources": {
+            "0": {
+                "itemId": 0,
+                "amount": "20"
+            }
+        },
+        "decayMultiplier": "0.5",
+        "tooltip": "Lowers <i class='far fa-heart-broken'></i> health decay by 50%, but does not prevent it from going up again"
+    },
+    "2": {
+        "id": 2,
+        "name": "Campfire",
+        "skillId": 2,
+        "requiredProgress": "10000",
+        "automationRequirement": 7,
+        "requiredResources": {
+            "0": {
+                "itemId": 0,
+                "amount": "5"
+            }
+        },
+        "tooltip": "Allows you to cook raw food such as fish"
+    },
+    "3": {
+        "id": 3,
+        "name": "Stone cart",
+        "skillId": 2,
+        "requiredProgress": "80000",
+        "requiredResources": {
+            "0": {
+                "itemId": 0,
+                "amount": "20"
+            },
+            "1": {
+                "itemId": 2,
+                "amount": "10"
+            }
+        },
+        "inventorySize": "5",
+        "tooltip": "Increases your <i class='far fa-trailer'></i> inventory capacity by 5"
+    },
+    "4": {
+        "id": 4,
+        "name": "Stone hut",
+        "skillId": 2,
+        "requiredProgress": "180000",
+        "requiredResources": {
+            "0": {
+                "itemId": 0,
+                "amount": "50"
+            },
+            "1": {
+                "itemId": 2,
+                "amount": "20"
+            }
+        },
+        "decayMultiplier": "0.5",
+        "tooltip": "Lowers <i class='far fa-heart-broken'></i> health decay by 50%, but does not prevent it from going up again"
+    },
+    "5": {
+        "id": 5,
+        "name": "Bridge",
+        "skillId": 2,
+        "requiredProgress": "200000",
+        "requiredResources": {
+            "0": {
+                "itemId": 0,
+                "amount": "60"
+            },
+            "1": {
+                "itemId": 2,
+                "amount": "20"
+            }
+        },
+        "tooltip": "A bridge is needed to cross the lake and explore what's on the other side"
+    },
+    "6": {
+        "id": 6,
+        "name": "Raft",
+        "skillId": 2,
+        "requiredProgress": "300000",
+        "requiredResources": {
+            "0": {
+                "itemId": 0,
+                "amount": "150"
+            }
+        },
+        "tooltip": "A raft is required to sail to the nearby island"
+    },
+    "7": {
+        "id": 7,
+        "name": "Copper club",
+        "skillId": 2,
+        "requiredProgress": "600000",
+        "requiredResources": {
+            "0": {
+                "itemId": 5,
+                "amount": "10"
+            }
+        },
+        "tooltip": "Increases the multiplier of your <i class='far fa-swords'></i> combat skill by 25%"
+    },
+    "8": {
+        "id": 8,
+        "name": "Stone oven",
+        "skillId": 2,
+        "requiredProgress": "500000",
+        "requiredResources": {
+            "0": {
+                "itemId": 2,
+                "amount": "50"
+            },
+            "1": {
+                "itemId": 5,
+                "amount": "5"
+            }
+        },
+        "tooltip": "Increases the multiplier of your <i class='far fa-hat-chef'></i> cooking skill by 25%"
+    },
+    "9": {
+        "id": 9,
+        "name": "Boots",
+        "skillId": 2,
+        "requiredProgress": "900000",
+        "requiredResources": {
+            "0": {
+                "itemId": 7,
+                "amount": "15"
+            }
+        },
+        "tooltip": "Increases the multiplier of your <i class='far fa-running'></i> agility skill by 25%"
+    },
+    "10": {
+        "id": 10,
+        "name": "Raft sail",
+        "skillId": 2,
+        "requiredProgress": "900000",
+        "requiredResources": {
+            "0": {
+                "itemId": 7,
+                "amount": "15"
+            }
+        },
+        "tooltip": "Increases the multiplier of your <i class='far fa-anchor'></i> sailing skill by 25%"
+    },
+    "11": {
+        "id": 11,
+        "name": "Tree house",
+        "skillId": 2,
+        "requiredProgress": "800000",
+        "automationRequirement": 5,
+        "requiredResources": {
+            "0": {
+                "itemId": 0,
+                "amount": "300"
+            }
+        },
+        "tooltip": "Useful to search from a higher vantage point"
+    },
+    "12": {
+        "id": 12,
+        "name": "Stone house",
+        "skillId": 2,
+        "requiredProgress": "8000000",
+        "requiredResources": {
+            "0": {
+                "itemId": 2,
+                "amount": "500"
+            },
+            "1": {
+                "itemId": 5,
+                "amount": "100"
+            }
+        },
+        "decayMultiplier": "0.5",
+        "tooltip": "Lowers <i class='far fa-heart-broken'></i> health decay by 50%, but does not prevent it from going up again"
+    },
+    "13": {
+        "id": 13,
+        "name": "Cocowood raft",
+        "skillId": 2,
+        "requiredProgress": "16000000",
+        "requiredResources": {
+            "0": {
+                "itemId": 9,
+                "amount": "20"
+            }
+        },
+        "tooltip": "Increases the multiplier of your <i class='far fa-anchor'></i> sailing skill by 25%"
+    },
+    "14": {
+        "id": 14,
+        "name": "Cocowood hut",
+        "skillId": 2,
+        "requiredProgress": "40000000",
+        "requiredResources": {
+            "0": {
+                "itemId": 9,
+                "amount": "50"
+            }
+        },
+        "decayMultiplier": "0.5",
+        "tooltip": "Lowers <i class='far fa-heart-broken'></i> health decay by 50%, but does not prevent it from going up again"
+    },
+    "15": {
+        "id": 15,
+        "name": "Iron stick",
+        "skillId": 2,
+        "requiredProgress": "20000000",
+        "automationUnlockAlternative": 16,
+        "requiredResources": {
+            "0": {
+                "itemId": 9,
+                "amount": "10"
+            },
+            "1": {
+                "itemId": 10,
+                "amount": "10"
+            }
+        },
+        "tooltip": "Increases the multiplier of your <i class='far fa-swords'></i> combat skill by 25%"
+    },
+    "16": {
+        "id": 16,
+        "name": "Cocowood soles",
+        "skillId": 2,
+        "requiredProgress": "16000000",
+        "automationUnlockAlternative": 15,
+        "requiredResources": {
+            "0": {
+                "itemId": 9,
+                "amount": "20"
+            }
+        },
+        "tooltip": "Increases the multiplier of your <i class='far fa-running'></i> agility skill by 25%"
+    },
+    "17": {
+        "id": 17,
+        "name": "Reinforced belt",
+        "skillId": 2,
+        "requiredProgress": "24000000",
+        "automationUnlockAlternative": 18,
+        "requiredResources": {
+            "0": {
+                "itemId": 10,
+                "amount": "20"
+            }
+        },
+        "tooltip": "Triples your <i class='far fa-heart'></i> maximum health"
+    },
+    "18": {
+        "id": 18,
+        "name": "Cocowood cart",
+        "skillId": 2,
+        "requiredProgress": "24000000",
+        "automationUnlockAlternative": 17,
+        "requiredResources": {
+            "0": {
+                "itemId": 9,
+                "amount": "30"
+            }
+        },
+        "inventorySize": "5",
+        "tooltip": "Increases your <i class='far fa-trailer'></i> inventory capacity by 5"
+    },
+    "19": {
+        "id": 19,
+        "name": "Gemstone ring",
+        "skillId": 2,
+        "requiredProgress": "200000000",
+        "requiredResources": {
+            "0": {
+                "itemId": 13,
+                "amount": "1"
+            }
+        },
+        "tooltip": "Makes you look fancy, causing others to respect you more! Increases the multiplier of your <i class='far fa-comments'></i> social skill by 25%"
+    },
+    "20": {
+        "id": 20,
+        "name": "Small shrine",
+        "skillId": 2,
+        "requiredProgress": "490000000.00000006",
+        "maxHealthGainMultiplier": "2",
+        "requiredResources": {
+            "0": {
+                "itemId": 14,
+                "amount": "20"
+            },
+            "1": {
+                "itemId": 13,
+                "amount": "2"
+            }
+        },
+        "tooltip": "Respectful of those that have come before you. Doubles your <span style='white-space:nowrap;'><i class='far fa-heart'></i> maximum health</span> gain after life"
+    },
+    "21": {
+        "id": 21,
+        "name": "Gem pendant",
+        "skillId": 2,
+        "requiredProgress": "600000000",
+        "requiredResources": {
+            "0": {
+                "itemId": 13,
+                "amount": "3"
+            }
+        },
+        "tooltip": "Channels the ancient power of these gems into your skills! Increases the multiplier of all your skills by 10%"
+    },
+    "22": {
+        "id": 22,
+        "name": "Clay hut",
+        "skillId": 2,
+        "requiredProgress": "450000000",
+        "requiredResources": {
+            "0": {
+                "itemId": 14,
+                "amount": "100"
+            }
+        },
+        "decayMultiplier": "0.5",
+        "tooltip": "Lowers <i class='far fa-heart-broken'></i> health decay by 50%, but does not prevent it from going up again"
+    },
+    "23": {
+        "id": 23,
+        "name": "Lobster pot",
+        "skillId": 2,
+        "requiredProgress": "800000000",
+        "requiredResources": {
+            "0": {
+                "itemId": 16,
+                "amount": "20"
+            }
+        },
+        "tooltip": "A wooden cage to catch lobsters with. Allows you to catch lobsters"
+    },
+    "24": {
+        "id": 24,
+        "name": "Boat",
+        "skillId": 2,
+        "requiredProgress": "4000000000",
+        "requiredResources": {
+            "0": {
+                "itemId": 16,
+                "amount": "100"
+            }
+        },
+        "tooltip": "Used to sail bigger waters than your raft would be able to. Can be expanded after completion, if not in a hurry"
+    },
+    "25": {
+        "id": 25,
+        "name": "Cabin",
+        "skillId": 2,
+        "requiredProgress": "8000000000",
+        "requiredResources": {
+            "0": {
+                "itemId": 16,
+                "amount": "200"
+            }
+        },
+        "decayMultiplier": "0.5",
+        "tooltip": "Lowers <i class='far fa-heart-broken'></i> health decay by 50%, but does not prevent it from going up again"
+    },
+    "26": {
+        "id": 26,
+        "name": "Gathering gloves",
+        "skillId": 10,
+        "requiredProgress": "10000000000",
+        "automationUnlockAlternative": 29,
+        "requiredResources": {
+            "0": {
+                "itemId": 19,
+                "amount": "5"
+            }
+        },
+        "tooltip": "Prevents scratches on your hands while gathering. Increases the multiplier of your <i class='far fa-wheat'></i> farming skill by 25%"
+    },
+    "27": {
+        "id": 27,
+        "name": "Fishing rod",
+        "skillId": 10,
+        "requiredProgress": "10000000000",
+        "automationUnlockAlternative": 30,
+        "requiredResources": {
+            "0": {
+                "itemId": 19,
+                "amount": "5"
+            }
+        },
+        "tooltip": "Useful when catching creatures in the water. Increases the multiplier of your <i class='far fa-fish'></i> fishing skill by 25%"
+    },
+    "28": {
+        "id": 28,
+        "name": "Wooden bow",
+        "skillId": 10,
+        "requiredProgress": "20000000000",
+        "automationUnlockAlternative": 31,
+        "requiredResources": {
+            "0": {
+                "itemId": 19,
+                "amount": "10"
+            }
+        },
+        "tooltip": "Handy when hunting creatures from a distance. Increases the multiplier of your <i class='far fa-bow-arrow'></i> hunting skill by 25%"
+    },
+    "29": {
+        "id": 29,
+        "name": "Simple axe",
+        "skillId": 10,
+        "requiredProgress": "10000000000",
+        "automationUnlockAlternative": 26,
+        "requiredResources": {
+            "0": {
+                "itemId": 19,
+                "amount": "5"
+            }
+        },
+        "tooltip": "One might wonder how you've managed to cut down so many trees without a tool like this. Increases the multiplier of your <i class='far fa-axe'></i> woodcutting skill by 25%"
+    },
+    "30": {
+        "id": 30,
+        "name": "Simple hammer",
+        "skillId": 10,
+        "requiredProgress": "10000000000",
+        "automationUnlockAlternative": 27,
+        "requiredResources": {
+            "0": {
+                "itemId": 19,
+                "amount": "5"
+            }
+        },
+        "tooltip": "Hitting things with this causes constructions to complete quicker. Increases the multiplier of your <i class='far fa-hammer'></i> construction skill by 25%"
+    },
+    "31": {
+        "id": 31,
+        "name": "Copper shovel",
+        "skillId": 10,
+        "requiredProgress": "20000000000",
+        "automationUnlockAlternative": 28,
+        "requiredResources": {
+            "0": {
+                "itemId": 19,
+                "amount": "10"
+            }
+        },
+        "tooltip": "Makes digging a little easier than it is with your hands. Increases the multiplier of your <i class='far fa-shovel'></i> digging skill by 25%"
+    },
+    "32": {
+        "id": 32,
+        "name": "Pan of soup",
+        "skillId": 2,
+        "requiredProgress": "250000000000",
+        "requiredResources": {
+            "0": {
+                "itemId": 21,
+                "amount": "30"
+            },
+            "1": {
+                "itemId": 22,
+                "amount": "20"
+            },
+            "2": {
+                "itemId": 23,
+                "amount": "80"
+            }
+        },
+        "tooltip": "Provides the tribe (as well as you) with soup! It's not entirely clear what sort of soup this is, it's a local recipe"
+    },
+    "33": {
+        "id": 33,
+        "name": "Liana rope",
+        "skillId": 2,
+        "requiredProgress": "250000000000",
+        "requiredResources": {
+            "0": {
+                "itemId": 24,
+                "amount": "50"
+            }
+        },
+        "tooltip": "Weave liana vines into a sturdy rope. Useful to swing over things"
+    },
+    "34": {
+        "id": 34,
+        "name": "Fortify cart",
+        "skillId": 2,
+        "requiredProgress": "100000000000",
+        "automationUnlockAlternative": 37,
+        "requiredResources": {
+            "0": {
+                "itemId": 25,
+                "amount": "20"
+            }
+        },
+        "inventorySize": "5",
+        "tooltip": "Expands the <i class='far fa-trailer'></i> capacity of your wooden cart by 5</br>Requires a wooden cart to expand"
+    },
+    "35": {
+        "id": 35,
+        "name": "Strengthen cart",
+        "skillId": 2,
+        "requiredProgress": "250000000000",
+        "automationUnlockAlternative": 37,
+        "requiredResources": {
+            "0": {
+                "itemId": 25,
+                "amount": "50"
+            }
+        },
+        "inventorySize": "5",
+        "tooltip": "Expands the <i class='far fa-trailer'></i> capacity of your stone cart by 5</br>Requires a stone cart to expand"
+    },
+    "36": {
+        "id": 36,
+        "name": "Toughen cart",
+        "skillId": 2,
+        "requiredProgress": "500000000000",
+        "automationUnlockAlternative": 37,
+        "requiredResources": {
+            "0": {
+                "itemId": 25,
+                "amount": "100"
+            }
+        },
+        "inventorySize": "5",
+        "tooltip": "Expands the <i class='far fa-trailer'></i> capacity of your cocowood cart by 5</br>Requires a cocowood cart to expand"
+    },
+    "37": {
+        "id": 37,
+        "name": "Fortify barricade",
+        "skillId": 2,
+        "requiredProgress": "500000000000",
+        "requiredResources": {
+            "0": {
+                "itemId": 25,
+                "amount": "100"
+            }
+        },
+        "tooltip": "Use the wood from old ships to reinforce their barricades. Has no useful purpose to you, but they're not giving you a choice in the matter"
+    },
+    "38": {
+        "id": 38,
+        "name": "Limestone hut",
+        "skillId": 2,
+        "requiredProgress": "2000000000000",
+        "requiredResources": {
+            "0": {
+                "itemId": 28,
+                "amount": "50"
+            }
+        },
+        "decayMultiplier": "0.5",
+        "tooltip": "Lowers <i class='far fa-heart-broken'></i> health decay by 50%, but does not prevent it from going up again"
+    },
+    "39": {
+        "id": 39,
+        "name": "Repair minecart",
+        "skillId": 2,
+        "requiredProgress": "1000000000000",
+        "requiredResources": {
+            "0": {
+                "itemId": 28,
+                "amount": "4"
+            }
+        },
+        "tooltip": "Limestone is a tricky material to repair wheels with, but it should do the trick to travel over these rails"
+    },
+    "40": {
+        "id": 40,
+        "name": "Magma hut",
+        "skillId": 2,
+        "requiredProgress": "5000000000000",
+        "requiredResources": {
+            "0": {
+                "itemId": 30,
+                "amount": "50"
+            }
+        },
+        "decayMultiplier": "0.5",
+        "tooltip": "Lowers <i class='far fa-heart-broken'></i> health decay by 50%, but does not prevent it from going up again"
+    },
+    "41": {
+        "id": 41,
+        "name": "Magma shrine",
+        "skillId": 2,
+        "requiredProgress": "10000000000000",
+        "maxHealthGainMultiplier": "2",
+        "requiredResources": {
+            "0": {
+                "itemId": 30,
+                "amount": "100"
+            }
+        },
+        "tooltip": "For people to pay respect to nature's rawest power. Doubles your <span style='white-space:nowrap;'><i class='far fa-heart'></i> maximum health</span> gain after life"
+    },
+    "42": {
+        "id": 42,
+        "name": "Upgrade shrine",
+        "skillId": 2,
+        "requiredProgress": "25000000000000",
+        "maxHealthGainMultiplier": "1.5",
+        "automationUnlockAlternative": 41,
+        "requiredResources": {
+            "0": {
+                "itemId": 30,
+                "amount": "250"
+            }
+        },
+        "tooltip": "Expand the shrine for another 50% <span style='white-space:nowrap;'><i class='far fa-heart'></i> maximum health</span> gain after life"
+    },
+    "43": {
+        "id": 43,
+        "name": "Ceremonial fire",
+        "skillId": 6,
+        "requiredProgress": "250000000000000",
+        "requiredResources": {
+            "0": {
+                "itemId": 32,
+                "amount": "50"
+            }
+        },
+        "tooltip": "Place coal under the ceremonial fire, so it can be ignited"
+    },
+    "44": {
+        "id": 44,
+        "name": "Classic toolkit",
+        "skillId": 10,
+        "requiredProgress": "50000000000000",
+        "automationUnlockAlternative": 45,
+        "requiredResources": {
+            "0": {
+                "itemId": 33,
+                "amount": "5"
+            }
+        },
+        "tooltip": "Contains a wooden bow and a copper shovel, which increase the skill multipliers of <i class='far fa-shovel'></i> digging and <i class='far fa-bow-arrow'></i> hunting by 25%. These are the same tools as were available in the chapter 5 city, and do not stack.<br/>Only available if you haven't already obtained both items earlier"
+    },
+    "45": {
+        "id": 45,
+        "name": "Slingshot",
+        "skillId": 10,
+        "requiredProgress": "150000000000000",
+        "automationUnlockAlternative": 46,
+        "requiredResources": {
+            "0": {
+                "itemId": 33,
+                "amount": "15"
+            }
+        },
+        "tooltip": "Some kids are selling a homemade slingshot. It looks pretty decent and is probably effective at shooting small objects to some height. You can't really think of a use for it at the moment though. Perhaps you'll find a use for it at a later time?"
+    },
+    "46": {
+        "id": 46,
+        "name": "Pearl necklace",
+        "skillId": 10,
+        "requiredProgress": "500000000000000",
+        "automationUnlockAlternative": 45,
+        "requiredResources": {
+            "0": {
+                "itemId": 33,
+                "amount": "50"
+            }
+        },
+        "tooltip": "A rare collection of pearls beautifully woven into a necklace. If it wasn't for the incredibly high price, you wouldn't believe anyone would sell such a treasure<br/>Increases the multiplier of all your skills by 10%"
+    },
+    "47": {
+        "id": 47,
+        "name": "Steel belt",
+        "skillId": 2,
+        "requiredProgress": "50000000000000",
+        "automationUnlockAlternative": 49,
+        "requiredResources": {
+            "0": {
+                "itemId": 34,
+                "amount": "20"
+            }
+        },
+        "tooltip": "Quadruples your <i class='far fa-heart'></i> maximum health, but replaces your iron belt if you have one"
+    },
+    "48": {
+        "id": 48,
+        "name": "Steel hut",
+        "skillId": 2,
+        "requiredProgress": "125000000000000",
+        "automationUnlockAlternative": 49,
+        "requiredResources": {
+            "0": {
+                "itemId": 34,
+                "amount": "50"
+            }
+        },
+        "decayMultiplier": "0.5",
+        "tooltip": "Hardly comfortable, but very robust. Lowers <i class='far fa-heart-broken'></i> health decay by 50%, but does not prevent it from going up again"
+    },
+    "49": {
+        "id": 49,
+        "name": "Steel fork",
+        "skillId": 2,
+        "requiredProgress": "250000000000000",
+        "automationUnlockAlternative": 48,
+        "requiredResources": {
+            "0": {
+                "itemId": 34,
+                "amount": "100"
+            }
+        },
+        "tooltip": "Useful for consuming food. The blueprint says it should be closer to 5 steel, but getting the tines right proves tricky without further knowledge. Luckily nobody seems to pay enough attention to judge you<br/>Increases the health value of all your food by 10% for the rest of this generation, without any penalty"
+    },
+    "50": {
+        "id": 50,
+        "name": "Catapult",
+        "skillId": 2,
+        "requiredProgress": "1000000000000000",
+        "requiredResources": {
+            "0": {
+                "itemId": 36,
+                "amount": "30"
+            },
+            "1": {
+                "itemId": 37,
+                "amount": "10"
+            }
+        },
+        "tooltip": "You should be able to launch debris with such a tool! Although it'll need to be loaded after completion"
+    },
+    "51": {
+        "id": 51,
+        "name": "Load catapult",
+        "skillId": 2,
+        "requiredProgress": "300000000000000",
+        "automationRequirement": 40,
+        "requiredResources": {
+            "0": {
+                "itemId": 36,
+                "amount": "5"
+            },
+            "1": {
+                "itemId": 37,
+                "amount": "5"
+            }
+        },
+        "tooltip": "Load your catapult with some debris for maximum fire power! But you'll need to reload it again after firing your catapult"
+    },
+    "52": {
+        "id": 52,
+        "name": "Titanstone hut",
+        "skillId": 2,
+        "requiredProgress": "8000000000000000",
+        "automationUnlockAlternative": 50,
+        "requiredResources": {
+            "0": {
+                "itemId": 36,
+                "amount": "200"
+            },
+            "1": {
+                "itemId": 37,
+                "amount": "100"
+            }
+        },
+        "decayMultiplier": "0.5",
+        "tooltip": "Are you sure you have the time to build this while the titan is firing arrows at you?<br/>Lowers <i class='far fa-heart-broken'></i> health decay by 50%, but does not prevent it from going up again"
+    }
+}

@@ -1,0 +1,16 @@
+# Caddy configuration for Increlution Automation Editor
+# Add this to your existing Caddyfile or use as standalone
+
+automations.eterm.uk {
+    # Reverse proxy to the .NET application
+    reverse_proxy localhost:5000
+
+    # Optional: Enable compression
+    encode gzip zstd
+
+    # Logging
+    log {
+        output file /var/log/caddy/automations.eterm.uk.log
+        format json
+    }
+}

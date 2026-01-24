@@ -1,0 +1,162 @@
+import { describe, it, expect } from 'vitest';
+import { parseLoadoutData, parseLoadoutJson, LoadoutParseError } from './loadoutData';
+
+// Example data inline to avoid fs/path dependencies
+const exampleAutomationExport = {
+  "0": { "0": 3, "1": 1, "44": 0 },
+  "1": { "0": 1, "31": 0 },
+  "2": { "0": 4, "35": 0 }
+};
+
+const exampleAutomations2 = {
+  "0": { "0": 3, "8": 0, "53": 2 },
+  "1": { "0": 1, "30": 4, "33": 0 },
+  "2": { "0": 4, "34": 0, "241": 3 }
+};
+
+// Minified JSON (single line, no whitespace) - this is the real export format from Increlution
+const exampleNotExpanded = '{"0":{"0":3,"1":1,"2":2,"3":2,"4":1,"5":2,"6":2,"7":3,"8":0,"9":2,"10":3,"11":1,"12":3,"13":2,"14":3,"15":2,"16":2,"17":2,"18":1,"19":1,"20":2,"21":2,"22":2,"23":1,"24":2,"25":2,"26":1,"27":1,"28":2,"29":1,"30":3,"31":4,"32":4,"33":2,"34":3,"35":4,"36":3,"37":3,"38":3,"39":3,"40":3,"41":3,"42":1,"43":3,"44":0,"45":3,"46":1,"47":1,"48":2,"49":3,"50":1,"51":2,"52":3,"53":2},"1":{"0":1,"1":3,"2":3,"3":1,"4":3,"5":2,"6":2,"7":2,"8":4,"9":3,"10":1,"11":3,"12":4,"13":1,"14":2,"15":2,"16":2,"17":2,"18":2,"19":2,"20":2,"21":4,"22":3,"23":4,"24":4,"25":4,"26":4,"27":4,"28":4,"29":4,"30":4,"31":4,"32":3,"33":0,"34":3,"35":3,"36":3,"37":4,"38":2,"39":2},"2":{"0":4,"1":3,"2":4,"3":1,"4":3,"5":3,"6":3,"7":1,"8":3,"9":3,"10":3,"11":4,"12":4,"13":4,"14":3,"15":1,"16":3,"17":2,"18":4,"20":3,"22":3,"23":1,"24":2,"25":1,"26":3,"27":3,"28":3,"29":3,"30":3,"31":1,"32":3,"33":3,"34":0,"35":3,"36":2,"37":2,"38":2,"39":3,"40":2,"41":3,"42":2,"43":2,"44":3,"45":0,"46":1,"47":3,"48":2,"50":2,"51":0,"53":0,"54":2,"55":2,"56":3,"57":3,"58":3,"59":3,"60":2,"61":1,"62":3,"63":3,"64":2,"65":3,"66":2,"67":2,"68":3,"69":3,"70":3,"71":3,"72":4,"73":4,"74":3,"75":2,"76":4,"77":4,"78":4,"79":4,"80":4,"81":4,"82":2,"83":3,"84":3,"85":1,"86":3,"87":3,"88":3,"89":3,"90":1,"91":3,"92":3,"93":3,"94":4,"95":4,"96":4,"97":3,"98":3,"99":3,"100":3,"101":3,"102":4,"103":3,"104":3,"105":3,"106":2,"107":3,"108":2,"109":3,"110":3,"111":3,"112":3,"113":3,"114":4,"115":3,"116":3,"117":3,"118":3,"119":4,"120":4,"121":3,"122":3,"123":3,"124":3,"125":3,"126":3,"127":1,"128":3,"129":3,"130":3,"131":4,"132":0,"133":2,"134":4,"135":4,"136":4,"137":4,"138":4,"139":4,"140":4,"141":2,"142":3,"143":3,"149":3,"150":1,"151":3,"152":3,"153":3,"154":3,"155":3,"157":3,"158":3,"159":3,"160":3,"161":0,"162":3,"163":1,"164":3,"165":3,"166":3,"167":3,"168":3,"169":3,"170":3,"171":3,"172":3,"173":3,"174":1,"175":3,"176":3,"177":2,"178":3,"179":1,"180":3,"181":3,"182":0,"183":3,"184":3,"185":1,"187":3,"188":3,"189":3,"190":0,"191":3,"192":3,"194":3,"195":3,"196":3,"197":3,"198":3,"199":3,"200":3,"201":3,"202":1,"204":3,"205":3,"206":3,"207":3,"208":2,"209":2,"210":3,"211":3,"213":3,"214":3,"215":3,"216":3,"217":1,"218":3,"219":3,"220":1,"221":3,"222":3,"223":3,"225":3,"226":3,"227":3,"228":0,"229":3,"230":1,"231":3,"232":3,"233":3,"234":3,"235":3,"236":3,"237":3,"238":3,"239":1,"240":3,"241":3}}';
+
+describe('parseLoadoutData', () => {
+  describe('example data patterns', () => {
+    it('should parse example-automation-export pattern', () => {
+      const data = parseLoadoutData(exampleAutomationExport);
+
+      // Verify structure
+      expect(data).toHaveProperty('0');
+      expect(data).toHaveProperty('1');
+      expect(data).toHaveProperty('2');
+
+      // Verify some specific values
+      expect(data[0][0]).toBe(3);
+      expect(data[0][1]).toBe(1);
+      expect(data[0][44]).toBe(0);
+      expect(data[1][0]).toBe(1);
+      expect(data[2][0]).toBe(4);
+    });
+
+    it('should parse example-automations-2 pattern', () => {
+      const data = parseLoadoutData(exampleAutomations2);
+
+      // Verify structure
+      expect(data).toHaveProperty('0');
+      expect(data).toHaveProperty('1');
+      expect(data).toHaveProperty('2');
+
+      // Verify values including higher action IDs
+      expect(data[0][8]).toBe(0);
+      expect(data[0][53]).toBe(2);
+      expect(data[1][30]).toBe(4);
+      expect(data[2][241]).toBe(3);
+    });
+
+    it('should handle real-world JSON string with string keys', () => {
+      const json = JSON.stringify(exampleAutomationExport);
+      const data = parseLoadoutJson(json);
+
+      expect(data[0][0]).toBe(3);
+      expect(data[1][0]).toBe(1);
+      expect(data[2][0]).toBe(4);
+    });
+
+    it('should parse minified JSON (example-not-expanded)', () => {
+      const data = parseLoadoutJson(exampleNotExpanded);
+
+      // Verify structure
+      expect(data).toHaveProperty('0');
+      expect(data).toHaveProperty('1');
+      expect(data).toHaveProperty('2');
+
+      // Verify entry counts
+      expect(Object.keys(data[0]).length).toBe(54); // Jobs
+      expect(Object.keys(data[1]).length).toBe(40); // Construction
+      expect(Object.keys(data[2]).length).toBe(227); // Exploration (has gaps)
+
+      // Verify specific values
+      expect(data[0][0]).toBe(3);
+      expect(data[0][53]).toBe(2);
+      expect(data[1][39]).toBe(2);
+      expect(data[2][241]).toBe(3);
+    });
+  });
+
+  describe('valid inputs', () => {
+    it('should parse empty object', () => {
+      const data = parseLoadoutData({});
+      expect(data).toEqual({});
+    });
+
+    it('should parse object with empty action types', () => {
+      const data = parseLoadoutData({ '0': {}, '1': {}, '2': {} });
+      expect(data).toEqual({ 0: {}, 1: {}, 2: {} });
+    });
+
+    it('should parse automation levels 0-4', () => {
+      const data = parseLoadoutData({
+        '0': { '0': 0, '1': 1, '2': 2, '3': 3, '4': 4 }
+      });
+      expect(data[0][0]).toBe(0);
+      expect(data[0][1]).toBe(1);
+      expect(data[0][2]).toBe(2);
+      expect(data[0][3]).toBe(3);
+      expect(data[0][4]).toBe(4);
+    });
+
+    it('should parse null automation levels', () => {
+      const data = parseLoadoutData({
+        '0': { '0': null, '1': 2 }
+      });
+      expect(data[0][0]).toBe(null);
+      expect(data[0][1]).toBe(2);
+    });
+
+    it('should handle string keys from JSON parsing', () => {
+      const json = '{"0": {"10": 3, "20": 4}}';
+      const data = parseLoadoutJson(json);
+      expect(data[0][10]).toBe(3);
+      expect(data[0][20]).toBe(4);
+    });
+
+    it('should handle large action IDs', () => {
+      const data = parseLoadoutData({
+        '2': { '241': 3, '500': 4 }
+      });
+      expect(data[2][241]).toBe(3);
+      expect(data[2][500]).toBe(4);
+    });
+  });
+
+  describe('invalid inputs', () => {
+    it('should reject null', () => {
+      expect(() => parseLoadoutData(null)).toThrow(LoadoutParseError);
+    });
+
+    it('should reject non-object', () => {
+      expect(() => parseLoadoutData('string')).toThrow(LoadoutParseError);
+      expect(() => parseLoadoutData(123)).toThrow(LoadoutParseError);
+      expect(() => parseLoadoutData([])).toThrow(LoadoutParseError);
+    });
+
+    it('should reject invalid action types', () => {
+      expect(() => parseLoadoutData({ '3': {} })).toThrow(/Invalid action type/);
+      expect(() => parseLoadoutData({ '-1': {} })).toThrow(/Invalid action type/);
+      expect(() => parseLoadoutData({ 'foo': {} })).toThrow(/Invalid action type/);
+    });
+
+    it('should reject invalid action IDs', () => {
+      expect(() => parseLoadoutData({ '0': { '-1': 2 } })).toThrow(/Invalid action ID/);
+      expect(() => parseLoadoutData({ '0': { 'foo': 2 } })).toThrow(/Invalid action ID/);
+    });
+
+    it('should reject invalid automation levels', () => {
+      expect(() => parseLoadoutData({ '0': { '0': 5 } })).toThrow(/Invalid automation level/);
+      expect(() => parseLoadoutData({ '0': { '0': -1 } })).toThrow(/Invalid automation level/);
+      expect(() => parseLoadoutData({ '0': { '0': 'high' } })).toThrow(/Invalid automation level/);
+    });
+
+    it('should reject invalid JSON', () => {
+      expect(() => parseLoadoutJson('not json')).toThrow(/Invalid JSON/);
+      expect(() => parseLoadoutJson('{invalid}')).toThrow(/Invalid JSON/);
+    });
+  });
+});

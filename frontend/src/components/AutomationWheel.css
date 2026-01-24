@@ -1,0 +1,59 @@
+.automation-wheel {
+  --wheel-track: #ddd;
+  --wheel-tick: #999;
+  --wheel-needle: #666;
+
+  width: 40px;
+  height: 24px;
+  cursor: pointer;
+  user-select: none;
+  transition: transform 0.1s;
+}
+
+.automation-wheel:hover {
+  transform: scale(1.1);
+}
+
+.automation-wheel:active {
+  transform: scale(1.05);
+}
+
+.wheel-svg {
+  width: 100%;
+  height: 100%;
+}
+
+.wheel-needle {
+  transition: transform 0.2s ease-out;
+}
+
+/* Level-specific colors */
+.automation-wheel.level-0 {
+  --wheel-needle: #6b7280;
+  --wheel-track: #e5e7eb;
+  --wheel-tick: #9ca3af;
+}
+
+.automation-wheel.level-1 {
+  --wheel-needle: #22c55e;
+  --wheel-track: #dcfce7;
+  --wheel-tick: #86efac;
+}
+
+.automation-wheel.level-2 {
+  --wheel-needle: #3b82f6;
+  --wheel-track: #dbeafe;
+  --wheel-tick: #93c5fd;
+}
+
+.automation-wheel.level-3 {
+  --wheel-needle: #f59e0b;
+  --wheel-track: #fef3c7;
+  --wheel-tick: #fcd34d;
+}
+
+.automation-wheel.level-4 {
+  --wheel-needle: #ef4444;
+  --wheel-track: #fee2e2;
+  --wheel-tick: #fca5a5;
+}

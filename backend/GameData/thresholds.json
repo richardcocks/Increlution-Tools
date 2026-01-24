@@ -1,0 +1,57 @@
+{
+    "0": {
+        "jobId": 0,
+        "constructionId": 0,
+        "explorationId": 0
+    },
+    "1": {
+        "jobId": 8,
+        "constructionId": 7,
+        "explorationId": 9
+    },
+    "2": {
+        "jobId": 15,
+        "constructionId": 13,
+        "explorationId": 32
+    },
+    "3": {
+        "jobId": 23,
+        "constructionId": 19,
+        "explorationId": 61
+    },
+    "4": {
+        "jobId": 29,
+        "constructionId": 23,
+        "explorationId": 88
+    },
+    "5": {
+        "jobId": 38,
+        "constructionId": 32,
+        "explorationId": 134
+    },
+    "6": {
+        "jobId": 45,
+        "constructionId": 34,
+        "explorationId": 165
+    },
+    "7": {
+        "jobId": 48,
+        "constructionId": 38,
+        "explorationId": 197
+    },
+    "8": {
+        "jobId": 53,
+        "constructionId": 40,
+        "explorationId": 231
+    },
+    "9": {
+        "jobId": 55,
+        "constructionId": 43,
+        "explorationId": 254
+    },
+    "10": {
+        "jobId": 63,
+        "constructionId": 50,
+        "explorationId": 291
+    }
+}

@@ -1,0 +1,147 @@
+.delete-confirmation {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 40px;
+}
+
+.delete-confirmation-content {
+  max-width: 500px;
+  width: 100%;
+}
+
+.delete-confirmation-content h1 {
+  margin: 0 0 24px 0;
+  font-size: 28px;
+  font-weight: 600;
+  color: #333;
+}
+
+.delete-target {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px;
+  background: #f5f5f5;
+  border-radius: 8px;
+  margin-bottom: 24px;
+}
+
+.delete-target-icon {
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.delete-target-icon.folder {
+  color: #1976d2;
+}
+
+.delete-target-icon.loadout {
+  color: #666;
+}
+
+.delete-target-name {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  flex: 1;
+  font-size: 18px;
+  color: #666;
+}
+
+.delete-path-separator {
+  font-size: 12px;
+  color: #999;
+}
+
+.delete-path-current {
+  color: #333;
+  font-weight: 600;
+}
+
+.delete-target-protected {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  background: #fef3c7;
+  color: #92400e;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.delete-warning {
+  display: flex;
+  gap: 16px;
+  padding: 20px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  margin-bottom: 32px;
+}
+
+.delete-warning > i {
+  font-size: 24px;
+  color: #dc2626;
+  flex-shrink: 0;
+}
+
+.delete-warning p {
+  margin: 0;
+  color: #991b1b;
+  line-height: 1.5;
+}
+
+.delete-warning p + p {
+  margin-top: 8px;
+}
+
+.delete-message {
+  color: #666;
+  font-size: 15px;
+  line-height: 1.6;
+  margin-bottom: 32px;
+}
+
+.delete-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.delete-cancel-button,
+.delete-confirm-button {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.delete-cancel-button {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.delete-cancel-button:hover {
+  background: #d1d5db;
+}
+
+.delete-confirm-button {
+  background: #dc2626;
+  color: white;
+}
+
+.delete-confirm-button:hover:not(:disabled) {
+  background: #b91c1c;
+}
+
+.delete-confirm-button:disabled {
+  background: #fca5a5;
+  cursor: not-allowed;
+}

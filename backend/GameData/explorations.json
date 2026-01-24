@@ -1,0 +1,2861 @@
+{
+    "0": {
+        "id": 0,
+        "name": "Explore the area",
+        "skillId": 3,
+        "requiredProgress": "20000",
+        "automationRequirement": 7,
+        "tooltip": "There are just some bushes and trees around, but perhaps there are more interesting things nearby",
+        "completedStory": "After exploring the area, you've found a lake! There appear to be fish in it, perhaps you can catch some"
+    },
+    "1": {
+        "id": 1,
+        "name": "Explore the cave",
+        "skillId": 3,
+        "requiredProgress": "50000",
+        "tooltip": "It seems like there's a cave near the lake. Who knows what could be in there",
+        "completedStory": "The cave appears to consist mostly of stone. That's probably useful for construction! It also seems that there's an exit at the other side of the cave. Sadly, there seems to be a rather big spider preventing passage"
+    },
+    "2": {
+        "id": 2,
+        "name": "Fight cave spider",
+        "skillId": 7,
+        "requiredProgress": "60000",
+        "additionalDamagePerMs": "0.005",
+        "tooltip": "To reach the other side of the cave, this spider needs to be removed. By force.",
+        "completedStory": "Spider, removed. Well done! The path to the other side of the cave appears to be clear now. However, it seems like there aren't any berries on the other side. It does look like there are some kind of trees though"
+    },
+    "3": {
+        "id": 3,
+        "name": "Explore cave exit",
+        "skillId": 3,
+        "requiredProgress": "50000",
+        "tooltip": "There don't seem to be any berries on the other side of the cave, so you'll lose access to that job. However, there seems to be something else to gather",
+        "completedStory": "You've made it to the other side of the cave. It looks like there are apples hanging from those trees. They look edible!"
+    },
+    "4": {
+        "id": 4,
+        "name": "Cross the lake",
+        "skillId": 3,
+        "requiredProgress": "100000",
+        "tooltip": "There appears to be some wildlife on the other side of the lake. However, you'll need a bridge to cross this lake",
+        "completedStory": "Making it to the other side of the lake felt easy with this bridge! There also seem to be rabbits on this side of the lake, you can probably hunt some. However, it seems that there is also a wolf on this side of the lake. You know what needs to be done"
+    },
+    "5": {
+        "id": 5,
+        "name": "Fight wolf",
+        "skillId": 7,
+        "requiredProgress": "180000",
+        "additionalDamagePerMs": "0.02",
+        "tooltip": "There appears to be a wolf on this side of the lake, to venture further you need to get rid of it. Fighting worked well last time!",
+        "completedStory": "So much for that wolf. You're getting pretty good at this! Now that you're able to see a bit further, it appears that there is a shore nearby"
+    },
+    "6": {
+        "id": 6,
+        "name": "Explore the shore",
+        "skillId": 3,
+        "requiredProgress": "100000",
+        "tooltip": "The shore mostly seems to consist of a lot of sand. Perhaps you can find something more interesting with some exploration",
+        "completedStory": "It seems that there is an island on the other side of the water! But it's definitely too far for a bridge to cover. Perhaps some floating object could help here?"
+    },
+    "7": {
+        "id": 7,
+        "name": "Board your raft",
+        "skillId": 9,
+        "requiredProgress": "45000",
+        "tooltip": "The island looks mysterious, yet tempting. But you're definitely going to need a raft to get there. Once you've entered your raft, you'll lose access to all jobs, except for fishing and cooking. So you might want to save up some reserves",
+        "completedStory": "All aboard and ready to set sail! This is going to be a tough ride, especially since you can't reach most of the resources now. Let's hope your preparations will suffice!"
+    },
+    "8": {
+        "id": 8,
+        "name": "Sail to the island",
+        "skillId": 9,
+        "requiredProgress": "180000",
+        "tooltip": "The island looks mysterious, yet tempting. All you can do now, is paddle until you get there.",
+        "completedStory": "It was a tough ride, but you've made it to the island! All sorts of new adventures await you here"
+    },
+    "9": {
+        "id": 9,
+        "name": "Walk to village",
+        "skillId": 3,
+        "requiredProgress": "180000",
+        "tooltip": "It looks like there is a small village on the island. It is somewhat away from the shore and the fish don't seem to swim that far inland, but there are probably people there",
+        "completedStory": "You've made it to the village. It appears to be quite a cozy little town, there are quite a few people living here. Let's get to know them!"
+    },
+    "10": {
+        "id": 10,
+        "name": "Meet fisher",
+        "skillId": 10,
+        "requiredProgress": "60000",
+        "tooltip": "It looks like someone is fishing some other kind of fish. Maybe the fisher could teach you how!",
+        "completedStory": "Thanks to the fisher, you now know how to catch herring! Delicious for raw consumption! Especially with pickles and onions, but just raw will do"
+    },
+    "11": {
+        "id": 11,
+        "name": "Meet farmer",
+        "skillId": 10,
+        "requiredProgress": "120000",
+        "tooltip": "A friendly looking person with grain and chickens",
+        "completedStory": "The farmer seems fond of you, and says that you can gather grain whenever you want! As long you don't hurt the chickens, which seems fair"
+    },
+    "12": {
+        "id": 12,
+        "name": "Meet miner",
+        "skillId": 10,
+        "requiredProgress": "180000",
+        "tooltip": "This seems to be the resourceful person of the town. Perhaps the miner can teach you some new things",
+        "completedStory": "The miner was very open to you and allows you to use the mine whenever you want! It contains stone like you're quite used to. But also some copper that seems a bit trickier to dig. That might just be useful for other forms of construction!"
+    },
+    "13": {
+        "id": 13,
+        "name": "Meet baker",
+        "skillId": 10,
+        "requiredProgress": "240000",
+        "tooltip": "Family of the farmer, and known for making great pastries. Perhaps the baker has some tricks to teach you about baking?",
+        "completedStory": "After a very pleasant chat, the baker decided to share an old family recipe for cake with you! It takes quite a while to bake, but it tastes better than bread! The baker decided to also share an old family secret with you: \"Baking works better in an oven than on a campfire\""
+    },
+    "14": {
+        "id": 14,
+        "name": "Meet the mayor",
+        "skillId": 10,
+        "requiredProgress": "120000",
+        "tooltip": "Now that you've met most of the town, the mayor invites you for a chat!",
+        "completedStory": "The mayor tells you they have a bit of a bandit problem on the island. Perhaps you'd be so nice as to take care of that for them? After that wolf story, they seem confident that you can"
+    },
+    "15": {
+        "id": 15,
+        "name": "Enter forest",
+        "skillId": 3,
+        "requiredProgress": "180000",
+        "tooltip": "The bandits are somewhere in the forest. Entering the forest will mean you lose access to the jobs in the town, so preparations may be a good idea",
+        "completedStory": "Somewhat into the forest, you run into a group of people that are having a campfire-party. They (obviously) recognize that you're a cool person, and invite you to join them! Probably not the best idea if you want to take care of the bandit problem. But on the other hand, it sounds fun!"
+    },
+    "16": {
+        "id": 16,
+        "name": "Campfire party!",
+        "skillId": 10,
+        "requiredProgress": "3600000",
+        "maxHealthGainMultiplier": "2",
+        "automationUnlockAlternative": 17,
+        "tooltip": "Because there ain't no party like a campfire party!<br/>Completing this exploration is optional, but doubles your <span style='white-space:nowrap;'><i class='far fa-heart'></i> maximum health</span> gain after life",
+        "completedStory": "Well that was a fun party! You've met a ton of new people and had a great time. Time to get back to that bandit problem"
+    },
+    "17": {
+        "id": 17,
+        "name": "Explore forest",
+        "skillId": 3,
+        "requiredProgress": "180000",
+        "tooltip": "To find the bandits, you'll need to further explore the forest",
+        "completedStory": "There's boars and wolves in the forest! This particular pack of wolves seems persistent in not letting you pass. You know how to handle those, but it seems like there are quite a few of them. It's hard to tell with them moving around so much, but it's probably about five to seven of them"
+    },
+    "18": {
+        "id": 18,
+        "name": "Fight wolf pack",
+        "skillId": 7,
+        "requiredProgress": "900000",
+        "additionalDamagePerMs": "0.1",
+        "tooltip": "These wolves aren't going to let you pass. Time to make them",
+        "completedStory": "Well done! All wolves have either been defeated, or fled from you. Admittedly, all that fighting made you completely lose track of where you were and you're somewhat lost in the forest now"
+    },
+    "19": {
+        "id": 19,
+        "name": "Search forest",
+        "skillId": 3,
+        "requiredProgress": "1800000",
+        "automationUnlockAlternative": 20,
+        "isStoryBranch": true,
+        "tooltip": "Search for the bandits the hard way",
+        "completedStory": "It was quite the search, but you've managed to find the bandit hideout in the forest! Time to convince them to leave"
+    },
+    "20": {
+        "id": 20,
+        "name": "Use lookout",
+        "skillId": 3,
+        "requiredProgress": "180000",
+        "automationUnlockAlternative": 19,
+        "isStoryBranch": true,
+        "tooltip": "Search for the bandits from your tree house. Requires a tree house to use as lookout spot",
+        "completedStory": "Finding these bandits was rather easy from your tree house! Time to convince them to leave"
+    },
+    "21": {
+        "id": 21,
+        "name": "Convince bandits",
+        "skillId": 10,
+        "requiredProgress": "6000000",
+        "automationUnlockAlternative": 22,
+        "isStoryBranch": true,
+        "tooltip": "Convince the bandits that they should leave the island",
+        "completedStory": "You've managed to convince the bandits to leave the island through the power of words. But it appears that these bandits were linked to a bigger group that hides out on a nearby ship. Maybe you should take care of that as well. Let's head back to town to discuss with the mayor"
+    },
+    "22": {
+        "id": 22,
+        "name": "Convince bandits",
+        "skillId": 7,
+        "requiredProgress": "1200000",
+        "additionalDamagePerMs": "0.08",
+        "automationUnlockAlternative": 21,
+        "isStoryBranch": true,
+        "tooltip": "Convince the bandits that they should leave the island",
+        "completedStory": "You've managed to convince the bandits to leave the island through the power of your fists! But it appears that these bandits were linked to a bigger group that hides out on a nearby ship. Maybe you should take care of that as well. Let's head back to town to discuss with the mayor"
+    },
+    "23": {
+        "id": 23,
+        "name": "Return to town",
+        "skillId": 3,
+        "requiredProgress": "1200000",
+        "tooltip": "Let's head back to town to inform the mayor about the nearby ship. The boars don't go out of the forest, so you lose access to them by returning to town",
+        "completedStory": "You got a little lost on the way back again, but you've made it back to the village! Time to inform the mayor about the bandit situation"
+    },
+    "24": {
+        "id": 24,
+        "name": "Talk to mayor",
+        "skillId": 10,
+        "requiredProgress": "600000",
+        "tooltip": "Inform the mayor about the nearby bandit ship, and form a plan together",
+        "completedStory": "The mayor has this idea that these sea-bandits might actually be called pirates. In any case, you can probably take care of them too! As a token of gratitude, the mayor also tells you that you can build a house in the village, if you want to"
+    },
+    "25": {
+        "id": 25,
+        "name": "Board your raft",
+        "skillId": 9,
+        "requiredProgress": "45000",
+        "tooltip": "Once you've entered your raft, you'll lose access to all jobs. So you might want to save up some reserves",
+        "completedStory": "All ready to set sail! Let's see what these sea-bandits are all about"
+    },
+    "26": {
+        "id": 26,
+        "name": "Sail to ship",
+        "skillId": 9,
+        "requiredProgress": "360000",
+        "tooltip": "Sail to the pirate ship. Don't expect them to go easy on you",
+        "completedStory": "You've made it to the ship, time to board it to take care of the pirates once and for all!"
+    },
+    "27": {
+        "id": 27,
+        "name": "Board ship",
+        "skillId": 9,
+        "requiredProgress": "90000",
+        "tooltip": "Board the ship to take care of whoever is on there!",
+        "completedStory": "Now that you're on the deck, it seems that a deckhand wants to get you off the deck. But that's not up to that deckhand is it?"
+    },
+    "28": {
+        "id": 28,
+        "name": "Fight deckhand",
+        "skillId": 7,
+        "requiredProgress": "600000",
+        "additionalDamagePerMs": "0.06",
+        "tooltip": "Let's get rid of this deckhand",
+        "completedStory": "Deckhand, dealt with. But one of the cannoneers charges right at you!"
+    },
+    "29": {
+        "id": 29,
+        "name": "Fight cannoneer",
+        "skillId": 7,
+        "requiredProgress": "900000",
+        "additionalDamagePerMs": "0.08",
+        "tooltip": "One more pirate to get rid of",
+        "completedStory": "Cannoneer, removed from ship. Most of the other pirates seem to flee the ship by now. However, the captain does not seem to be leaving this ship without a fight"
+    },
+    "30": {
+        "id": 30,
+        "name": "Fight captain",
+        "skillId": 7,
+        "requiredProgress": "1200000",
+        "additionalDamagePerMs": "0.1",
+        "tooltip": "This should be the last pirate to take care of",
+        "completedStory": "Captain removed, ship empty. Well done! That takes care of the entire bandit problem that the village was having. But wait, some kind of huge octopus seems to attack the ship. That's going to be trouble (probably a lot of it too)"
+    },
+    "31": {
+        "id": 31,
+        "name": "Fight octopus",
+        "skillId": 7,
+        "requiredProgress": "1800000",
+        "additionalDamagePerMs": "0.125",
+        "decayMultiplier": "3",
+        "maxHealthGainMultiplier": "2",
+        "tooltip": "This was not part of the plan, but it just attacked out of nowhere! The giant octopus tries to grab you and it's unclear where you'll end up if you manage to defeat it<br/>Completing this exploration doubles your <span style='white-space:nowrap;'><i class='far fa-heart'></i> maximum health</span> gain after life, but causes you to lose your resources and triples your <i class='far fa-heart-broken'></i> health decay",
+        "completedStory": "Well, octopus defeated, it seems. You seem to have lost consciousness for what feels like five minutes and that has taken a toll on your health decay. You seem to have lost most of your inventory somewhere in the ocean as well. That could be a problem. But your constructions somehow washed ashore. You're in some kind of cavern that touches the ocean, perhaps there's some things to be found around here<br/><span style='font-weight: 500;'>Your <i class='far fa-heart-broken'></i> health decay has tripled</span>"
+    },
+    "32": {
+        "id": 32,
+        "name": "Explore sea cave",
+        "skillId": 3,
+        "requiredProgress": "2800000",
+        "tooltip": "This cave is quite pretty, but might not be the best place to survive for long. Let's see if you can find an exit!",
+        "completedStory": "You've found an exit to the seaside cave. It ends at a sunny beach with palm trees"
+    },
+    "33": {
+        "id": 33,
+        "name": "Explore beach",
+        "skillId": 3,
+        "requiredProgress": "3400000",
+        "tooltip": "There is sand and sun, but maybe there's more!",
+        "completedStory": "The beach appears to be a part of a rather big land, you even see some mountains in the distance. You see two ways to venture forth from here, there is a river leading inland, and an old mineshaft. It seems to be one or the other, the choice is yours"
+    },
+    "34": {
+        "id": 34,
+        "name": "Enter mineshaft",
+        "skillId": 3,
+        "requiredProgress": "3600000",
+        "automationUnlockAlternative": 35,
+        "isStoryBranch": true,
+        "tooltip": "It seems to have been abandoned for some time, but might contain materials.<br/>Entering the mineshaft will mean you won't be able to board the river",
+        "completedStory": "It appears that there is iron in the mineshaft! Useful for crafting. Entering the mineshaft means you can no longer board the river, but you're still close enough to the entrance to gather resources on the beach"
+    },
+    "35": {
+        "id": 35,
+        "name": "Board river",
+        "skillId": 9,
+        "requiredProgress": "1700000",
+        "automationUnlockAlternative": 34,
+        "isStoryBranch": true,
+        "tooltip": "Moving inland through the river will mean paddling upstream.<br/>Boarding the river will mean you won't be able to enter the mineshaft",
+        "completedStory": "Now that you are on the river, you won't be able to enter the mine anymore. But crabs and coconut trees seem to surround the river still, so that's useful!"
+    },
+    "36": {
+        "id": 36,
+        "name": "Fight rats",
+        "skillId": 7,
+        "requiredProgress": "14000000",
+        "additionalDamagePerMs": "0.2",
+        "automationUnlockAlternative": 37,
+        "tooltip": "Yuck, the mineshaft is infested with rats. Let's remove those!",
+        "completedStory": "That's better, no more rats in the mineshaft! You see some kind of belt lying on the floor. Perhaps, if it was a little sturdier, it could be of use?"
+    },
+    "37": {
+        "id": 37,
+        "name": "Paddle upstream",
+        "skillId": 9,
+        "requiredProgress": "4000000",
+        "automationUnlockAlternative": 36,
+        "tooltip": "The current is quite strong, but to get further inland you'll need to paddle against it",
+        "completedStory": "You've made it to a fallen tree that has crashed into the river. It leads to a small piece of land that contains some other trees with yellow things in it. Perhaps these are edible? There are also some tools lying around that appear to be left by someone that is long gone. You might be able to repair those!"
+    },
+    "38": {
+        "id": 38,
+        "name": "Proceed in mine",
+        "skillId": 3,
+        "requiredProgress": "8000000",
+        "automationUnlockAlternative": 39,
+        "tooltip": "Let's see what else is in this mine!",
+        "completedStory": "The mine appears to be quite deep, and might actually lead onto another exit. You hear the sound of water in the distance, but are blocked by a bunch of bats. You know how to take care of those!"
+    },
+    "39": {
+        "id": 39,
+        "name": "Paddle forth",
+        "skillId": 9,
+        "requiredProgress": "8000000",
+        "automationUnlockAlternative": 38,
+        "tooltip": "The current seems to get a lot stronger here",
+        "completedStory": "You've made it to a waterfall! No wonder the current was getting so strong here. As you know, almost every waterfall has a cave behind it! So let's bet on this being such a waterfall as well. Passing through a waterfall is going to hurt though"
+    },
+    "40": {
+        "id": 40,
+        "name": "Fight bats",
+        "skillId": 7,
+        "requiredProgress": "8000000",
+        "additionalDamagePerMs": "0.3",
+        "automationUnlockAlternative": 41,
+        "tooltip": "Make sure they don't bite you!",
+        "completedStory": "Bats taken care of. It seems that that sound of water is coming from a narrow path in the side of the mineshaft. You should be able to fit through, barely"
+    },
+    "41": {
+        "id": 41,
+        "name": "Pass waterfall",
+        "skillId": 9,
+        "requiredProgress": "2500000",
+        "automationUnlockAlternative": 40,
+        "completionDamage": "25000",
+        "tooltip": "This is going to hurt, but it's probably worth it!",
+        "completedStory": "Ouch, that hurt. But you've made it through a waterfall! And as expected, there's a cave behind it. Let's see what's in this cave"
+    },
+    "42": {
+        "id": 42,
+        "name": "Pass narrow path",
+        "skillId": 3,
+        "requiredProgress": "12000000",
+        "automationUnlockAlternative": 41,
+        "tooltip": "Pass the narrow path to follow the sound of water",
+        "completedStory": "It seems like this path led to a cave behind a waterfall. That path probably formed way after the mine was last used"
+    },
+    "43": {
+        "id": 43,
+        "name": "Explore cave",
+        "skillId": 3,
+        "requiredProgress": "12000000",
+        "tooltip": "See what else is behind this waterfall! Perhaps another exit?",
+        "completedStory": "Uh oh... A bear! As cute as it might look, it looks far more dangerous"
+    },
+    "44": {
+        "id": 44,
+        "name": "Fight bear",
+        "skillId": 7,
+        "requiredProgress": "120000000",
+        "additionalDamagePerMs": "0.5",
+        "automationUnlockAlternative": 45,
+        "maxHealthGainMultiplier": "2",
+        "isStoryBranch": true,
+        "tooltip": "Are you sure? Beating a bear is no small feat.<br/>Completing this exploration is optional, but doubles your <span style='white-space:nowrap;'><i class='far fa-heart'></i> maximum health</span> gain after life",
+        "completedStory": "Oh wow, you've actually beaten the bear! Nice job! Now that that's over and done with, it is actually really easy to see that there's an exit of the cave somewhat higher. It shouldn't be too hard to climb there"
+    },
+    "45": {
+        "id": 45,
+        "name": "Flee from bear",
+        "skillId": 3,
+        "requiredProgress": "180000000",
+        "automationUnlockAlternative": 44,
+        "isStoryBranch": true,
+        "tooltip": "It's a bear. No shame in running away! But it seems very set on catching you",
+        "completedStory": "Ok, after a lot of running, climbing and bruises, you've made it up onto a rock where the bear can't seem to climb. Luckily for you, it appears that there's an exit if you crawl past these stones!"
+    },
+    "46": {
+        "id": 46,
+        "name": "Exit cave",
+        "skillId": 3,
+        "requiredProgress": "18000000",
+        "tooltip": "Leaving the cave behind the waterfall will cause you to lose access to all current jobs",
+        "completedStory": "You are further inland and are on somewhat higher ground. You see a rather big mountain in front of you and a path leading up to it. There seems to be some kind of temple on the mountain. Let's see what that's about!"
+    },
+    "47": {
+        "id": 47,
+        "name": "Climb mountain",
+        "skillId": 3,
+        "requiredProgress": "90000000",
+        "tooltip": "Let's see what's up that mountain!",
+        "completedStory": "You've climbed a fair bit of the mountain and made it to a ravine. You'll need to cross it somehow. Oh and it looks like you're not alone here, there are mountain goats around!"
+    },
+    "48": {
+        "id": 48,
+        "name": "Walk around",
+        "skillId": 3,
+        "requiredProgress": "1000000000",
+        "automationUnlockAlternative": 49,
+        "isStoryBranch": true,
+        "tooltip": "That's a long way down! Walking around seems to be the safe and slow road",
+        "completedStory": "You've made it to the other side of the ravine! The safe way. You see a temple a little higher up in the mountain and hear some gong sounds in the distance"
+    },
+    "49": {
+        "id": 49,
+        "name": "Jump over ravine",
+        "skillId": 3,
+        "requiredProgress": "50000000",
+        "automationUnlockAlternative": 48,
+        "isStoryBranch": true,
+        "completionDamage": "50000",
+        "tooltip": "That's a long way down! Jumping seems highly dangerous, but fast!",
+        "completedStory": "You've made it to the other side of the ravine! The fast way, although it hurt a bit. You see a temple a little higher up in the mountain and hear some gong sounds in the distance"
+    },
+    "50": {
+        "id": 50,
+        "name": "Climb to temple",
+        "skillId": 3,
+        "requiredProgress": "100000000",
+        "tooltip": "Follow the sound of gongs a little higher in the mountain",
+        "completedStory": "You've made it to the temple! It appears to be populated by monks. They don't talk much... Or at all. But they do seem to be training and seem to be welcoming you to join them"
+    },
+    "51": {
+        "id": 51,
+        "name": "Tiger teaching",
+        "skillId": 3,
+        "requiredProgress": "1000000000",
+        "automationUnlockAlternative": 55,
+        "tooltip": "Let the monks teach you the way of the tiger, a fast and agile beast<br/>Completing this teaching is optional, but can be used to train your <i class='far fa-running'></i> Agility skill",
+        "completedStory": "You've been taught the way of the tiger! Useful when you have a need to be agile"
+    },
+    "52": {
+        "id": 52,
+        "name": "Parrot teaching",
+        "skillId": 10,
+        "requiredProgress": "1000000000",
+        "automationUnlockAlternative": 55,
+        "tooltip": "Let the monks teach you the way of the parrot, a beautiful beast that just keeps on talking<br/>Completing this teaching is optional, but can be used to train your <i class='far fa-comments'></i> Social skill",
+        "completedStory": "You've been taught the way of the parrot! By talking, a lot. The monks didn't even talk back. It was a little awkward to be honest"
+    },
+    "53": {
+        "id": 53,
+        "name": "Goat teaching",
+        "skillId": 9,
+        "requiredProgress": "1000000000",
+        "automationUnlockAlternative": 55,
+        "tooltip": "Let the monks teach you the way of the goat, a stable beast that can withstand almost any trembles<br/>Completing this teaching is optional, but can be used to train your <i class='far fa-anchor'></i> Sailing skill",
+        "completedStory": "You've been taught the way of the goat! By balancing on your raft in the pond, you now know how to conquer bigger waves"
+    },
+    "54": {
+        "id": 54,
+        "name": "Bear teaching",
+        "skillId": 7,
+        "requiredProgress": "1000000000",
+        "additionalDamagePerMs": "0.5",
+        "automationUnlockAlternative": 55,
+        "tooltip": "Let the monks teach you the way of the bear, a strong and robust beast<br/>Completing this teaching is optional, but can be used to train your <i class='far fa-swords'></i> Combat skill",
+        "completedStory": "You've been taught the way of the bear! Useful when raw power benefits your goals"
+    },
+    "55": {
+        "id": 55,
+        "name": "Continue climb",
+        "skillId": 3,
+        "requiredProgress": "500000000",
+        "tooltip": "If you proceed your climb, you won't be able to follow (additional) teachings. The monks seem to indicate danger ahead",
+        "completedStory": "You've reached a point where it starts to snow. That must be due to the height. Moving through the cold ahead might take a toll on your health"
+    },
+    "56": {
+        "id": 56,
+        "name": "Climb to top",
+        "skillId": 3,
+        "requiredProgress": "500000000",
+        "decayMultiplier": "2",
+        "tooltip": "It's getting really cold up here.<br/>Climbing to the icy top will double your <i class='far fa-heart-broken'></i> health decay",
+        "completedStory": "The cold is pretty severe. You've made it to some sort of glacier. You hear the sound of some giant lizard-like screech, which is probably what the monks tried to warn you about<br/><span style='font-weight: 500;'>Your <i class='far fa-heart-broken'></i> health decay has doubled</span>"
+    },
+    "57": {
+        "id": 57,
+        "name": "Fight lizard",
+        "skillId": 7,
+        "requiredProgress": "500000000",
+        "additionalDamagePerMs": "1",
+        "maxHealthGainMultiplier": "2",
+        "automationUnlockAlternative": 60,
+        "tooltip": "A strange lizard that seems to live in the cold. It seems fierce, yet somehow not fierce enough to explain the screeches you've heard<br/>Completing this exploration is optional, but doubles your <span style='white-space:nowrap;'><i class='far fa-heart'></i> maximum health</span> gain after life",
+        "completedStory": "Lizard taken care of! But the screeches don't seem to stop. You see another lizard being eaten by some sort of winged, bigger, lizard pretty close"
+    },
+    "58": {
+        "id": 58,
+        "name": "Fight baby dragon",
+        "skillId": 7,
+        "requiredProgress": "2500000000",
+        "additionalDamagePerMs": "2",
+        "maxHealthGainMultiplier": "2",
+        "automationUnlockAlternative": 60,
+        "tooltip": "This thing is huge already and eats those lizards for breakfast, yet it seems to not be fully matured either<br/>Completing this exploration is optional, but doubles your <span style='white-space:nowrap;'><i class='far fa-heart'></i> maximum health</span> gain after life",
+        "completedStory": "Baby dragon, defeated! Well done. However, it seems that that angered an even bigger dragon. This thing looks magnificent and incredibly dangerous"
+    },
+    "59": {
+        "id": 59,
+        "name": "Fight dragon",
+        "skillId": 7,
+        "requiredProgress": "12500000000",
+        "additionalDamagePerMs": "5",
+        "maxHealthGainMultiplier": "2",
+        "automationUnlockAlternative": 60,
+        "tooltip": "After defeating that baby dragon, this dragon looks very angry. It's unclear if anyone has ever beaten such a beast<br/>Completing this exploration is optional, but doubles your <span style='white-space:nowrap;'><i class='far fa-heart'></i> maximum health</span> gain after life",
+        "completedStory": "Wow, you've actually defeated a dragon. You might just get featured in legends and tales now!"
+    },
+    "60": {
+        "id": 60,
+        "name": "Climb down",
+        "skillId": 3,
+        "requiredProgress": "1500000000",
+        "tooltip": "Descend at the other side of the mountain. You see a lot of sand in the distance and some sort of distortion in sight",
+        "completedStory": "You've made it to the bottom of the mountain. It is pretty clear that the waterfall was on the other side of the mountain as there appears to be no water here. All vegetation seems unable to survive here, and there is only sand in sight. It's probably best to travel on with only essentials as this journey is going to be tough"
+    },
+    "61": {
+        "id": 61,
+        "name": "Enter desert",
+        "skillId": 3,
+        "requiredProgress": "500000000",
+        "decayMultiplier": "2",
+        "tooltip": "There's a lot of sand on this side of the mountain.<br/>Entering the heat will double your <i class='far fa-heart-broken'></i> health decay.<br/>Construction resources will be left behind to travel lightly, but uncooked food will be taken with you. There don't appear to be any goats in the desert",
+        "completedStory": "You've made it somewhat into the desert. At this point you're mostly seeing a lot of sand and the heat is a little uncomfortable. But you're developing a bit of a tan and see something that looks like water in the distance<br/><span style='font-weight: 500;'>Your <i class='far fa-heart-broken'></i> health decay has doubled</span>"
+    },
+    "62": {
+        "id": 62,
+        "name": "Walk to oasis",
+        "skillId": 3,
+        "requiredProgress": "500000000",
+        "decayMultiplier": "2",
+        "tooltip": "It looks like there's water up ahead<br/>Venturing further through this heat will double your <i class='far fa-heart-broken'></i> health decay",
+        "completedStory": "Uh oh, it looks like what seemed like water was actually a distortion of sight because of the heat. There is no water here. But even worse, you're being attacked by vultures!<br/><span style='font-weight: 500;'>Your <i class='far fa-heart-broken'></i> health decay has doubled</span>"
+    },
+    "63": {
+        "id": 63,
+        "name": "Fight vultures",
+        "skillId": 7,
+        "requiredProgress": "200000000",
+        "additionalDamagePerMs": "0.3",
+        "tooltip": "Well that's not what you expected when walking to what seemed to be an oasis, but you know how to deal with creatures like this!",
+        "completedStory": "Vultures, dealt with. Who's the predator or the prey now huh? You're also seeing some weird brown triangle in the distance. You may as well check out what that is"
+    },
+    "64": {
+        "id": 64,
+        "name": "Walk to pyramid",
+        "skillId": 3,
+        "requiredProgress": "1000000000",
+        "decayMultiplier": "2",
+        "tooltip": "Let's see what that brown triangle in the distance is!<br/>Venturing further through this heat will double your <i class='far fa-heart-broken'></i> health decay",
+        "completedStory": "Having walked all the way here, you're seeing a massive structure built out of clay blocks. It has certainly been here for a while. It seems to have an entrance in the front, but it's unclear what's inside of it<br/><span style='font-weight: 500;'>Your <i class='far fa-heart-broken'></i> health decay has doubled</span>"
+    },
+    "65": {
+        "id": 65,
+        "name": "Enter pyramid",
+        "skillId": 3,
+        "requiredProgress": "500000000",
+        "maxHealthGainMultiplier": "2",
+        "tooltip": "This thing is enormous! Let's see what sort of ancient secrets lie within. It also seems to be less hot inside<br/>Completing this exploration doubles your <span style='white-space:nowrap;'><i class='far fa-heart'></i> maximum health</span> gain after life",
+        "completedStory": "The pyramid seems to contain three ancient temples and some sort of crypt. There are also some hieroglyphs painted on the wall, which give you the idea of some constructions. Although it's unclear if that's what they actually mean"
+    },
+    "66": {
+        "id": 66,
+        "name": "Emerald temple",
+        "skillId": 3,
+        "requiredProgress": "500000000",
+        "isStoryBranch": true,
+        "tooltip": "This temple is marked with a beautiful green gem. You can enter it to see what it contains",
+        "completedStory": "Well, this temple hasn't been cleaned for a while. Clearly. There's moss everywhere! And the door suddenly closed behind you. To venture further, it seems that you need to pass some sort of spike trap"
+    },
+    "67": {
+        "id": 67,
+        "name": "Pass spike trap",
+        "skillId": 3,
+        "requiredProgress": "1000000000",
+        "completionDamage": "150000",
+        "tooltip": "Walking on spikes kind of hurts, but there is no other way out of here!",
+        "completedStory": "Spike trap passed. It certainly did hurt, but let's move on! Now that you've made it a little further into the temple, you see an ancient gemstone carved into a wooden statue. That might just be useful for those construction ideas you've got from the hieroglyphs!"
+    },
+    "68": {
+        "id": 68,
+        "name": "Carve out gem",
+        "skillId": 1,
+        "requiredProgress": "500000000",
+        "awardItem": {
+            "type": 1,
+            "id": 13,
+            "amount": "1"
+        },
+        "tooltip": "Cut the emerald gemstone out of this wooden statue",
+        "completedStory": "You mostly destroyed the statue in the process, but now have an emerald gemstone! It looks like there's also a chameleon guarding another gemstone behind it, but you're also able to reach the exit of this temple"
+    },
+    "69": {
+        "id": 69,
+        "name": "Fight chameleon",
+        "skillId": 7,
+        "requiredProgress": "10000000000",
+        "additionalDamagePerMs": "2",
+        "awardItem": {
+            "type": 1,
+            "id": 13,
+            "amount": "1"
+        },
+        "automationUnlockAlternative": 70,
+        "tooltip": "A surprisingly big chameleon. If it wasn't for the color changing, you would have definitely noticed it earlier!<br/>Completing this exploration is optional, but provides an additional gemstone on completion",
+        "completedStory": "Well, it stopped changing colors and you have another gemstone because of it!"
+    },
+    "70": {
+        "id": 70,
+        "name": "Emerald exit",
+        "skillId": 3,
+        "requiredProgress": "500000000",
+        "tooltip": "Return to the pyramid hall. You keep access to moss while in the pyramid",
+        "completedStory": "Emerald temple, cleared! It seems that once all temples have been explored, the crypt might open"
+    },
+    "71": {
+        "id": 71,
+        "name": "Ruby temple",
+        "skillId": 3,
+        "requiredProgress": "500000000",
+        "isStoryBranch": true,
+        "tooltip": "This temple is marked with a pretty red gem. You can enter it to see what treasures it holds",
+        "completedStory": "This temple seems to be very sandy. It appears to contain some sort of clay that the pyramid itself seems to be built from. Oh, and the door suddenly closed behind you. To venture further, it seems that you need to pass some scarabs that live here",
+        "startsBranch": true,
+        "branchColor": "--red"
+    },
+    "72": {
+        "id": 72,
+        "name": "Fight scarabs",
+        "skillId": 7,
+        "requiredProgress": "2000000000",
+        "additionalDamagePerMs": "1",
+        "tooltip": "These scarabs live here and are in your way",
+        "completedStory": "Path cleared! You see some red glittering in the clay ahead, that may just be a gemstone!"
+    },
+    "73": {
+        "id": 73,
+        "name": "Dig up gem",
+        "skillId": 6,
+        "requiredProgress": "500000000",
+        "awardItem": {
+            "type": 1,
+            "id": 13,
+            "amount": "1"
+        },
+        "tooltip": "Dig in the clay to get out that glittering rock",
+        "completedStory": "Your instincts were right, you found a ruby gemstone in the clay! It seems that there is another one a little higher, but it's blocked by a massive boulder that is clearly placed as a trap. You could try to grab it, but you're also able to reach the exit of this temple"
+    },
+    "74": {
+        "id": 74,
+        "name": "Catch boulder",
+        "skillId": 3,
+        "requiredProgress": "1000000000",
+        "completionDamage": "280000",
+        "awardItem": {
+            "type": 1,
+            "id": 13,
+            "amount": "1"
+        },
+        "automationUnlockAlternative": 75,
+        "tooltip": "Catching this thing might not be such a good idea, but it's the only way to obtain what's behind it.",
+        "completedStory": "Ouch, that boulder proved to be an effective trap. Just not effective enough to stop you! Grabbing the gemstone behind it was easy with the boulder out of the way"
+    },
+    "75": {
+        "id": 75,
+        "name": "Ruby exit",
+        "skillId": 3,
+        "requiredProgress": "500000000",
+        "tooltip": "Return to the pyramid hall. You keep access to clay while in the pyramid",
+        "completedStory": "Ruby temple, cleared! Once all temples have been explored, the crypt might just open"
+    },
+    "76": {
+        "id": 76,
+        "name": "Sapphire temple",
+        "skillId": 3,
+        "requiredProgress": "500000000",
+        "isStoryBranch": true,
+        "tooltip": "This temple is marked with a clear blue gem. You can enter it to find out what is inside",
+        "completedStory": "This temple is entirely flooded with water that could only be described as dirty. There seem to be animals living in the water but it's hard to see through it. It might be best to proceed on your raft"
+    },
+    "77": {
+        "id": 77,
+        "name": "Paddle in temple",
+        "skillId": 9,
+        "requiredProgress": "500000000",
+        "tooltip": "Move across the flooded temple",
+        "completedStory": "Halfway through the temple, you're being attacked by a group of piranhas! You should be able to fight them off"
+    },
+    "78": {
+        "id": 78,
+        "name": "Fight piranhas",
+        "skillId": 7,
+        "requiredProgress": "4000000000",
+        "additionalDamagePerMs": "1.5",
+        "tooltip": "Angry fish with sharp teeth. They seem hungry, because they haven't eaten in a while",
+        "completedStory": "You've managed to scare off the piranhas! Now that the water is a little clearer, you see a shiny blue gemstone at the bottom. It might be better not to enter the water just in case, but your fishing skills should do the trick!"
+    },
+    "79": {
+        "id": 79,
+        "name": "Pull in gemstone",
+        "skillId": 4,
+        "requiredProgress": "500000000",
+        "awardItem": {
+            "type": 1,
+            "id": 13,
+            "amount": "1"
+        },
+        "tooltip": "Get this gemstone out of the water",
+        "completedStory": "Swimming would probably have been more efficient, but you've gotten the gemstone out of the water! But it was probably a good idea not to go swimming as you now notice a crocodile guarding another gemstone. You should be able to pass it and paddle right to the temple exit though"
+    },
+    "80": {
+        "id": 80,
+        "name": "Fight crocodile",
+        "skillId": 7,
+        "requiredProgress": "20000000000",
+        "additionalDamagePerMs": "3",
+        "awardItem": {
+            "type": 1,
+            "id": 13,
+            "amount": "1"
+        },
+        "automationUnlockAlternative": 81,
+        "tooltip": "It looks a little like a floating log, but it's clearly more dangerous.<br/>Completing this exploration is optional, but provides an additional gemstone on completion",
+        "completedStory": "Gemstone acquired! That crocodile is now exactly as dangerous as a floating log. Time to paddle out of this temple"
+    },
+    "81": {
+        "id": 81,
+        "name": "Sapphire exit",
+        "skillId": 9,
+        "requiredProgress": "500000000",
+        "tooltip": "Paddle to the exit to return to the pyramid hall. You keep access to eels while in the pyramid",
+        "completedStory": "Sapphire temple, cleared! When all temples are cleared, the crypt should open its doors"
+    },
+    "82": {
+        "id": 82,
+        "name": "Enter crypt",
+        "skillId": 3,
+        "requiredProgress": "1500000000",
+        "tooltip": "Enter the crypt within the pyramid.<br/>Requires all temples to be explored before the doors open",
+        "completedStory": "You've made it into the crypt of this pyramid. It's filled with all sorts of ancient treasures that are clearly here to respect an old soul that rests here. However, the passage appears to be guarded by an enormous scorpion"
+    },
+    "83": {
+        "id": 83,
+        "name": "Fight scorpion",
+        "skillId": 7,
+        "requiredProgress": "50000000000",
+        "additionalDamagePerMs": "2.5",
+        "tooltip": "This beast seems unrealistically big for a scorpion. As if it was specifically bred to guard this crypt",
+        "completedStory": "With that scorpion out of the way, you're now able to fully grasp what's within this crypt. Aside from all the treasures, there's a sarcophagus in the middle of the crypt that particularly catches your eye"
+    },
+    "84": {
+        "id": 84,
+        "name": "See sarcophagus",
+        "skillId": 10,
+        "requiredProgress": "500000000",
+        "tooltip": "An ancient casket of sorts. Let's inspect the construction and decipher the inscriptions. You feel somehow drawn to it, as if you recognize it subconsciously",
+        "completedStory": "The sarcophagus almost looks like it wasn't built to honor the dead, but rather to imprison the dead. The inscriptions read: \"Forgive us, brother. We saw no other way. Your power had to be stopped, or it would have become the end of us all\". You're not exactly sure what that means, but feel a pressing urge to get out of here"
+    },
+    "85": {
+        "id": 85,
+        "name": "Exit pyramid",
+        "skillId": 3,
+        "requiredProgress": "2000000000",
+        "decayMultiplier": "2",
+        "tooltip": "After inspecting the sarcophagus, you feel a strong urge to leave this pyramid as quickly as you can.<br/>Leaving the pyramid will cause you to lose access to jobs within the pyramid<br/>Returning into the heat will double your <i class='far fa-heart-broken'></i> health decay",
+        "completedStory": "You've made it out of the pyramid! It seems that a group of nomads has arrived at the front of the pyramid while you were inside. They look friendly, let's meet them!<br/><span style='font-weight: 500;'>Your <i class='far fa-heart-broken'></i> health decay has doubled</span>"
+    },
+    "86": {
+        "id": 86,
+        "name": "Meet nomads",
+        "skillId": 10,
+        "requiredProgress": "500000000",
+        "tooltip": "They seem like a friendly group of people!",
+        "completedStory": "The nomads were exactly as friendly as you expected, just a nice bunch of people traveling the desert! They seemed very surprised when you told them you just came from the pyramid crypt though. Apparently, nobody has been able to enter that crypt for hundreds of years. In any case, they were just heading back home and said you're welcome to hop along for the ride!"
+    },
+    "87": {
+        "id": 87,
+        "name": "Catch a ride",
+        "skillId": 10,
+        "requiredProgress": "2000000000",
+        "tooltip": "Join the nomads on their ride home. It's a nice chance to get to know them better too, without suffering from the heat too much",
+        "completedStory": "After a nice ride and a lot of fun stories, you've arrived at what the nomads referred to as home. Maybe they weren't really nomads. This city seems pretty big!"
+    },
+    "88": {
+        "id": 88,
+        "name": "Walk to gate",
+        "skillId": 3,
+        "requiredProgress": "2000000000",
+        "tooltip": "Let's see if you can enter this city!",
+        "completedStory": "It looks like not just anybody is allowed to enter the city. \"Residents only\". But perhaps you can persuade the guard?"
+    },
+    "89": {
+        "id": 89,
+        "name": "Persuade guard",
+        "skillId": 10,
+        "requiredProgress": "500000000",
+        "multiplierRequirement": "49950",
+        "failDamage": "10000",
+        "tooltip": "Convince the guard to let you enter the city!",
+        "completedStory": "It took some persuasion, but the guard welcomes you into the city! With those social skills, you should fit in great!"
+    },
+    "90": {
+        "id": 90,
+        "name": "Enter city",
+        "skillId": 3,
+        "requiredProgress": "2000000000",
+        "tooltip": "Come on in, the city welcomes you!<br/>There are no vultures inside the city, luckily. But that means you won't be able to hunt them either",
+        "completedStory": "Now that you're inside the city, you're starting to grasp just how big of a city it actually is! You hear a lot of noise which seems to be coming from a market, but hear some ship sounds in the distance as well. Let's see if the nomads can give you some directions!"
+    },
+    "91": {
+        "id": 91,
+        "name": "Talk to nomads",
+        "skillId": 10,
+        "requiredProgress": "500000000",
+        "tooltip": "So they probably aren't really nomads. But they should be able to point you in the right direction in town!",
+        "completedStory": "They seem surprised that you thought they were nomads in the first place. They are just a bunch of adventurers that happened to run into you in the desert! They say they are actually a group of a warrior, two rangers, a cleric and two paladins. Which seems oddly specific. Anyway... You should definitely check out the market! There should be some food available there. After that, they also indicate you should check out the docks, lowtown and maybe even hightown"
+    },
+    "92": {
+        "id": 92,
+        "name": "Enter market",
+        "skillId": 3,
+        "requiredProgress": "2000000000",
+        "tooltip": "Let's see what kind of trades are made here!",
+        "completedStory": "You mostly see a lot of people, but there are some vendors as well. Some of them selling oddly specific things, but you're particularly interested to see what sorts of food they have available around here"
+    },
+    "93": {
+        "id": 93,
+        "name": "Fruit vendor",
+        "skillId": 10,
+        "requiredProgress": "2000000000",
+        "tooltip": "This vendor sells both wood and a colorful sort of fruit. You don't have any money, but being nice to people has always served you well!",
+        "completedStory": "The fruit vendor says that you can take all the wood you want. It doesn't sell all that well and starts to get in the way anyway. Additionally, the vendor tells you that some people stole fruit! If you take care of that, you can also pick as many oranges as you can eat!"
+    },
+    "94": {
+        "id": 94,
+        "name": "Catch thieves",
+        "skillId": 3,
+        "requiredProgress": "7500000000",
+        "multiplierRequirement": "1495000",
+        "failDamage": "25000",
+        "automationUnlockAlternative": 96,
+        "tooltip": "Help a vendor out, would you?<br/>Completing this exploration is optional, but rewards you with a new food job!",
+        "completedStory": "Those thieves did not want to give those orange fruits back. At all. But they couldn't outrun you! The vendor thanks you, and tells you that you can pick as many oranges as you want!"
+    },
+    "95": {
+        "id": 95,
+        "name": "Pastries vendor",
+        "skillId": 10,
+        "requiredProgress": "2000000000",
+        "tooltip": "This vendor sells dough and all sorts of pastries. You don't have any money, but perhaps you can make a new friend!",
+        "completedStory": "The pastries vendor says that you can take some dough, if you do the baking yourself. Some of it might expire by tomorrow anyway. Oh, and the vendor shares a little recipe with you, for biscuits!"
+    },
+    "96": {
+        "id": 96,
+        "name": "Walk to docks",
+        "skillId": 3,
+        "requiredProgress": "4000000000",
+        "tooltip": "Leave the market and go to the docks. You keep access to jobs unlocked at the market",
+        "completedStory": "The docks are quite big! There must be at least twenty ships docked here. You also see some people with some sort of wooden cages that appear to be fishing, and some others constructing boats"
+    },
+    "97": {
+        "id": 97,
+        "name": "Cage fishers",
+        "skillId": 10,
+        "requiredProgress": "3000000000",
+        "tooltip": "Maybe they can tell you what they are fishing with those cages!",
+        "completedStory": "It appears that they are fishing lobsters with these cages. They tell you it's actually quite easy, just build a cage and drop it in the water! These things just walk right in"
+    },
+    "98": {
+        "id": 98,
+        "name": "Boat builders",
+        "skillId": 10,
+        "requiredProgress": "3000000000",
+        "tooltip": "Having a boat instead of a raft might be useful! Perhaps they can show you how those things are built",
+        "completedStory": "Citrus wood looks to be perfect for the construction of boats! It's not that complicated either, just make sure to make it waterproof"
+    },
+    "99": {
+        "id": 99,
+        "name": "Enter lowtown",
+        "skillId": 3,
+        "requiredProgress": "6000000000",
+        "tooltip": "Leave the docks and move into the lower side of town<br/>You lose access to additional boat constructions and citrus wood when you leave the docks",
+        "completedStory": "This seems to be the shady part of town. You walked around for a bit, entered an alley and some people are already trying to rob you! Well, that's not happening if you have anything to say about it!"
+    },
+    "100": {
+        "id": 100,
+        "name": "Fight robbers",
+        "skillId": 7,
+        "requiredProgress": "100000000000",
+        "additionalDamagePerMs": "10",
+        "tooltip": "These people try to rob you! Well, not if you have anything to say about it!",
+        "completedStory": "Robbers, scared away. With all of your possessions safe and secure. Let's see if there are some nicer people in lowtown..."
+    },
+    "101": {
+        "id": 101,
+        "name": "Proceed in alley",
+        "skillId": 3,
+        "requiredProgress": "6000000000",
+        "tooltip": "Let's see what else is in this alley",
+        "completedStory": "As you walk further into this alley, you come across a local tavern. It seems to be rather exclusive, but perhaps you can convince the bouncer to let you in. Or you could just walk along"
+    },
+    "102": {
+        "id": 102,
+        "name": "Coax bouncer",
+        "skillId": 10,
+        "requiredProgress": "5000000000",
+        "multiplierRequirement": "999500.1",
+        "failDamage": "100000",
+        "tooltip": "Regulars only. Move along! But perhaps you can persuade the bouncer to make an exception",
+        "completedStory": "It definitely took some persuading, but the bouncer says you're able to enter! Let's see what's inside of this tavern"
+    },
+    "103": {
+        "id": 103,
+        "name": "Enter tavern",
+        "skillId": 3,
+        "requiredProgress": "4000000000",
+        "isStoryBranch": true,
+        "tooltip": "Come on in! I'm sure they are friendly in this tavern!",
+        "completedStory": "Now that you've entered the tavern, you see all sorts of people enjoying their time off. There seems to be some sort of dance battle, some cards being played and a mysterious person sitting at the bar. Let's mingle!"
+    },
+    "104": {
+        "id": 104,
+        "name": "Dance battle",
+        "skillId": 3,
+        "requiredProgress": "200000000000",
+        "additionalDamagePerMs": "30",
+        "awardItem": {
+            "type": 1,
+            "id": 19,
+            "amount": "5"
+        },
+        "automationUnlockAlternative": 108,
+        "tooltip": "Beat the locals in their very intense type of dancing!<br/>Optional, but provides five silver coins upon completion",
+        "completedStory": "Pfeew, those people sure knew how to dance. But, not as well as you do! Have five silver coins for your efforts!"
+    },
+    "105": {
+        "id": 105,
+        "name": "Play cards",
+        "skillId": 10,
+        "requiredProgress": "5000000000",
+        "multiplierRequirement": "2495000",
+        "failDamage": "100000",
+        "awardItem": {
+            "type": 1,
+            "id": 19,
+            "amount": "5"
+        },
+        "automationUnlockAlternative": 108,
+        "tooltip": "The trick is to read their faces and act quickly. But that requires some skill<br/>Optional, but provides five silver coins upon completion",
+        "completedStory": "Ha! You saw right through them and won at playing cards! The silver coins are yours"
+    },
+    "106": {
+        "id": 106,
+        "name": "Mysterious type",
+        "skillId": 10,
+        "requiredProgress": "5000000000",
+        "automationUnlockAlternative": 108,
+        "tooltip": "The tavern keeper indicates that this person only talks to dragon slayers",
+        "completedStory": "The mysterious person happened to be a dragon slayer too! Just like you! The both of you are notably cooler than anyone else in this tavern for sure. But, only one of you can be the coolest person in the tavern! And both of you know how that's settled"
+    },
+    "107": {
+        "id": 107,
+        "name": "Dragon's equals",
+        "skillId": 7,
+        "requiredProgress": "500000000000",
+        "additionalDamagePerMs": "100",
+        "awardItem": {
+            "type": 1,
+            "id": 19,
+            "amount": "10"
+        },
+        "automationUnlockAlternative": 108,
+        "tooltip": "There can only be one coolest person in this tavern. And there's only one mature way to settle that, through a match of armwrestling!<br/>Optional, but provides ten silver coins upon completion",
+        "completedStory": "That settles it. You're the coolest person in this tavern! No hard feelings, just a lot of respect! And ten silver coins for your troubles"
+    },
+    "108": {
+        "id": 108,
+        "name": "Leave tavern",
+        "skillId": 3,
+        "requiredProgress": "4000000000",
+        "tooltip": "Leave the tavern to proceed into lowtown",
+        "completedStory": "That was fun! The tavern had a great atmosphere. But now it's time to proceed into lowtown!"
+    },
+    "109": {
+        "id": 109,
+        "name": "Move along",
+        "skillId": 3,
+        "requiredProgress": "4000000000",
+        "tooltip": "Proceed into lowtown",
+        "completedStory": "After walking further through the alleys, you run into what seems to be an orphanage. Let's see if you can help them out!"
+    },
+    "110": {
+        "id": 110,
+        "name": "Enter orphanage",
+        "skillId": 3,
+        "requiredProgress": "4000000000",
+        "tooltip": "These kids might just need your help!",
+        "completedStory": "Ok, it looks like these kids are very well taken care of by the lovely people working in the orphanage. However, they could use some extra food and are even willing to pay you for your troubles. Could you maybe head over to the chef next door and get them some food? Pretty please"
+    },
+    "111": {
+        "id": 111,
+        "name": "Walk to eatery",
+        "skillId": 3,
+        "requiredProgress": "4000000000",
+        "tooltip": "Let's see if you can gather some food for those cute kids!",
+        "completedStory": "The chef is totally willing to help these kids too! But is in a bit of a rush at the moment. Here's some eggs, could you cook them for the kids? As much as you can carry would be great!"
+    },
+    "112": {
+        "id": 112,
+        "name": "Return to the kids",
+        "skillId": 3,
+        "requiredProgress": "4000000000",
+        "awardItem": {
+            "type": 1,
+            "id": 19,
+            "amount": "5"
+        },
+        "tooltip": "Let's return some eggs to the kids! Please fill your entire inventory before returning though, they seemed truly hungry. You're free to use the chef's eggs!<br/>Provides five silver coins upon completion",
+        "completedStory": "Well, you made their day for sure. These eggs are delicious and full of protein! Have five silver coins for your troubles! Spending them anywhere else would have surely gotten them much less food"
+    },
+    "113": {
+        "id": 113,
+        "name": "Go to hightown",
+        "skillId": 3,
+        "requiredProgress": "4000000000",
+        "tooltip": "It looks like we've seen all of lowtown. You're hearing a lot of commotion ahead though, let's see what that's all about!",
+        "completedStory": "There's a lot of commotion in hightown. It seem like today is their annual sports competition, with some cool prizes that you can cash for tools. It appears that the prizes are silver coins, of which you already have some! Let's see what the vendor has to offer"
+    },
+    "114": {
+        "id": 114,
+        "name": "Tools vendor",
+        "skillId": 10,
+        "requiredProgress": "4000000000",
+        "tooltip": "Now that you've got some coins to spend, let's see what this vendor has for sale!",
+        "completedStory": "Alright, this vendor offers tools in tiers. Buy one, something else gets added! Pick wisely, you only have so many coins to spend"
+    },
+    "115": {
+        "id": 115,
+        "name": "Pie vendor",
+        "skillId": 10,
+        "requiredProgress": "4000000000",
+        "tooltip": "Maybe this vendor can teach you a new recipe?<br/>Unlocks a new job that replaces bake biscuits",
+        "completedStory": "The vendor was happy to teach you something \"better\" than the biscuit recipe. These hightown vendors seem to look down on the vendors on the market for some reason"
+    },
+    "116": {
+        "id": 116,
+        "name": "Tomato vendor",
+        "skillId": 10,
+        "requiredProgress": "4000000000",
+        "tooltip": "This vendor indicates that something much nicer than oranges can be picked from trees too!<br/>Unlocks a new job that replaces pick oranges",
+        "completedStory": "So to little surprise, the vendor taught you how to pick tomatoes. But asked you to promise not to pick oranges anymore. That seems like some weird competition thing between vendors, but that's not your problem"
+    },
+    "117": {
+        "id": 117,
+        "name": "Enter the games",
+        "skillId": 3,
+        "requiredProgress": "6000000000",
+        "tooltip": "The hightown sports competition is currently accepting sign-ups! Prizes? Silver coins!<br/>Please meet all the vendors before entering the games, they might have some useful things for you!",
+        "completedStory": "Welcome to the annual sporting games! Beat your competitors to win silver coins! May the best person win"
+    },
+    "118": {
+        "id": 118,
+        "name": "Scavenger hunt",
+        "skillId": 6,
+        "requiredProgress": "50000000000",
+        "additionalDamagePerMs": "15",
+        "awardItem": {
+            "type": 1,
+            "id": 19,
+            "amount": "5"
+        },
+        "tooltip": "The first to find the treasure in the sand wins! But these competitors are fierce in that objective<br/>Provides five silver coins upon completion",
+        "completedStory": "Ha, treasure found! And you've played totally by the rules. Luckily there weren't too many of those"
+    },
+    "119": {
+        "id": 119,
+        "name": "Raft racing",
+        "skillId": 9,
+        "requiredProgress": "10000000000",
+        "multiplierRequirement": "999500.1",
+        "failDamage": "200000",
+        "awardItem": {
+            "type": 1,
+            "id": 19,
+            "amount": "5"
+        },
+        "tooltip": "The first to paddle to the finish line wins the race!<br/>Provides five silver coins upon completion",
+        "completedStory": "That took some heavy paddling and will probably come with some sore arms tomorrow, but you won!"
+    },
+    "120": {
+        "id": 120,
+        "name": "Bullseye shot",
+        "skillId": 8,
+        "requiredProgress": "1000000000",
+        "multiplierRequirement": "999500.1",
+        "failDamage": "30000",
+        "awardItem": {
+            "type": 1,
+            "id": 19,
+            "amount": "5"
+        },
+        "tooltip": "It's quite simple. Hit the center of the target to win! But missing means having to retrieve the arrow through the line of fire<br/>Provides five silver coins upon completion",
+        "completedStory": "Straight in the middle of the target, nice shot! Challenge won! The rest of them just kept missing"
+    },
+    "121": {
+        "id": 121,
+        "name": "Claim medal",
+        "skillId": 3,
+        "requiredProgress": "10000000000",
+        "tooltip": "Win at least two games to claim a medal and get invited into the royal palace to celebrate your victory!",
+        "completedStory": "\"We have a new winner people! This contender came out of nowhere to make it straight onto a podium spot!\" The crowd is notably enthusiastic about your performance in their annual games. But better yet, you get invited to the celebration in the royal palace!"
+    },
+    "122": {
+        "id": 122,
+        "name": "Enter palace",
+        "skillId": 3,
+        "requiredProgress": "40000000000",
+        "tooltip": "You've been invited to the royal palace for your accomplishments in the annual games!<br/>You lose access to the tools vendor when you enter the palace. Make sure to spend your silver coins first!",
+        "completedStory": "This palace is huge! Filled with all sorts of treasures, these people must be rich. Oh look, there are the adventurers you travelled to town with too!"
+    },
+    "123": {
+        "id": 123,
+        "name": "Friendly chat",
+        "skillId": 10,
+        "requiredProgress": "40000000000",
+        "tooltip": "Let's hear what your adventuring friends have been up to since you last met!",
+        "completedStory": "They are clearly impressed by your performance in the games! It's been years since a new contestant won more than one of those games in a single year! You should definitely meet the elder in the palace, who is the advisor to the royal family. The elder is also the person who determines whether you are worthy to meet the royal family, but your friends already put in a good word for you!"
+    },
+    "124": {
+        "id": 124,
+        "name": "Meet elder",
+        "skillId": 10,
+        "requiredProgress": "100000000000",
+        "tooltip": "Let's hope the palace elder deems you worthy of meeting the royal family! This elder has been around for ages and clearly has a lot of knowledge",
+        "completedStory": "The elder was already aware of your accomplishments in the annual games, and your friends enthusiastically tell that you're also the one that managed to enter the crypt in the pyramid. All of a sudden, the face of the elder turns pale, as if looking at a ghost. The elder mumbles: \"It can't be... It should have ended with her...\". As if the elder recognizes something in you that nobody else has. Before you're able to ask any questions, the elder signals the guards. Clearly to the surprise of everyone in the palace"
+    },
+    "125": {
+        "id": 125,
+        "name": "Fight guards",
+        "skillId": 7,
+        "requiredProgress": "500000000000",
+        "additionalDamagePerMs": "20",
+        "tooltip": "Why would the elder set the guards on you?! Better get out of here as fast as possible!",
+        "completedStory": "You've managed to shake off the guards within the palace. Let's not wait for reinforcements and get out as quickly as you can"
+    },
+    "126": {
+        "id": 126,
+        "name": "Flee to docks",
+        "skillId": 3,
+        "requiredProgress": "500000000000",
+        "additionalDamagePerMs": "15",
+        "decayMultiplier": "3",
+        "tooltip": "Run first, ask questions later. Let's get out of here!<br/>Due to damaging encounters on the way, your <i class='far fa-heart-broken'></i> health decay will triple on completion",
+        "completedStory": "You've made it back to the docks, the fastest way out of here is probably through water as there may already be guards waiting for you at the main gate<br/><span style='font-weight: 500;'>Your <i class='far fa-heart-broken'></i> health decay has tripled</span>"
+    },
+    "127": {
+        "id": 127,
+        "name": "Board boat",
+        "skillId": 9,
+        "requiredProgress": "10000000000",
+        "tooltip": "The sea seems like the safest way to flee from the city<br/>Requires a boat to board<br/>You lose access to all jobs in town by boarding your boat, and to reduce weight it's better to leave resources on shore",
+        "completedStory": "You've boarded your boat and are ready to set sail! Let's get out of here before the guards catch up to you"
+    },
+    "128": {
+        "id": 128,
+        "name": "Set sail",
+        "skillId": 9,
+        "requiredProgress": "100000000000",
+        "tooltip": "The open water awaits you. Let's get out of here before the guards catch up to you",
+        "completedStory": "The city is starting to become merely a sight in the distance. It looks like you've managed to escape. Now that you've got a chance to think about what just happened, you notice that the elder slipped a note into your inventory. It reads: \"If we were unable to stop you, we can only hope that your intentions are pure. Please find the one that came before you in her volcano hideout. She should be able to explain my reasons to you\""
+    },
+    "129": {
+        "id": 129,
+        "name": "Sail to smoke",
+        "skillId": 9,
+        "requiredProgress": "100000000000",
+        "tooltip": "You see a lot of smoke in the distance. That might just indicate volcanic activity. Perhaps that's what the elder's note refers to?",
+        "completedStory": "Somewhat closer to the volcanic island, you see that it's currently erupting quite heavily. It doesn't seem approachable just yet, as a lot of magma is flowing directly into the sea. However, that island seems to be surrounded by three other islands. You might as well explore those until the volcano settles down"
+    },
+    "130": {
+        "id": 130,
+        "name": "Sail west",
+        "skillId": 9,
+        "requiredProgress": "100000000000",
+        "decayMultiplier": "3",
+        "isStoryBranch": true,
+        "tooltip": "Looking west, you see an island through the smoke<br/>Passing through this smoke triples your <i class='far fa-heart-broken'></i> health decay",
+        "completedStory": "You've made it through the smoke and are getting closer to the island. From a distance, it looks like a tribe of people is living on the island. Let's hope they're friendly. However, there's a slight problem... You're being attacked by sharks!<br/><span style='font-weight: 500;'>Your <i class='far fa-heart-broken'></i> health decay has tripled due to inhaling volcanic smoke</span>"
+    },
+    "131": {
+        "id": 131,
+        "name": "Sail north",
+        "skillId": 9,
+        "requiredProgress": "100000000000",
+        "decayMultiplier": "3",
+        "isStoryBranch": true,
+        "tooltip": "The smoke seems too thick to sail this way at the moment. Somehow it feels as if that's limited by your instincts",
+        "completedStory": "You've made it through the smoke and are getting closer to the island. From a distance, it looks like there's quite a big city located on this rather small island. Let's find out who lives here!<br/><span style='font-weight: 500;'>Your <i class='far fa-heart-broken'></i> health decay has tripled due to inhaling volcanic smoke</span>"
+    },
+    "132": {
+        "id": 132,
+        "name": "Sail east",
+        "skillId": 9,
+        "requiredProgress": "100000000000",
+        "decayMultiplier": "3",
+        "isStoryBranch": true,
+        "tooltip": "The smoke seems too thick to sail this way at the moment. Somehow it feels as if that's limited by your instincts",
+        "completedStory": "You've made it through the smoke and are getting closer to the island. From a distance it looks like quite a few ships have moored at the shore, all of which have similar coloring<br/><span style='font-weight: 500;'>Your <i class='far fa-heart-broken'></i> health decay has tripled due to inhaling volcanic smoke</span>"
+    },
+    "133": {
+        "id": 133,
+        "name": "Sail to volcano",
+        "skillId": 9,
+        "requiredProgress": "100000000000",
+        "decayMultiplier": "3",
+        "tooltip": "The volcano should settle down eventually. A rough guess would be after exploring two of the three other islands, but who can predict volcanoes",
+        "completedStory": "You've made it through the smoke and are getting closer to the volcanic island. The magma is still flowing into the water, causing a lot of smoke which makes it hard to look ahead.<br/><span style='font-weight: 500;'>Your <i class='far fa-heart-broken'></i> health decay has tripled due to inhaling volcanic smoke</span>"
+    },
+    "134": {
+        "id": 134,
+        "name": "Fight sharks",
+        "skillId": 7,
+        "requiredProgress": "500000000000",
+        "additionalDamagePerMs": "10",
+        "tooltip": "These things are attacking your boat for no other reason than considering you to be food!",
+        "completedStory": "That takes care of these beasts. You know what? They may just be edible themselves"
+    },
+    "135": {
+        "id": 135,
+        "name": "Dock at beach",
+        "skillId": 9,
+        "requiredProgress": "50000000000",
+        "tooltip": "Let's find out what's on this island!",
+        "completedStory": "You've docked at the beach and are almost instantly greeted by some people from a local tribe. They don't speak quite the same language as you, but seem to be welcoming you to their camp"
+    },
+    "136": {
+        "id": 136,
+        "name": "Follow locals",
+        "skillId": 3,
+        "requiredProgress": "100000000000",
+        "tooltip": "They point to their camp which is close to the beach and seem to indicate that you should follow them",
+        "completedStory": "What a cozy little camp! It's a small community of people that live in tents, and mostly feed themselves from the nature on the island"
+    },
+    "137": {
+        "id": 137,
+        "name": "Meet chieftain",
+        "skillId": 10,
+        "requiredProgress": "100000000000",
+        "tooltip": "The leader of this little native community. It's a friendly looking person, and it's probably a good idea to introduce yourself",
+        "completedStory": "The language barrier made communicating with the chieftain a little odd, but it looks like you're welcome to join the rest of the clan in some of their activities. Their main goal seems to be to make some sort of soup, perhaps you can help out with that?"
+    },
+    "138": {
+        "id": 138,
+        "name": "Meet hunters",
+        "skillId": 10,
+        "requiredProgress": "100000000000",
+        "tooltip": "They have spears to hunt some local wildlife. Following them around might point you to some edible beasts!",
+        "completedStory": "After following the hunters around for a bit, you noticed that they are hunting pelicans. Those mostly eat a lot of fish around the ocean, and you should be able to catch some!"
+    },
+    "139": {
+        "id": 139,
+        "name": "Meet gatherers",
+        "skillId": 10,
+        "requiredProgress": "100000000000",
+        "tooltip": "It looks like they are trying to gather some specific vegetables, but are running into some trouble. Let's find out if you can help them out",
+        "completedStory": "The gatherers seem to be trying to gather some vegetables in the underbrush, but stinging nettles make it very difficult. You should be able to weed those out to get to the vegetables"
+    },
+    "140": {
+        "id": 140,
+        "name": "Weed out nettles",
+        "skillId": 1,
+        "requiredProgress": "100000000000",
+        "additionalDamagePerMs": "25",
+        "tooltip": "Those stinging nettles prevent the gatherers from getting the vegetables they're looking for!",
+        "completedStory": "Stinging nettles weeded out. Well done! The gatherers are clearly happy about this and get right to the vegetables. You should be able to gather some of those too now"
+    },
+    "141": {
+        "id": 141,
+        "name": "Enter jungle",
+        "skillId": 3,
+        "requiredProgress": "200000000000",
+        "tooltip": "Leave the tribe and venture forth into the island. You lose access to sharks, soup and vegetables when you enter the jungle",
+        "completedStory": "Leaving the tribe behind, you've made it somewhat into the jungle on the island. It's hard to say how big this jungle actually is, as it's tricky to look beyond all these trees"
+    },
+    "142": {
+        "id": 142,
+        "name": "Follow stream",
+        "skillId": 3,
+        "requiredProgress": "200000000000",
+        "automationUnlockAlternative": 145,
+        "isStoryBranch": true,
+        "tooltip": "A little stream of water in the jungle. Let's hope whatever lives in it isn't too aggressive",
+        "completedStory": "There were some creatures in the stream, but they didn't seem to pay too much attention to you. Further down the stream, you see some rocks that look climbable, as well as a mangrove swamp. Both seem to be viable paths toward some smoke you see coming from behind these rocks"
+    },
+    "143": {
+        "id": 143,
+        "name": "Cross swamp",
+        "skillId": 3,
+        "requiredProgress": "1000000000000",
+        "additionalDamagePerMs": "30",
+        "automationUnlockAlternative": 144,
+        "isStoryBranch": true,
+        "tooltip": "A swamp filled with mangrove roots and crabs, making it tricky to pass",
+        "completedStory": "Pfeew, when you weren't stumbling over these roots, those nasty crabs kept pinching you as if you were intruding their territory. But you've managed to pass the swamp! Now that you're a bit closer, it seems that the smoke is coming from an abandoned campsite. Let's check that out!"
+    },
+    "144": {
+        "id": 144,
+        "name": "Climb rocks",
+        "skillId": 3,
+        "requiredProgress": "300000000000",
+        "multiplierRequirement": "29950000",
+        "failDamage": "500000",
+        "automationUnlockAlternative": 143,
+        "isStoryBranch": true,
+        "tooltip": "The climb itself wouldn't be too tricky, if it wasn't for these rocks being so slippery",
+        "completedStory": "You somehow managed to maintain enough grip to make it to the top of those rocks! From here the road ahead is clearly easier, and you're now able to see that that smoke is coming from what appears to be an abandoned camp"
+    },
+    "145": {
+        "id": 145,
+        "name": "Bushwhack along",
+        "skillId": 1,
+        "requiredProgress": "200000000000",
+        "automationUnlockAlternative": 142,
+        "isStoryBranch": true,
+        "tooltip": "Axe your way through the dense part of the jungle",
+        "completedStory": "You've made it through the densest part of the jungle. But it appears that you ran right into where the jaguars live. It doesn't look like they've spotted you yet, but it might be best to keep it that way"
+    },
+    "146": {
+        "id": 146,
+        "name": "Fight jaguar",
+        "skillId": 7,
+        "requiredProgress": "10000000000000",
+        "additionalDamagePerMs": "500",
+        "automationUnlockAlternative": 148,
+        "isStoryBranch": true,
+        "maxHealthGainMultiplier": "2",
+        "tooltip": "Have you seen these things? Fighting one of them might not be such a good idea.<br/>Completing this exploration is optional, but doubles your <span style='white-space:nowrap;'><i class='far fa-heart'></i> maximum health</span> gain after life",
+        "completedStory": "Oh wow, you've actually beaten that jaguar! No reason to sneak around now, the rest of them won't try to bother you. Now that you're able to look around freely, you see smoke coming from an abandoned camp ahead. Might as well check that out!"
+    },
+    "147": {
+        "id": 147,
+        "name": "Mud cover",
+        "skillId": 6,
+        "requiredProgress": "200000000000",
+        "automationUnlockAlternative": 146,
+        "tooltip": "Jaguars use their highly developed sense of smell to hunt. By covering yourself in mud, you might be able to sneak past",
+        "completedStory": "Yuck, well... your regular odor is certainly gone. Let's see if you're able to sneak past these jaguars now"
+    },
+    "148": {
+        "id": 148,
+        "name": "Sneak past",
+        "skillId": 3,
+        "requiredProgress": "200000000000",
+        "multiplierRequirement": "19950000",
+        "failDamage": "1000000",
+        "automationUnlockAlternative": 146,
+        "isStoryBranch": true,
+        "tooltip": "Now that they won't smell you, it's still best not to be spotted visually",
+        "completedStory": "Jaguars, passed! You should be far enough past them to continue walking normally. Actually, you also notice some smoke coming from what appears to be an abandoned camp"
+    },
+    "149": {
+        "id": 149,
+        "name": "Abandoned camp",
+        "skillId": 3,
+        "requiredProgress": "200000000000",
+        "tooltip": "The camp looks recent, and some smoke is still coming from a campfire. Perhaps they've left something useful behind?",
+        "completedStory": "It appears that the camp was from the same tribe that you've met on the beach, and they left a pan of soup behind"
+    },
+    "150": {
+        "id": 150,
+        "name": "Leave campsite",
+        "skillId": 3,
+        "requiredProgress": "200000000000",
+        "tooltip": "Follow the trail left by the people that started the camp",
+        "completedStory": "The trail leads right up to a narrow gorge. It's rather deep and seems far too long to walk around. But you'll probably be able to come up with a way to cross it!"
+    },
+    "151": {
+        "id": 151,
+        "name": "Jump gorge",
+        "skillId": 3,
+        "requiredProgress": "500000000000",
+        "multiplierRequirement": "249500000",
+        "failDamage": "10000000",
+        "automationUnlockAlternative": 152,
+        "isStoryBranch": true,
+        "tooltip": "Jump right over it! This seems highly dangerous... but fast",
+        "completedStory": "That's what we call a leap of faith! But you've actually managed to make it across the gorge in one jump! You hear the sound of monkeys in the distance. It's probably a good idea to check on that commotion"
+    },
+    "152": {
+        "id": 152,
+        "name": "Swing across",
+        "skillId": 3,
+        "requiredProgress": "125000000000",
+        "multiplierRequirement": "24950000",
+        "failDamage": "250000",
+        "automationUnlockAlternative": 151,
+        "isStoryBranch": true,
+        "tooltip": "Somewhat safer, but requires something to swing across with",
+        "completedStory": "Well done! You've swung across the gorge! Now that you're on this side, you hear the sound of monkeys in the distance. Monkeys generally get more vocal when there's people near them, to alert each other. That might be worth checking out"
+    },
+    "153": {
+        "id": 153,
+        "name": "Follow the sounds",
+        "skillId": 3,
+        "requiredProgress": "200000000000",
+        "tooltip": "The sound of those monkeys might indicate the presence of other people in that direction",
+        "completedStory": "It looks like people may have passed through here, but those monkeys seem more interested in the food in your inventory than anything else"
+    },
+    "154": {
+        "id": 154,
+        "name": "Meet monkeys",
+        "skillId": 10,
+        "requiredProgress": "200000000000",
+        "tooltip": "The monkeys seem quite interested in you. Or rather, your food",
+        "completedStory": "As cute as these monkeys might look, they make it perfectly clear that you're not getting out without sharing some of your food"
+    },
+    "155": {
+        "id": 155,
+        "name": "Get ransacked",
+        "skillId": 10,
+        "requiredProgress": "100000000000",
+        "completionDamage": "5000000",
+        "automationUnlockAlternative": 156,
+        "isStoryBranch": true,
+        "tooltip": "Let them have your food, anything to get past those beasts! But if you don't have enough food, they may even go for your limbs. They are that hungry",
+        "completedStory": "Well, you've made it past the monkeys. You distracted them with your food and they stopped paying attention to you. But at what cost..."
+    },
+    "156": {
+        "id": 156,
+        "name": "Fight gorilla",
+        "skillId": 7,
+        "requiredProgress": "4000000000000",
+        "additionalDamagePerMs": "750",
+        "automationUnlockAlternative": 155,
+        "isStoryBranch": true,
+        "tooltip": "You know what they say, pick a fight with the alpha and the others will leave you be",
+        "completedStory": "Gorilla, beaten. That'll show them not to mess with you! The other monkeys quickly flee the scene. No food for them today!"
+    },
+    "157": {
+        "id": 157,
+        "name": "Exit jungle",
+        "skillId": 3,
+        "requiredProgress": "200000000000",
+        "tooltip": "Now that you've passed the monkeys, you see a way out of this jungle!",
+        "completedStory": "Now that you've made it through the jungle, you've reached what appear to be ruins of an ancient civilization. The inhabitants seem long gone, although you see some track marks of others having passed by these ruins recently. In the middle of it all is a massive triangle-shaped building which you can only assume is some sort of temple. It's not quite a pyramid though. Let's take a closer look"
+    },
+    "158": {
+        "id": 158,
+        "name": "Walk to temple",
+        "skillId": 3,
+        "requiredProgress": "200000000000",
+        "tooltip": "A massive, ancient, triangular construction that seems to have been abandoned by its original inhabitants long ago",
+        "completedStory": "Approaching the temple, you see all sorts of ancient symbols, some depicting mask-like faces, others the sun. More importantly, there's an enormous staircase in the center of it, leading to the top of the temple"
+    },
+    "159": {
+        "id": 159,
+        "name": "Climb stairs",
+        "skillId": 3,
+        "requiredProgress": "1000000000000",
+        "tooltip": "Climb the temple stairs to see what's up there",
+        "completedStory": "After climbing all the way to the top of the temple, you see some sort of altar. Whoever lived here before seem to have glorified the sun itself as a divine being. But before you're able to inspect it all too much, your eyes fall upon an ancient hourglass. You're not quite sure why, but you can't quite seem to take your eyes off it. As if it calls to you subconsciously"
+    },
+    "160": {
+        "id": 160,
+        "name": "Inspect hourglass",
+        "skillId": 11,
+        "requiredProgress": "10000",
+        "additionalDamagePerMs": "50",
+        "tooltip": "Inspect the hourglass on the altar. It seems to somehow influence time itself, but wears you out as well</br>Completing this decreases the cooldown at which you can eat every food-type by 20% for this generation",
+        "completedStory": "After closely inspecting the hourglass, some of its power fueled into you and you're able to eat food types more frequently as a result. You have a strong feeling that closer inspection might allow you to funnel some of its power directly into your instincts"
+    },
+    "161": {
+        "id": 161,
+        "name": "Funnel hourglass",
+        "skillId": 11,
+        "requiredProgress": "15000",
+        "additionalDamagePerMs": "50",
+        "completionScaling": "1.1",
+        "tooltip": "Funnel the power of the hourglass into your DNA</br>Completing this permanently decreases the cooldown at which you can eat every food-type by 1% for all future generations, as well as your current generation.<br/>Completing this exploration in multiple generations compounds the permanent bonus, but the difficulty increases per completion",
+        "completedStory": "You have successfully funneled some of the hourglass' power into your instincts! While the effect appears to be small on its own, it persists through generations permanently. Future generations will be able to funnel even more of its power into your instincts, but it will be even harder next time"
+    },
+    "162": {
+        "id": 162,
+        "name": "Climb down",
+        "skillId": 3,
+        "requiredProgress": "500000000000",
+        "tooltip": "Leave the altar and climb down the temple stairs. From up here, you're able to see a small river behind the temple",
+        "completedStory": "Climbing down was a little easier than climbing up. Who would have guessed? In any case, now that you know there's a small river behind the temple, you should be able to board that with your raft!"
+    },
+    "163": {
+        "id": 163,
+        "name": "Follow stream",
+        "skillId": 9,
+        "requiredProgress": "200000000000",
+        "tooltip": "Use your raft to follow the stream of the river. Completing this exploration causes you to lose access to pelicans",
+        "completedStory": "The river led directly back to the sea! From here on, you should be able to continue exploring the other islands"
+    },
+    "164": {
+        "id": 164,
+        "name": "Board boat",
+        "skillId": 9,
+        "requiredProgress": "100000000000",
+        "chapterCompletionTrigger": 6,
+        "tooltip": "Board your boat to continue exploring the other islands",
+        "completedStory": "You've set sail and left the west island behind you. Time to explore another island!"
+    },
+    "165": {
+        "id": 165,
+        "name": "Dock at harbor",
+        "skillId": 9,
+        "requiredProgress": "100000000000",
+        "tooltip": "This island appears to be quite small but highly populated. There's a little harbor where you can dock",
+        "completedStory": "Now that you've docked in the harbor, some of the guards seem to direct you to a guest entrance. It's probably best to follow them"
+    },
+    "166": {
+        "id": 166,
+        "name": "Follow guards",
+        "skillId": 3,
+        "requiredProgress": "200000000000",
+        "tooltip": "The guards seem to guide you to their guest entrance",
+        "completedStory": "Whoa! Once you've entered the door, they've shut it right behind you! What's this about?!"
+    },
+    "167": {
+        "id": 167,
+        "name": "Talk to officer",
+        "skillId": 10,
+        "requiredProgress": "200000000000",
+        "tooltip": "What's this about?! Why did they lock the door behind you?",
+        "completedStory": "The officer speaks to you with an unpleasant smirk on the face. \"Welcome to the arena! I know this must be a surprise to you, but this is your life now! You silly tourists just keep running right into our trap. You can of course get out whenever you want. Just make sure to entertain our royals in the arena and win all fights! It has been done before. Once or twice.\". There doesn't seem to be any way out other than to obey at this point. So it's probably best to do so until an opportunity arises"
+    },
+    "168": {
+        "id": 168,
+        "name": "Enter cell",
+        "skillId": 3,
+        "requiredProgress": "200000000000",
+        "tooltip": "It is what it is. There doesn't seem any other way to handle this",
+        "completedStory": "Walking into your cell, you see that you're not alone in here. There's someone else you're sharing this cell with"
+    },
+    "169": {
+        "id": 169,
+        "name": "Meet cellmate",
+        "skillId": 10,
+        "requiredProgress": "200000000000",
+        "tooltip": "Your companion in this cell, for now",
+        "completedStory": "Your cellmate seems nice! \"I used to be a merchant, traveling the seas, hoping for business to thrive. Until I arrived here and walked into their trap. I've been working in the yard every day since, but may have a plan to get out!\". Your cellmate seems surprisingly trusting of a newcomer like yourself, and almost directly shows you the start of a tunnel that's being worked on. Not much progress on it yet, but it might prove a viable way out!"
+    },
+    "170": {
+        "id": 170,
+        "name": "Help digging",
+        "skillId": 6,
+        "requiredProgress": "200000000000",
+        "tooltip": "Help your cellmate with digging the tunnel. It probably can't be completed all at once, but let's see how far we can dig before the guards return!",
+        "completedStory": "With your help, the tunnel digging went notably faster! And your cellmate seems glad to have informed you about it. But as you proceeded, the cellmate rushed to hide the tunnel. And that was the right call, as a guard made its way to your cell. It doesn't seem like the tunnel was spotted, but you are being directed out of the cell. \"Dinner time! I'll show you to our diner.\""
+    },
+    "171": {
+        "id": 171,
+        "name": "Go to dining area",
+        "skillId": 3,
+        "requiredProgress": "200000000000",
+        "tooltip": "It's dinner time. Let's hope this isn't another one of their tricks",
+        "completedStory": "The guard led you to the... eating room. This is not what you would call a \"diner\". But they are serving food here, so it looks like that part wasn't a trick. That could have been worse. Although, after seeing the food... maybe not much worse"
+    },
+    "172": {
+        "id": 172,
+        "name": "Meet others",
+        "skillId": 10,
+        "requiredProgress": "200000000000",
+        "tooltip": "Now that you're in the dining area, it seems like there's actually quite a large number of people imprisoned here. Is this all due to their trap?",
+        "completedStory": "Well, it doesn't seem like these are only people that were trapped. Some of them are real harsh and seem to be here for better reasons. A couple of them are particularly unfriendly to you"
+    },
+    "173": {
+        "id": 173,
+        "name": "Pick a fight",
+        "skillId": 7,
+        "requiredProgress": "1000000000000",
+        "additionalDamagePerMs": "40",
+        "tooltip": "You know what they say. Pick a fight with the toughest of them, and the rest should leave you be",
+        "completedStory": "That'll teach them to show some respect! Punching that tough person surely caused the others to look at you differently. You probably won't be making friends, but they should at least leave you be"
+    },
+    "174": {
+        "id": 174,
+        "name": "Return to cell",
+        "skillId": 3,
+        "requiredProgress": "200000000000",
+        "tooltip": "The guards didn't even seem to mind the fighting going on. It's just time to return to your cells<br/>You lose access to stew by returning to your cell",
+        "completedStory": "As you walk into your cell, the guard tells you: \"I'll come get you when it's time for yardwork in a bit.\". As the guard walks away, your cellmate starts to continue digging the tunnel"
+    },
+    "175": {
+        "id": 175,
+        "name": "Work on tunnel",
+        "skillId": 6,
+        "requiredProgress": "200000000000",
+        "tooltip": "You don't get too many chances to continue digging the escape tunnel. Best make use of the time that's there",
+        "completedStory": "Some good progress was made again. And it even seems that you're hearing some sounds behind the tunnel wall. You may be getting close to an exit! But the guard approaches again. The two of you will have to finish it later"
+    },
+    "176": {
+        "id": 176,
+        "name": "Go to yard",
+        "skillId": 3,
+        "requiredProgress": "200000000000",
+        "tooltip": "Time for some serious involuntary labor!",
+        "completedStory": "The guard led you to the yard. It's quite hot out here. \"You can return to the diner when your work is done. No sooner. Now go and reinforce the barricades.\". Those instructions seem quite clear, and it doesn't appear as if anyone really sees any other way at the moment. It's probably best to behave until you and your cellmate get a chance to finish the tunnel in your cell"
+    },
+    "177": {
+        "id": 177,
+        "name": "Return to diner",
+        "skillId": 3,
+        "requiredProgress": "200000000000",
+        "tooltip": "You can eat after reinforcing the barricades. But you can only complete cart upgrades while in the yard. Any wood you may still hold is seized by the guards when heading back inside",
+        "completedStory": "You've made it back to the diner for some well-deserved food. Looking around, you don't see your cellmate though. That's odd. Oh well, let's eat!"
+    },
+    "178": {
+        "id": 178,
+        "name": "Talk to guard",
+        "skillId": 10,
+        "requiredProgress": "200000000000",
+        "tooltip": "While in the diner, one of the guards urges you to come and talk. It looks urgent",
+        "completedStory": "After casually walking up to the guard to see what's up. You sense a great anger in the guard before the yelling begins: \"Your cellmate escaped! Through a tunnel dug in your cell! We've been nice to you so far, but that's over right now. No more dinner, nor sleep for you. Into the arena with you. Let's see how well you'll fare.\". Knowing all that, you can't help but feel betrayed about the fact that your cellmate escaped without you!"
+    },
+    "179": {
+        "id": 179,
+        "name": "Enter the arena",
+        "skillId": 3,
+        "requiredProgress": "200000000000",
+        "tooltip": "This is where all prisoners eventually go. But your cellmate hasn't helped with the situation<br/>You lose access to stew by entering the arena",
+        "completedStory": "Walking into the arena, you see a rather large crowd of spectators. A few of them are sitting on what look like thrones, they are probably important. But you quickly realize that you're not the only prisoner in the arena. Another prisoner starts charging at you, and it looks like only one of you will be able to make it to the next round"
+    },
+    "180": {
+        "id": 180,
+        "name": "Fight gladiator",
+        "skillId": 7,
+        "requiredProgress": "1000000000000",
+        "additionalDamagePerMs": "60",
+        "tooltip": "This other prisoner has already won a couple of fights, and the crowd cheers for a gladiator. That can hardly be anyone but that other prisoner",
+        "completedStory": "Well done, you've won the first fight in the arena! The crowd seems pleased, although you have beaten their odds. It seems that this was one of their stronger competitors, and you're being moved up to the next tier of combatants right away. But first, you get to claim the shield of the gladiator!"
+    },
+    "181": {
+        "id": 181,
+        "name": "Claim shield",
+        "skillId": 10,
+        "requiredProgress": "200000000000",
+        "automationUnlockAlternative": 182,
+        "isStoryBranch": true,
+        "tooltip": "Claim the shield of the gladiator you've just beaten</br>Reduces the damage in <i class='far fa-heart-broken'></i> health decay of combat and similar explorations by 20%",
+        "completedStory": "Shield claimed. Now that you're able to protect yourself a bit better in battle, you feel slightly more comfortable heading into the next fight"
+    },
+    "182": {
+        "id": 182,
+        "name": "Reject shield",
+        "skillId": 10,
+        "requiredProgress": "200000000000",
+        "automationUnlockAlternative": 181,
+        "isStoryBranch": true,
+        "maxHealthGainMultiplier": "1.5",
+        "tooltip": "Continue the arena fights without additional protection. Considered to be much cooler by the crowd.</br>Increases your <span style='white-space:nowrap;'><i class='far fa-heart'></i> maximum health</span> gain after life by 50%",
+        "completedStory": "Shield rejected. Whether or not that was a good decision is unclear, but the crowd definitely likes it!"
+    },
+    "183": {
+        "id": 183,
+        "name": "Fight champion",
+        "skillId": 7,
+        "requiredProgress": "2000000000000",
+        "additionalDamagePerMs": "80",
+        "tooltip": "The only competitor that has not lost a single fight so far! Beating this one will definitely impress the crowd!",
+        "completedStory": "You've beaten the champion, and the crowd is euphoric! The people on the thrones seem to do some sort of vote with their thumbs. Most of their thumbs go up. You're not sure what that means, but the crowd seems to enjoy it. An announcer shouts out that they have found a new one to fight their rare creatures, and that the show will commence after lunch! It looks like they have plans for you"
+    },
+    "184": {
+        "id": 184,
+        "name": "Short break",
+        "skillId": 3,
+        "requiredProgress": "200000000000",
+        "tooltip": "Return to the diner while the crowd takes a break too",
+        "completedStory": "The guards seem hasty. \"Fill up on stew and get going right away. We're not waiting for you.\". Looks like you're not really catching much of a break here"
+    },
+    "185": {
+        "id": 185,
+        "name": "Return to arena",
+        "skillId": 3,
+        "requiredProgress": "200000000000",
+        "tooltip": "Right back to provide a show. Without much time to catch up<br/>You lose access to stew when you return to the arena",
+        "completedStory": "The crowd clearly loves this. The time of fighting other prisoners seems to be over, as they release a bull into the arena almost immediately"
+    },
+    "186": {
+        "id": 186,
+        "name": "Fight bull",
+        "skillId": 7,
+        "requiredProgress": "4000000000000",
+        "additionalDamagePerMs": "100",
+        "automationUnlockAlternative": 187,
+        "isStoryBranch": true,
+        "tooltip": "It's angry and coming for you",
+        "completedStory": "Well done, you've beaten the bull! The crowd keeps getting more excited as they watch you accomplish these challenges. Without even giving you a chance to catch your breath, a new cage opens and a lion enters the arena"
+    },
+    "187": {
+        "id": 187,
+        "name": "Hunt bull",
+        "skillId": 8,
+        "requiredProgress": "4000000000000",
+        "additionalDamagePerMs": "100",
+        "automationUnlockAlternative": 186,
+        "isStoryBranch": true,
+        "awardItem": {
+            "type": 1,
+            "id": 26,
+            "amount": "max"
+        },
+        "tooltip": "If you tackle this right, you might be able to take this beast down in a way where you'll be able to cook it afterwards.</br>Provides a full inventory of bull meat upon completion, which can be cooked",
+        "completedStory": "Wow you've not only managed to beat that bull, you've even managed to hunt it down in such a way that you can now cook it! The crowd looks a little confused. That's not what they expected to happen. Regardless, a new cage opens immediately, and a lion enters the arena"
+    },
+    "188": {
+        "id": 188,
+        "name": "Fight lion",
+        "skillId": 7,
+        "requiredProgress": "6000000000000",
+        "additionalDamagePerMs": "120",
+        "tooltip": "This beast looks fierce and not too well fed. At the same time, you notice that your hourglass starts to tremble just a little",
+        "completedStory": "Lion, dealt with. Well done! The crowd goes wild. It's been ages since someone has made it this far in the arena! But you aren't done just yet. They start preparing for the finale and announce that if you win the next fight, you'll earn back your freedom! Only two people ever made it that far before. While they prepare for the next fight, both you and the crowd get one final break"
+    },
+    "189": {
+        "id": 189,
+        "name": "Final break",
+        "skillId": 3,
+        "requiredProgress": "200000000000",
+        "tooltip": "Return to the diner one last time to fill up on stew before the finale",
+        "completedStory": "When you're entering the diner, you see some sort of ancient shield lying on one of the tables. The guard tells you one of the people on the thrones wanted you to see this. It's inscribed with some ancient text and encrusted with all sorts of gemstones. It seems way too heavy to carry, but your hourglass starts to tremble as you get closer to it, as if they are somehow connected"
+    },
+    "190": {
+        "id": 190,
+        "name": "Funnel shield",
+        "skillId": 11,
+        "requiredProgress": "15000",
+        "additionalDamagePerMs": "50",
+        "completionScaling": "1.1",
+        "tooltip": "Funnel some of the power of this ancient shield into your hourglass</br>Completing this permanently reduces the damage in <i class='far fa-heart-broken'></i> health decay of combat and similar explorations by 1% for all future generations, as well as your current generation.<br/>Completing this exploration in multiple generations compounds the permanent bonus, but the difficulty increases per completion",
+        "completedStory": "You have successfully funneled some of the shield's power into your hourglass! While limited on its own, the effect persists through generations permanently. Future generations will be able to funnel even more of its power into your hourglass, but it will be even harder next time"
+    },
+    "191": {
+        "id": 191,
+        "name": "Return for finale",
+        "skillId": 3,
+        "requiredProgress": "200000000000",
+        "tooltip": "Return to the arena for the final fight!",
+        "completedStory": "When you enter the arena again, they almost immediately send in a giant three-headed lizard. It's definitely not a type of beast you've seen before. This should be it: defeat this beast to win back your freedom!"
+    },
+    "192": {
+        "id": 192,
+        "name": "Fight hydra",
+        "skillId": 7,
+        "requiredProgress": "8000000000000",
+        "additionalDamagePerMs": "200",
+        "tooltip": "Some sort of three-headed lizard. It looks horrifying! Beating it should earn you your freedom back",
+        "completedStory": "You have defeated the hydra! The crowd is ecstatic! This hasn't been seen in ages and most of them have never seen this happen at all. You have earned your freedom, the doors are open and your boat is mostly still intact. However, if you really want to prove your strength, they have one last beast left that hasn't ever been defeated before"
+    },
+    "193": {
+        "id": 193,
+        "name": "Fight chimera",
+        "skillId": 7,
+        "requiredProgress": "10000000000000",
+        "additionalDamagePerMs": "750",
+        "maxHealthGainMultiplier": "2",
+        "automationUnlockAlternative": 194,
+        "tooltip": "What even is this thing?! It has two heads, one of a lion and one of a goat. And it has a snake-like tail. It has also never been beaten before. But luckily you don't have to beat it to leave the arena, as you've already earned your freedom.<br/>Completing this exploration is optional, but doubles your <span style='white-space:nowrap;'><i class='far fa-heart'></i> maximum health</span> gain after life",
+        "completedStory": "The crowd actually became a little quiet, stunned by disbelief of how you've managed to defeat their strongest beast. That was believed to be impossible. At this point you're starting to scare them, and the announcer asks you to leave the arena with a tremble in the voice"
+    },
+    "194": {
+        "id": 194,
+        "name": "Leave the arena",
+        "skillId": 3,
+        "requiredProgress": "200000000000",
+        "automationUnlockAlternative": 193,
+        "tooltip": "You have earned your freedom! You are finally allowed to leave as you please",
+        "completedStory": "Walking out of the arena, a few guards are waiting to escort you to the docks. They'd rather not have you enter the city behind the arena as they fear you might resent them for locking you up earlier"
+    },
+    "195": {
+        "id": 195,
+        "name": "Get escorted out",
+        "skillId": 3,
+        "requiredProgress": "200000000000",
+        "tooltip": "The guards will escort you back to your boat. They'd rather not have you wander around in case you might resent them for locking you up earlier",
+        "completedStory": "After following the guards back to your boat, you see it has partially been patched up. Looks like it might have already been at the salvage pile in the yard earlier. But it seems waterproof enough to sail with"
+    },
+    "196": {
+        "id": 196,
+        "name": "Board boat",
+        "skillId": 9,
+        "requiredProgress": "200000000000",
+        "chapterCompletionTrigger": 7,
+        "tooltip": "Board your boat to continue exploring the other islands",
+        "completedStory": "You've set sail and left the north island behind you. Time to explore another island!"
+    },
+    "197": {
+        "id": 197,
+        "name": "Dock aside ships",
+        "skillId": 9,
+        "requiredProgress": "200000000000",
+        "tooltip": "Let's see who these ships belong to, and if they are friendly",
+        "completedStory": "You've docked at the beach and can now see that these ships are branded with dragon symbols. The ships look way sturdier than your boat, but you should be able to take pride in the fact that you've built it yourself. Some of the people that the ships belong to seem to be on the beach. Let's meet them!"
+    },
+    "198": {
+        "id": 198,
+        "name": "Meet fleet people",
+        "skillId": 10,
+        "requiredProgress": "200000000000",
+        "tooltip": "Their ships look impressive, let's see if they're friendly!",
+        "completedStory": "After a quick chat, they inform you that they belong to a clan that gathers rare resources around the world. Initially, they point you towards the nearby quarry that seems to hold some construction resources. But you get the feeling that they're here for something far more valuable that they aren't telling you about"
+    },
+    "199": {
+        "id": 199,
+        "name": "Walk to quarry",
+        "skillId": 3,
+        "requiredProgress": "500000000000",
+        "tooltip": "Let's find out what resources that quarry holds!",
+        "completedStory": "This quarry is enormous! The first layers look like they were dug out ages ago, but the lower layers appear to be newer. It seems to technically be off-limits and the stairs are guarded. But then again, it's just one jump down to enter. Oh, and you see falcons flying around the quarry! You can probably eat those"
+    },
+    "200": {
+        "id": 200,
+        "name": "Enter quarry",
+        "skillId": 3,
+        "requiredProgress": "500000000000",
+        "completionDamage": "5000000",
+        "tooltip": "Technically, you're not allowed to enter. But one quick jump should get you into the quarry anyway!",
+        "completedStory": "Ouch, that jump didn't feel great on your ankles. But you're in! It looks like they're digging for some form of limestone. Perhaps you can use that for construction!"
+    },
+    "201": {
+        "id": 201,
+        "name": "Descend layer",
+        "skillId": 3,
+        "requiredProgress": "500000000000",
+        "completionDamage": "6000000",
+        "tooltip": "Jump to the next layer of the quarry",
+        "completedStory": "Ouch, these jumps don't get any softer. A little further down, you see that they are primarily mining the more valuable mineral quartz in this quarry. Unfortunately, getting down there would probably not go unnoticed. However, it looks like this layer has an entrance to an old mineshaft that appears to be out of use. Perhaps there's something in there?"
+    },
+    "202": {
+        "id": 202,
+        "name": "Enter old mine",
+        "skillId": 3,
+        "requiredProgress": "500000000000",
+        "tooltip": "It looks old and quite unstable. Who knows where it leads though! You will lose access to falcons when you enter the mine",
+        "completedStory": "Somewhat into the old mine, you run into an old minecart. With the way the rails work, it seems impossible to continue walking. There's just some iron bars above chasms within the mine. But the cart clearly hasn't moved in ages either. You might be able to repair it"
+    },
+    "203": {
+        "id": 203,
+        "name": "Climb rails",
+        "skillId": 3,
+        "requiredProgress": "500000000000",
+        "multiplierRequirement": "499500000",
+        "failDamage": "100000000",
+        "automationUnlockAlternative": 204,
+        "isStoryBranch": true,
+        "tooltip": "If you hang on these rails upside down, you might be able to shimmy across. But it's quite a long way down if your fingers slip",
+        "completedStory": "You've shimmied across the minecart rails! An impressive performance that nobody was able to see, sadly. Now that you've made it to the other side of these underground chasms, you see what appears to be an ancient door. It seems unlikely that this was ever part of the mining expedition that this shaft was made for. It seems far older than that"
+    },
+    "204": {
+        "id": 204,
+        "name": "Ride minecart",
+        "skillId": 9,
+        "requiredProgress": "500000000000",
+        "automationUnlockAlternative": 203,
+        "isStoryBranch": true,
+        "tooltip": "Riding the rails with this old minecart seems like the safer approach for sure. But you'll need to repair it before it will move",
+        "completedStory": "It was a bumpy ride, but you've managed to make it across these underground chasms! Now that you've made it to the other side, you see what appears to be an ancient door. It seems unlikely that this was ever part of the mining expedition that this shaft was made for. It seems far older than that"
+    },
+    "205": {
+        "id": 205,
+        "name": "Inspect door",
+        "skillId": 10,
+        "requiredProgress": "500000000000",
+        "tooltip": "It appears to be an ancient door, clearly aimed to keep people out. Crafted entirely from quartz and engraved with ancient symbols. Let's see if you can get it open",
+        "completedStory": "Upon touching the door, it just sort of opened by itself. Seems odd, as if you've passed some sort of test that you weren't made aware of. It seems to have opened a passage into an old treasure room of sorts. Although it has been long abandoned"
+    },
+    "206": {
+        "id": 206,
+        "name": "Enter treasury",
+        "skillId": 3,
+        "requiredProgress": "500000000000",
+        "tooltip": "It appears to be massive, but long abandoned. You will lose access to limestone when you enter the treasury",
+        "completedStory": "Walking into the treasure room, you can barely see all of it. It's that big. The treasures themselves seem to be long gone, probably pillaged over the years. Although there are some ancient writings near what looks to have been a throne at one point"
+    },
+    "207": {
+        "id": 207,
+        "name": "Explore treasury",
+        "skillId": 3,
+        "requiredProgress": "2000000000000",
+        "tooltip": "Let's see what's in here!",
+        "completedStory": "The treasury has definitely seen better days. There's a lot of empty space, huge pillars and only some statues and inscriptions left. That throne that you spotted when you initially entered the treasury seems to be guarded by some sort of machine made from stone"
+    },
+    "208": {
+        "id": 208,
+        "name": "Inspect statues",
+        "skillId": 10,
+        "requiredProgress": "1000000000000",
+        "tooltip": "These statues are quite big, but the proportions seem a little odd",
+        "completedStory": "It looks like these statues represent a civilization that lived here at some time in the past. They seem to have been rather short, and all had rather long beards. You can't help but wonder why they left. If this is just their treasury, the entirety of this construction could have housed hundreds of them"
+    },
+    "209": {
+        "id": 209,
+        "name": "Read inscriptions",
+        "skillId": 10,
+        "requiredProgress": "1000000000000",
+        "tooltip": "The texts are in a different dialect than you're used to. But you'll probably be able to make some sense of them",
+        "completedStory": "The inscriptions seem to have been carved into the stone with a sense of haste. As if the habitants left in a hurry and wanted anyone looking for them to know why they left. The details are tricky to decipher, but indicate some enormous fiery creature attacking their city. It appears as if they carried out as much of their treasures as they could when fleeing their home. You can't help but get a little uncomfortable by the idea that a civilization that lived in such a big place felt the need to flee from the very point where you're standing"
+    },
+    "210": {
+        "id": 210,
+        "name": "Fight golem",
+        "skillId": 7,
+        "requiredProgress": "4000000000000",
+        "additionalDamagePerMs": "200",
+        "tooltip": "It's a machine entirely made out of stone. Unusual technology, but clearly protective of the throne",
+        "completedStory": "You've managed to disable the golem, for now. Best not to stick around for too long as it seems to be restarting itself"
+    },
+    "211": {
+        "id": 211,
+        "name": "Climb to throne",
+        "skillId": 3,
+        "requiredProgress": "1000000000000",
+        "tooltip": "Now that the golem is out of the way, let's see what's up there!",
+        "completedStory": "The throne seems to be mostly stone at this point. Some royal family tree is portrayed in the rocks behind it, but nothing useful was left behind. However, you notice a secret exit behind the throne. You're just starting to wonder what it's for when you're startled by an incredibly loud screech behind you, as if something enormous is heading your way very quickly. Suddenly that exit seems like a very good idea"
+    },
+    "212": {
+        "id": 212,
+        "name": "Bronze dragon",
+        "skillId": 7,
+        "requiredProgress": "50000000000000",
+        "additionalDamagePerMs": "1500",
+        "maxHealthGainMultiplier": "2",
+        "automationUnlockAlternative": 213,
+        "tooltip": "This beast is enormous! It must have been the reason that this treasury was abandoned.<br/>Completing this exploration is optional, but doubles your <span style='white-space:nowrap;'><i class='far fa-heart'></i> maximum health</span> gain after life",
+        "completedStory": "Wow! You actually managed to beat the dragon in the treasury! I suppose it can be inhabited again. Although those who lived here are probably long gone by now"
+    },
+    "213": {
+        "id": 213,
+        "name": "Exit treasury",
+        "skillId": 3,
+        "requiredProgress": "1000000000000",
+        "automationUnlockAlternative": 212,
+        "tooltip": "Use the secret passage behind the throne to exit the treasury. You feel a very chilly wind coming from the exit",
+        "completedStory": "You've managed to crawl to the secret exit behind the throne. It was rather narrow and clearly designed for people smaller than yourself. Now that you have a chance to look around, you see snow. As if some element of nature froze this particular part of the island"
+    },
+    "214": {
+        "id": 214,
+        "name": "Dig through snow",
+        "skillId": 6,
+        "requiredProgress": "2000000000000",
+        "tooltip": "There's quite a bit of snow directly in front of the exit. This is clearly not a path that's used often anymore. You should be able to dig through it",
+        "completedStory": "Now that you've dug through the biggest pile of snow, you've arrived at what seems to be a lake. A frozen one. You don't really see any way around it. Using this exit must have originally involved boats in warmer days"
+    },
+    "215": {
+        "id": 215,
+        "name": "Walk frozen lake",
+        "skillId": 3,
+        "requiredProgress": "1000000000000",
+        "completionDamage": "5000000",
+        "tooltip": "This ice looks highly unstable. But you don't really see any other way than to try walking over it anyway",
+        "completedStory": "Oof, let's call it refreshing... the ice did not hold. However, from this point forth you should be able to climb on your raft to continue!"
+    },
+    "216": {
+        "id": 216,
+        "name": "Sail through ice",
+        "skillId": 9,
+        "requiredProgress": "2000000000000",
+        "additionalDamagePerMs": "100",
+        "tooltip": "You're quite cold from falling through the ice, but should be able to sail to the other side of the lake from here",
+        "completedStory": "Back on shore, finally! Well, a muddy bank covered in snow anyway. It looks like there's a bunch of seals living around here, and you see falcons again!"
+    },
+    "217": {
+        "id": 217,
+        "name": "Explore mudbank",
+        "skillId": 3,
+        "requiredProgress": "1000000000000",
+        "tooltip": "Perhaps you can find some direction by seeing where this mud leads to",
+        "completedStory": "You see some people in the distance, dressed similarly to those you met at the quarry. But a fairly big walrus prevents passage. You know what to do!"
+    },
+    "218": {
+        "id": 218,
+        "name": "Fight walrus",
+        "skillId": 7,
+        "requiredProgress": "5000000000000",
+        "additionalDamagePerMs": "250",
+        "tooltip": "Watch out for its big tusks. It doesn't seem like it'll let you pass peacefully",
+        "completedStory": "Walrus beaten! The other walruses seem to be totally fine with letting you pass peacefully all of a sudden. Let's see what these people ahead are here for!"
+    },
+    "219": {
+        "id": 219,
+        "name": "Meet poachers",
+        "skillId": 10,
+        "requiredProgress": "2000000000000",
+        "tooltip": "They seem to be from the same fleet as the people you've met at the shore. Although clearly equipped to hunt something big",
+        "completedStory": "They seem hesitant to tell you what they're hunting. You get a strong impression that it's important to them"
+    },
+    "220": {
+        "id": 220,
+        "name": "Inquire more",
+        "skillId": 10,
+        "requiredProgress": "2000000000000",
+        "multiplierRequirement": "249500000",
+        "failDamage": "1000000",
+        "tooltip": "They are reluctant to tell you more. But luckily you can be very convincing!",
+        "completedStory": "You managed to get them to tell you a little more: \"Alright, we're here to hunt for a rare greenscale... Now move along!\". Although you're clearly not welcome to join them, it has piqued your interest. Maybe you can follow them in a less observable way?"
+    },
+    "221": {
+        "id": 221,
+        "name": "Follow poachers",
+        "skillId": 3,
+        "requiredProgress": "4000000000000",
+        "multiplierRequirement": "399500000",
+        "failDamage": "500000",
+        "tooltip": "You'll have to go at this a little stealthily. It's best if they don't catch you following them. You will lose access to seals after successfully following the poachers",
+        "completedStory": "You've managed to follow the poachers without being caught. In a giant dirt circle, you see they've trapped a green dragon. That must be the rare creature they are hunting. It looks young, although just old enough to call mature. It's entangled in quite a lot of ropes. You can't help but feel sorry for it"
+    },
+    "222": {
+        "id": 222,
+        "name": "Look at dragon",
+        "skillId": 10,
+        "requiredProgress": "2000000000000",
+        "tooltip": "A rather pretty green dragon. It's entirely entangled in the ropes of the poachers. You can't help but feel a little sorry for it",
+        "completedStory": "Upon looking at the green dragon, your eyes meet. It looks at you with a sort of helpless despair. As if it's hoping for you to somehow set it free. Maybe you should? Although you haven't had the best experiences with dragons so far"
+    },
+    "223": {
+        "id": 223,
+        "name": "Inspect area",
+        "skillId": 3,
+        "requiredProgress": "2000000000000",
+        "tooltip": "If you're going to risk freeing this dragon, you'd better make sure you know what you're up against",
+        "completedStory": "The site is crawling with poachers. You could get rid of them the old fashioned way, but that might prove to be quite the challenge. You also spotted a camp they've built nearby, which is notably less well-guarded. Perhaps you can sabotage that to distract them?"
+    },
+    "224": {
+        "id": 224,
+        "name": "Fight poachers",
+        "skillId": 7,
+        "requiredProgress": "60000000000000",
+        "additionalDamagePerMs": "1250",
+        "maxHealthGainMultiplier": "2",
+        "automationUnlockAlternative": 225,
+        "isStoryBranch": true,
+        "tooltip": "Get to the dragon through the poachers. With your fists.<br/>Completing this exploration is optional, but doubles your <span style='white-space:nowrap;'><i class='far fa-heart'></i> maximum health</span> gain after life",
+        "completedStory": "Poachers defeated! Those of them that still stand flee the scene. You should be able to try and free the dragon without further issues. From the poachers anyway"
+    },
+    "225": {
+        "id": 225,
+        "name": "Sabotage camp",
+        "skillId": 2,
+        "requiredProgress": "50000000000000",
+        "automationUnlockAlternative": 224,
+        "isStoryBranch": true,
+        "tooltip": "Distract the poachers by sabotaging their campsite, so you can get to the dragon while they're preoccupied",
+        "completedStory": "It seems that your construction skills work wonders for deconstruction too! The poachers didn't really notice their tents going down initially, but getting that flag to fly through the air caught their attention! Now that they are preoccupied for a bit, you should be able to get closer to the dragon"
+    },
+    "226": {
+        "id": 226,
+        "name": "Approach dragon",
+        "skillId": 10,
+        "requiredProgress": "2000000000000",
+        "tooltip": "Now that the poachers are taken care of, let's see if this dragon lets you approach",
+        "completedStory": "The dragon looks deep into your eyes with what seems to be a look of relief. Almost as if it recognizes you and knows it's going to be alright. You're not sure why it seems to trust you so readily, but you feel inclined to set it free"
+    },
+    "227": {
+        "id": 227,
+        "name": "Cut ropes",
+        "skillId": 1,
+        "requiredProgress": "1000000000000",
+        "multiplierRequirement": "499500000",
+        "failDamage": "250000",
+        "tooltip": "Cut the ropes that pin the dragon to the ground. They are rather sturdy and require just the right angle to break",
+        "completedStory": "Pfeew, all ropes cut! The dragon makes an almost purring sound, although it sounds more like an oven being heated. It did take some serious damage from the poachers, with all sorts of giant scratches and even some teeth missing. But it does seem able to fly to safety by itself. Before it does, it shoves one of its missing teeth towards you. Almost as if it knows that it may be of use to you. And it clearly is: your hourglass starts to tremble as it gets closer"
+    },
+    "228": {
+        "id": 228,
+        "name": "Funnel tooth",
+        "skillId": 11,
+        "requiredProgress": "22500",
+        "additionalDamagePerMs": "75",
+        "completionScaling": "1.15",
+        "tooltip": "Funnel the power of the dragon's tooth into your hourglass</br>Completing this permanently increases the health value of all food types by 1.25%, but also increases the cooldown at which you can eat them by 1%. This applies to all future generations, as well as your current generation. In practice, your food will be able to counter a slightly higher rate of decay, but it will mostly last longer<br/>Completing this exploration in multiple generations compounds the permanent bonus, but the difficulty increases per completion",
+        "completedStory": "You have successfully funneled some of the dragon tooth's power into your hourglass! While the effect isn't too big by itself, it persists through generations permanently. Future generations will be able to funnel even more of its power into your instincts, but it will be even harder next time"
+    },
+    "229": {
+        "id": 229,
+        "name": "Dragon ride",
+        "skillId": 9,
+        "requiredProgress": "5000000000000",
+        "tooltip": "The dragon hints that it'll help you get off this island. Just jump on its back! It's quite tired after being trapped, so it'll just drop you at your boat for now",
+        "completedStory": "Wow, riding a dragon was quite scary! It flew fast and keeping your grip only just worked for as long as needed. It didn't even really land at your boat, but you managed to jump relatively close to it!"
+    },
+    "230": {
+        "id": 230,
+        "name": "Board boat",
+        "skillId": 9,
+        "requiredProgress": "100000000000",
+        "chapterCompletionTrigger": 8,
+        "tooltip": "Board your boat to continue exploring the other islands. Completing this exploration causes you to lose access to falcons",
+        "completedStory": "You've set sail and left the east island behind you. Time to explore another island!"
+    },
+    "231": {
+        "id": 231,
+        "name": "Approach shore",
+        "skillId": 9,
+        "requiredProgress": "2000000000000",
+        "tooltip": "There's quite a bit of magma flowing into the water, causing a lot of smoke. Let's see if there is any safe spot to dock",
+        "completedStory": "After sailing through the smoke for a while, dodging the magma flowing into the sea, you found a safe spot! It looks like the magma mostly covers the eastern side of the island, whereas the western side hasn't been destroyed entirely"
+    },
+    "232": {
+        "id": 232,
+        "name": "Dock on shore",
+        "skillId": 9,
+        "requiredProgress": "2000000000000",
+        "tooltip": "Now that you've found a safe spot to dock, let's do just that!",
+        "completedStory": "The island is covered in smoke and you can't see much farther than a few feet ahead of you. The temperature isn't comfortable either, but it's not an immediate danger"
+    },
+    "233": {
+        "id": 233,
+        "name": "Walk inland",
+        "skillId": 3,
+        "requiredProgress": "5000000000000",
+        "tooltip": "You can't see much, but let's just walk in a direction that the smoke doesn't seem to be coming from",
+        "completedStory": "A little further inland, you see a small village. It's covered in smoke and appears to be abandoned. Which is probably for the best considering this volcano recently erupted"
+    },
+    "234": {
+        "id": 234,
+        "name": "Enter village",
+        "skillId": 3,
+        "requiredProgress": "3000000000000",
+        "tooltip": "Let's see if anything useful is left in this village. Or if anyone stayed",
+        "completedStory": "The village looks entirely empty. Good for them! That probably means that everyone that lived here managed to get away before the volcano erupted! Looking a little further, you see some sort of shrine in the center of the village. At the same time, you could also inspect some houses. Perhaps there's something useful left"
+    },
+    "235": {
+        "id": 235,
+        "name": "Inspect bakery",
+        "skillId": 10,
+        "requiredProgress": "5000000000000",
+        "tooltip": "Maybe they left some food behind? No harm in checking. It'll probably be rotten before they return anyway",
+        "completedStory": "Aww, the bakery was cleared out entirely... They probably took their food with them when they left town"
+    },
+    "236": {
+        "id": 236,
+        "name": "Inspect farm",
+        "skillId": 10,
+        "requiredProgress": "5000000000000",
+        "tooltip": "Maybe there's some crops that are still standing around the farm? The heat probably hasn't been too good for them though",
+        "completedStory": "Would you look at that! There's some corn still standing! It's definitely not in the best condition, and appears to be deteriorating rapidly. But it looks like you should still be able to gather some edible ears!"
+    },
+    "237": {
+        "id": 237,
+        "name": "Inspect shrine",
+        "skillId": 10,
+        "requiredProgress": "5000000000000",
+        "tooltip": "You can't help but feel curious as to what or who the villagers worshipped around these lands",
+        "completedStory": "There's some text engraved in the shrine: \"Blessed be she who foresaw the future. Guarding us against the dangers of the world.\". Huh. This doesn't sound like some ancient legend they were worshipping. It almost sounds as if they worshipped someone they personally knew"
+    },
+    "238": {
+        "id": 238,
+        "name": "Meet stranger",
+        "skillId": 10,
+        "requiredProgress": "10000000000000",
+        "tooltip": "After exploring the village, someone walks up behind you, dressed mostly in robes",
+        "completedStory": "The stranger looks at you with a clear sense of confusion. Not expecting anyone to be in the village so shortly after the volcanic eruption. But then quickly shifts tone: \"You can only be here for her. She entered the volcano, to save us all\". Could that be the same person the elder from the city referred to in the note that was slipped into your inventory? It read: \"Please find the one that came before you in her volcano hideout. She should be able to explain my reasons to you\""
+    },
+    "239": {
+        "id": 239,
+        "name": "Exit village",
+        "skillId": 3,
+        "requiredProgress": "3000000000000",
+        "tooltip": "It seems that <q>she</q> entered the volcano itself. Which seems like a horrible idea. But somehow you feel like you should follow. Exiting the village will cause you to lose access to corn",
+        "completedStory": "You left the village behind you. It's time to approach the volcano. While it has stopped erupting, there's still lava flowing all around the island. That'll take some effort to pass safely"
+    },
+    "240": {
+        "id": 240,
+        "name": "Path around lava",
+        "skillId": 3,
+        "requiredProgress": "30000000000000",
+        "additionalDamagePerMs": "400",
+        "tooltip": "There's lava all over the place, but it's mostly flowing in streams. It's slow and you can walk around it mostly, but the temperature is incredibly high",
+        "completedStory": "You managed to walk around most of the lava leading up to the volcano. But you've reached a point where you're surrounded by lava entirely. You did end up on a bit of high ground, where a couple of trees are still standing. If you tackle this right, you might cut one of those trees down in just the right direction to use as a bridge to cross the lava"
+    },
+    "241": {
+        "id": 241,
+        "name": "Cut down tree",
+        "skillId": 1,
+        "requiredProgress": "10000000000000",
+        "tooltip": "Let's use one of these trees as a bridge to cross the lava flow",
+        "completedStory": "You managed to take the tree down in just the right direction. It's not very wide, but you should be able to walk over it to pass the lava flow below"
+    },
+    "242": {
+        "id": 242,
+        "name": "Cross lava flow",
+        "skillId": 3,
+        "requiredProgress": "7500000000000",
+        "multiplierRequirement": "749500000",
+        "failDamage": "5000000",
+        "tooltip": "You should be able to maintain your balance on the chopped down tree and cross the lava flow below you",
+        "completedStory": "Pfeew, that was a little scary, but you've managed to cross the lava flow. Now that you've made it to the volcano, you should be able to bypass further lava coming down as the eruption has stopped"
+    },
+    "243": {
+        "id": 243,
+        "name": "Climb volcano",
+        "skillId": 3,
+        "requiredProgress": "50000000000000",
+        "tooltip": "Time to climb up! That seems to be the only way to enter this volcano",
+        "completedStory": "You've made it all the way to the top. Looking into the volcano's crater, you do see a shape that could be a person. But it's hard to see through all the smoke coming out of the crater. While it has stopped erupting, the heat that's still coming from the volcano hurts your skin. But the only way forward seems to be to jump right in"
+    },
+    "244": {
+        "id": 244,
+        "name": "Jump in",
+        "skillId": 3,
+        "requiredProgress": "5000000000000",
+        "completionDamage": "20000000",
+        "decayMultiplier": "4",
+        "maxHealthGainMultiplier": "2",
+        "tooltip": "This is going to hurt, but you see no other way to enter this volcano<br/>The heat within the volcano quadruples your <i class='far fa-heart-broken'></i> health decay, but also doubles your <span style='white-space:nowrap;'><i class='far fa-heart'></i> maximum health</span> gain after life",
+        "completedStory": "Oof, that was a seriously uncomfortable landing. You did manage to land somewhere \"somewhat safe\" though. The heat is hard to handle, yet you manage to gasp some air between the smoke. When you manage to order your thoughts and look forward, you see someone approaching you!<br/><span style='font-weight: 500;'>Your <i class='far fa-heart-broken'></i> health decay has quadrupled</span>"
+    },
+    "245": {
+        "id": 245,
+        "name": "Meet \"her\"",
+        "skillId": 10,
+        "requiredProgress": "20000000000000",
+        "tooltip": "Could she be the one that the elder told you to look for?",
+        "completedStory": "She tells you: \"I go by Amy these days. I came here to end the cycle. But now that you're here, I think I understand why it didn't work."
+    },
+    "246": {
+        "id": 246,
+        "name": "Amy's story",
+        "skillId": 10,
+        "requiredProgress": "30000000000000",
+        "tooltip": "Hear who she is, and how she ended up here",
+        "completedStory": "Amy tells you: at some point a long time ago, what feels like lifetimes ago, she just \"started to exist\". And has been reincarnating at that exact same point in time ever since, a little stronger every time. This was very confusing at first, as the people she grew to see as friends kept forgetting who she was. But with enough time, even that is something you grow used to. At some point, she either decided to meet people anew, or just warn them about things to come. Until she met someone like her"
+    },
+    "247": {
+        "id": 247,
+        "name": "Like her?",
+        "skillId": 10,
+        "requiredProgress": "30000000000000",
+        "tooltip": "Continue to hear more of Amy's story",
+        "completedStory": "She continues to tell you that, by the time she lost count of how many times she had been starting anew, she came across someone that recognized \"what\" she was. Someone that had been around for even longer, in an almost identical cycle. \"But that wasn't the first of us either.\""
+    },
+    "248": {
+        "id": 248,
+        "name": "Wait, us?",
+        "skillId": 10,
+        "requiredProgress": "30000000000000",
+        "tooltip": "Learn more about who Amy met",
+        "completedStory": "\"People used to call us 'The children of Osiris'. Legend has it that he was the first of us. Believed to be a god in his time. But I haven't met anyone that goes nearly that far back. See, the first of our kind didn't influence time itself, but simply resurrected. Because of this, people of their time feared their powers and either considered them gods or a grave danger to the world. One of the first children was even believed to be captured and entombed in a pyramid, but none of us have been able to find that location to verify the myth.\""
+    },
+    "249": {
+        "id": 249,
+        "name": "Your part in this",
+        "skillId": 10,
+        "requiredProgress": "30000000000000",
+        "tooltip": "Ask Amy what any of this has to do with you",
+        "completedStory": "\"I believe that you're one of us. The elder you've met, used to be my mentor through all this. I came here to destroy the sands of time in my hourglass. And it did change things, but failed to end the cycle. I suspect that it may instead have caused your moment of creation. But you seem different than the others I've met.\""
+    },
+    "250": {
+        "id": 250,
+        "name": "Different how?",
+        "skillId": 10,
+        "requiredProgress": "30000000000000",
+        "tooltip": "Ask Amy what she means by <q>different</q>",
+        "completedStory": "\"Most of us remember everything, driving many of us crazy. Seeing how whatever we've tried, we hadn't been able to end the cycle. Maybe we just can't. But you don't appear to remember any of your previous generations? Yet somehow you seem to know exactly what to do. Almost as if you're guided by something, or someone, out of this world. This could be the key, as that might mean your actions won't cause the butterfly effect. For most of us, every small action can change the course of time as a whole.\""
+    },
+    "251": {
+        "id": 251,
+        "name": "So what now?",
+        "skillId": 10,
+        "requiredProgress": "30000000000000",
+        "tooltip": "See if she can point you in the right direction",
+        "completedStory": "\"I've told you everything I know. I don't know for certain what to do, as my actions haven't worked out how I hoped they would. I think you should look for the other artifacts to complete your hourglass. Find some of the others like us to help you out. And maybe, if at all possible, find the entombed one. It may have all started there. Now go, your ride is waiting!\" And as you look over her shoulder, you see a green dragon coming out of the volcanic smoke."
+    },
+    "252": {
+        "id": 252,
+        "name": "Exit on dragon",
+        "skillId": 9,
+        "requiredProgress": "20000000000000",
+        "tooltip": "Hop on the back of this green dragon to leave the volcano.<br/>To limit the weight for the dragon, you'll leave your construction resources behind",
+        "completedStory": "Leaving the volcano was quite scary, you didn't see much through all the smoke and the heat wasn't pleasant at all. But the heat clearly didn't bother the dragon, and holding on tight worked very well. Let's see where this dragon wants to bring you!"
+    },
+    "253": {
+        "id": 253,
+        "name": "Fly away",
+        "skillId": 9,
+        "requiredProgress": "80000000000000",
+        "tooltip": "Let's see where this dragon will take you",
+        "completedStory": "This beast is fast, but you've managed to hold on so far! It seems very determined in where it's bringing you. Almost as if it's done this before? In the distance, you see an enormous construction peeking through the clouds. And the dragon proceeds to fly directly to it"
+    },
+    "254": {
+        "id": 254,
+        "name": "Cross clouds",
+        "skillId": 9,
+        "requiredProgress": "40000000000000",
+        "tooltip": "Proceed to fly through the clouds, towards the construction that the dragon seems to bring you to",
+        "completedStory": "Now that you've passed through the most dense parts of the clouds, you have a fairly clear view of where the dragon is bringing you. It looks as if a whole civilization has taken residence within a mountain. The construction appears to use the mountain itself as a foundation, whereas both smoke and light exit through various what appear to be windows. Getting closer, one cliff seems to stick out a fair bit. It looks like the dragon is aiming to land there"
+    },
+    "255": {
+        "id": 255,
+        "name": "Land on cliff",
+        "skillId": 9,
+        "requiredProgress": "20000000000000",
+        "tooltip": "This cliff looks like it should be a relatively safe landing zone. But hold on tight. Hanging on to the dragon as it tries to land may be a little tricky",
+        "completedStory": "Well that wasn't all that bad. The dragon safely landed on the cliff and you're able to jump right off its back! Bringing you here seems to have been its entire purpose, and it flies away almost immediately. After taking a quick moment to come to your senses, you notice that a couple of odd-looking people are staring at you"
+    },
+    "256": {
+        "id": 256,
+        "name": "Meet cliff people",
+        "skillId": 10,
+        "requiredProgress": "30000000000000",
+        "tooltip": "They appear to be staring at you. Who can blame them though? You've just arrived on the back of a dragon",
+        "completedStory": "After a little staring in disbelief, one of the people on the cliff starts talking: \"A dragon rider?! Those were supposed to be legends\". But before continuing they notice that you're looking fairly hungry, and point you towards their koi pond. It looks like they have a bit of an overpopulation problem in the pond, so seem to be totally ok with you catching some"
+    },
+    "257": {
+        "id": 257,
+        "name": "Continue cliff chat",
+        "skillId": 10,
+        "requiredProgress": "50000000000000",
+        "tooltip": "Proceed to meet the people on the cliff",
+        "completedStory": "One of the people on the cliff feels like a proper introduction is appropriate. \"We're the guardians of the vault. We've been living in this mountain for most of our lives, dedicated to protect what's inside the vault. We can't exactly say what we're guarding, but legend tells us it's defended by something created by someone more than mortal. In any case, you're welcome to enter our city, dragon rider\""
+    },
+    "258": {
+        "id": 258,
+        "name": "Enter mountain",
+        "skillId": 3,
+        "requiredProgress": "50000000000000",
+        "tooltip": "These people seem to live inside the mountain itself. As if they used the mountain as the foundation of their city and dug through it",
+        "completedStory": "After walking through the entrance on the cliff, you can't help but feel surprised by how many people actually live inside this mountain. It must be housing hundreds. Luckily for you, there's koi ponds everywhere and the overpopulation in those ponds is notable. That said, there's stairs everywhere, and one enormous fortified vault in the middle of the city. It appears that you're welcome to travel through the city on your own"
+    },
+    "259": {
+        "id": 259,
+        "name": "Climb to low layer",
+        "skillId": 3,
+        "requiredProgress": "50000000000000",
+        "isStoryBranch": true,
+        "tooltip": "It's quite a few stairs down, but nothing else is stopping you from going to the lower layer of the city",
+        "completedStory": "After quite a few stairs, you've made it to the lower layer of the city within the mountain. It's notably humid in this area, and seems to house a fair amount of people. Some of the little shacks down here seem welcoming, while others are clearly closed"
+    },
+    "260": {
+        "id": 260,
+        "name": "Enter forage shack",
+        "skillId": 3,
+        "requiredProgress": "20000000000000",
+        "isStoryBranch": true,
+        "tooltip": "A little shack that looks open. It has a little sign outside that appears to portray a mushroom",
+        "completedStory": "To no surprise, you're welcomed by the local forager upon entering the shack! The shack is littered with piles of mushrooms, but you can't say you have a clue about whether or not they are edible"
+    },
+    "261": {
+        "id": 261,
+        "name": "Meet forager",
+        "skillId": 10,
+        "requiredProgress": "50000000000000",
+        "automationUnlockAlternative": 263,
+        "tooltip": "The forager looks excited to meet someone that's interested in the mushroom collection!",
+        "completedStory": "You barely got a word in, the forager just kept on rambling about mushrooms. Long story short: it appears that this city within the mountain is covered with mushrooms, if you know where to look. And some of them are edible, but telling them apart takes some skill. The forager is happy to teach you!"
+    },
+    "262": {
+        "id": 262,
+        "name": "Mushroom school",
+        "skillId": 0,
+        "requiredProgress": "31250000000000",
+        "multiplierRequirement": "4995000000",
+        "failDamage": "4500000",
+        "automationUnlockAlternative": 263,
+        "tooltip": "The forager has a rather suboptimal way to teach you which mushrooms are edible. Just taste the mushrooms until you figure out which ones aren't toxic. This might have some unfortunate consequences on your stomach in the meantime",
+        "completedStory": "Well, you figured it out! The mushrooms with the red caps are the poisonous ones. And the dull looking mushrooms are somewhat edible! You should be able to use this knowledge throughout the entire city within the mountain"
+    },
+    "263": {
+        "id": 263,
+        "name": "Exit shack",
+        "skillId": 3,
+        "requiredProgress": "20000000000000",
+        "tooltip": "Leave the forager's shack and continue exploring the lower layer of the city",
+        "completedStory": "You've left the forager's shack. Let's find out what else is around in the lower part of the city!"
+    },
+    "264": {
+        "id": 264,
+        "name": "Walk to waterfall",
+        "skillId": 3,
+        "requiredProgress": "20000000000000",
+        "tooltip": "Walk past the shacks to a waterfall at the end of the lower layer of the city. It appears to be their source of drinking water within the mountain",
+        "completedStory": "There seems to be someone on top of the waterfall, removing debris from their water supply. That person appears to be making gestures at you, pointing at some things on top of the waterfall as well as downwards, and waving at you"
+    },
+    "265": {
+        "id": 265,
+        "name": "Meet cleaner",
+        "skillId": 10,
+        "requiredProgress": "50000000000000",
+        "automationUnlockAlternative": 269,
+        "tooltip": "There's someone at the top of the waterfall cleaning debris and making gestures at you. Let's hear what that's about. With a bit of shouting to understand one another. Since the cleaner is standing on top of the waterfall and you're not",
+        "completedStory": "\"If I throw this stuff down, could you catch it for me so it doesn't harm bystanders? I'll let you keep whatever you catch!\". You can't help but feel like this is a very impractical approach to it, but don't want to be rude either"
+    },
+    "266": {
+        "id": 266,
+        "name": "Catch soles",
+        "skillId": 3,
+        "requiredProgress": "25000000000000",
+        "completionDamage": "20000000",
+        "automationUnlockAlternative": 269,
+        "tooltip": "Coming down! A set of cocowood soles that increase the multiplier of your <i class='far fa-running'></i> agility skill by 25%!",
+        "completedStory": "Somehow trying to catch any form of footwear always hurts more than it should. But you've managed to catch the cocowood soles and the waterfall is a little clearer already! There are still some bigger objects stuck up there though"
+    },
+    "267": {
+        "id": 267,
+        "name": "Catch cart",
+        "skillId": 3,
+        "requiredProgress": "50000000000000",
+        "completionDamage": "50000000",
+        "automationUnlockAlternative": 269,
+        "tooltip": "Watch your head! A cocowood cart that increases your <i class='far fa-trailer'></i> inventory capacity by 5",
+        "completedStory": "The doubts you had about this cleaning approach continue to grow. There must be a better way to clear this out than catching carts by hand? Anyhow, you've managed!"
+    },
+    "268": {
+        "id": 268,
+        "name": "Catch statue",
+        "skillId": 3,
+        "requiredProgress": "100000000000000",
+        "completionDamage": "100000000",
+        "maxHealthGainMultiplier": "2",
+        "automationUnlockAlternative": 269,
+        "tooltip": "This is really getting out of hand. A wooden statue that doubles your <span style='white-space:nowrap;'><i class='far fa-heart'></i> maximum health</span> gain after life",
+        "completedStory": "Well, that's that! The waterfall is mostly cleared, or at least clear enough to no longer require your help to finish up. The cleaner excitedly thanks you for your assistance!"
+    },
+    "269": {
+        "id": 269,
+        "name": "Climb back up",
+        "skillId": 3,
+        "requiredProgress": "100000000000000",
+        "tooltip": "Leave the lower layer and return to the entrance of the city",
+        "completedStory": "Somehow climbing up always feels about twice as hard as climbing down. Anyhow, let's see what else is in this mountain city!"
+    },
+    "270": {
+        "id": 270,
+        "name": "Enter main square",
+        "skillId": 3,
+        "requiredProgress": "50000000000000",
+        "isStoryBranch": true,
+        "tooltip": "You hear commotion coming from the center area of the city.<br/>This area is entirely paved, so you won't be able to gather local food sources in the main square",
+        "completedStory": "It appears as if they are preparing a trade fair in the square. You hear some people talking about Prophecy Day. Has this something to do with your entrance? Either way, let's see if you can help out!"
+    },
+    "271": {
+        "id": 271,
+        "name": "Introduce yourself",
+        "skillId": 10,
+        "requiredProgress": "50000000000000",
+        "tooltip": "Mingle with the people in the main square to find out what's going on",
+        "completedStory": "The people here are clearly welcoming! You didn't want to boast too much about the fact that you were the one to fly in on that dragon, but it grabbed some attention for sure. They are working on a festive fire. It's all built, but could use some coal and they'd like you to be the one to ignite it!"
+    },
+    "272": {
+        "id": 272,
+        "name": "Ignite the fire",
+        "skillId": 5,
+        "requiredProgress": "50000000000000",
+        "tooltip": "Ignite the fire to ceremonially start the festivities!<br/>Requires coal to be present under the fire",
+        "completedStory": "It started a little smokey, but eased into a beautiful fire in no time! The festivities are ready to begin! The square is getting really busy really quickly. You hear some people talking about the trade fair, as if they do this every other week. Maybe they were just looking for an excuse to throw another fair"
+    },
+    "273": {
+        "id": 273,
+        "name": "Enter the crowd",
+        "skillId": 3,
+        "requiredProgress": "50000000000000",
+        "tooltip": "The crowd is really dense now that the trade fair has started. You're welcome to join, but can't move much",
+        "completedStory": "Well this crowd is packed for sure. You can't move much, but your inventory attracts some attention. It appears that they use some form of wooden chips as a currency for trade during the fair. Let's see if you can acquire something of interest!"
+    },
+    "274": {
+        "id": 274,
+        "name": "Exit the square",
+        "skillId": 3,
+        "requiredProgress": "50000000000000",
+        "tooltip": "When you're all done trading, you can exit the square to return to the entrance of the city. You'll gain access to local food sources again by leaving the crowd too",
+        "completedStory": "Well that was a nice trade fair! You feel comfortable with the trades you've been able to make. Let's see what else is around in the city!"
+    },
+    "275": {
+        "id": 275,
+        "name": "Walk to top layer",
+        "skillId": 3,
+        "requiredProgress": "50000000000000",
+        "isStoryBranch": true,
+        "tooltip": "You see some smoke coming from the higher layer of the city",
+        "completedStory": "The stairs were in a pretty good state, so it wasn't too much of a climb up. Now that you're here, you see that the smoke is coming from some furnaces. It seems that they manage their production of resources here, so that the smoke doesn't cover too much of the city"
+    },
+    "276": {
+        "id": 276,
+        "name": "Meet blacksmith",
+        "skillId": 10,
+        "requiredProgress": "20000000000000",
+        "tooltip": "A fairly old person with a face covered in soot. The blacksmith appears busy, but maybe you can get some quick questions in!",
+        "completedStory": "The blacksmith didn't seem too interested in a long conversation, but gave you some quick pointers. There are some construction blueprints on the table that you're free to use... Oh and the dog is playing with a stick that it shouldn't be playing with"
+    },
+    "277": {
+        "id": 277,
+        "name": "Approach dog",
+        "skillId": 10,
+        "requiredProgress": "50000000000000",
+        "tooltip": "The blacksmith's dog is playing with some sort of stick. It isn't supposed to, but the blacksmith didn't really seem to have the time to take it away from the dog",
+        "completedStory": "Well, the dog does not seem obedient whatsoever... If you're going to take its stick, you might get bitten in the process. Now that you've gotten a closer look, you see that it's holding an iron stick. That doesn't seem like a proper toy for a dog"
+    },
+    "278": {
+        "id": 278,
+        "name": "Take dog's toy",
+        "skillId": 7,
+        "requiredProgress": "50000000000000",
+        "additionalDamagePerMs": "750",
+        "tooltip": "You can keep the iron stick if you manage to take it from the dog. It increases the multiplier of your <i class='far fa-swords'></i> combat skill by 25%<br/>You have a gut feeling that there might be more to this dog than meets the eye",
+        "completedStory": "Well, you managed to take the stick from the blacksmith's dog! You can't help but feel that this dog could use some behavioral training though. Now that you did manage to take its toy, it's almost instantly distracted by some birds and starts charging after those. You have a gut feeling that following it might be a good idea"
+    },
+    "279": {
+        "id": 279,
+        "name": "Follow dog",
+        "skillId": 3,
+        "requiredProgress": "50000000000000",
+        "tooltip": "The dog charged after some birds right after you took its toy. Let's see where it leads you!",
+        "completedStory": "The dog led you to a nest of crows! They all fled as soon as the dog approached. You see some glimmering things in their nest"
+    },
+    "280": {
+        "id": 280,
+        "name": "Pillage nest",
+        "skillId": 6,
+        "requiredProgress": "50000000000000",
+        "tooltip": "Now that the crows fled from the dog, let's grab everything valuable from their nest!<br/>Provides a full inventory of steel on completion. This reward can surpass your inventory capacity if you already hold steel",
+        "completedStory": "So many shiny things in such a small nest! But uh oh, the dog seems to have lost interest, and the crows are returning to their nest!"
+    },
+    "281": {
+        "id": 281,
+        "name": "Shoo crows",
+        "skillId": 7,
+        "requiredProgress": "100000000000000",
+        "additionalDamagePerMs": "1500",
+        "automationUnlockAlternative": 283,
+        "tooltip": "These things want you out of their nest as soon as possible and are coming at you with their entire flock. Let's see if you can scare them away like the dog did",
+        "completedStory": "It took quite a bit of tricky moves and a few hits before the flock decided to move along, but they seem convinced not to mess with you any more. That leaves the rest of their shiny possessions to you!"
+    },
+    "282": {
+        "id": 282,
+        "name": "Empty nest",
+        "skillId": 6,
+        "requiredProgress": "50000000000000",
+        "automationUnlockAlternative": 283,
+        "tooltip": "Now that you've scared all the crows away, you can comfortably empty their nest<br/>Provides a full inventory of steel on completion. This reward can surpass your inventory capacity if you already hold steel",
+        "completedStory": "It remains surprising just how much these birds managed to store in such a small nest. Oh well, it's yours now!"
+    },
+    "283": {
+        "id": 283,
+        "name": "Exit top layer",
+        "skillId": 3,
+        "requiredProgress": "50000000000000",
+        "tooltip": "When you're done exploring the top layer, walk back down. You do lose access to steel when you do",
+        "completedStory": "Phew, while that smoke wasn't nearly as bad as you managed to survive in the volcano, it's still pretty nice to take a breath of cleaner air after walking down! Let's see what else is around town"
+    },
+    "284": {
+        "id": 284,
+        "name": "Approach vault",
+        "skillId": 3,
+        "requiredProgress": "50000000000000",
+        "tooltip": "Approach the vault in the center of this city. A massive door that's easily six times your size and visible from almost anywhere in town. But it's common courtesy to visit the other parts of town first!",
+        "completedStory": "As you approach the vault, you can't help but feel impressed by just how enormous this door is. What could possibly have needed a door this big? You notice that some locals in ceremonial robes are awaiting you. It looks like they've been preparing for this day. But the well-worn state of their robes suggests that time has caused preparations to become more of an old tradition rather than anything else. Yet their faces indicate something between solemnity and an overwhelming surprise they are trying to mask"
+    },
+    "285": {
+        "id": 285,
+        "name": "Meet keepers",
+        "skillId": 10,
+        "requiredProgress": "100000000000000",
+        "tooltip": "Some locals in ceremonial robes are awaiting you, let's find out what they can tell you about this vault",
+        "completedStory": "The keepers welcome you, and get right to it. \"We've been guarding this vault for generations, without even being sure if anyone would ever prove worthy of reopening it. Legend has it that if anyone worthy ever arrived, it would be in a manner that others would consider impossible. So you understand our surprise when you flew in on the back of a greenscale. It isn't for us to judge though. The vault was created by the Architect himself, and should be able to determine for itself\""
+    },
+    "286": {
+        "id": 286,
+        "name": "The Architect?",
+        "skillId": 10,
+        "requiredProgress": "100000000000000",
+        "tooltip": "Ask the keepers who the Architect is",
+        "completedStory": "\"Ah of course, you're not from around here and couldn't know this. Our ancestors used to follow the Architect on his journey. He was believed to hold the knowledge of a hundred lifetimes. He parted ways with our ancestors after completing the construction of the vault, leaving us with the task of guarding it against entry of unworthy thieves or demolishers\". You can't help but feel that this Architect may just be similar to Amy and you. But how would they remember, if he truly was? Let's see if you can open the vault!"
+    },
+    "287": {
+        "id": 287,
+        "name": "Inspect vault",
+        "skillId": 3,
+        "requiredProgress": "100000000000000",
+        "tooltip": "Let's look around to see if there's some sort of mechanism to open it. It's definitely not as simple as a door handle",
+        "completedStory": "As you get closer to the center of the vault door, your hourglass starts to tremble. As if these things are somehow linked? Perhaps your hourglass is the key to opening this door"
+    },
+    "288": {
+        "id": 288,
+        "name": "Open vault door",
+        "skillId": 11,
+        "requiredProgress": "500000",
+        "additionalDamagePerMs": "350",
+        "tooltip": "Use your hourglass to attempt opening the vault",
+        "completedStory": "It worked! Channeling your hourglass in front of the door started lighting up symbols engraved in the door initially, until it eventually started making loud noises before opening slightly. It should be far enough open for you to enter now! Let's see if the keepers have any final advice for you"
+    },
+    "289": {
+        "id": 289,
+        "name": "Talk to keepers",
+        "skillId": 10,
+        "requiredProgress": "100000000000000",
+        "tooltip": "Let's see if they have any final advice before you enter the vault!",
+        "completedStory": "They weren't as talkative as before, clearly overwhelmed by the moment that multiple generations of their families had been waiting for. \"We don't know what awaits you inside. But you can dispose of any leftover resources here. You've proven worthy by the vault itself. I'm sure you'll manage whatever the Architect guarded inside!\""
+    },
+    "290": {
+        "id": 290,
+        "name": "Enter the vault",
+        "skillId": 3,
+        "requiredProgress": "100000000000000",
+        "tooltip": "Enter the Architect's vault. By entering the vault, you'll lose access to food sources in the city. You'll also leave construction resources behind to free up inventory space",
+        "completedStory": "Walking into the vault, you see a mostly empty room. It's enormous and even smells as if nobody has entered this room in decades. In the very center of the room there's one enormous humanoid-like stone shape. It seems like a statue, but you can't quite tell for sure"
+    },
+    "291": {
+        "id": 291,
+        "name": "Approach statue",
+        "skillId": 3,
+        "requiredProgress": "100000000000000",
+        "tooltip": "There's an enormous humanoid-like stone shape in the middle of the vault. Let's find out what it is",
+        "completedStory": "As you get somewhat close, it quickly becomes very clear that this isn't a real statue. The stone limbs start moving, making sounds as if the cave itself is moving. This thing clearly isn't what the vault is guarding. It's another layer of defense<br/><span style='font-weight: 500;'>You have entered the <i class='far fa-skull'></i> Stone Titan boss fight.</span> During boss fights, only milestones such as health thresholds or unique explorations advance the story, rather than every exploration"
+    },
+    "292": {
+        "id": 292,
+        "name": "Attack titan",
+        "skillId": 7,
+        "requiredProgress": "25000000000000",
+        "additionalDamagePerMs": "1000",
+        "bossId": 0,
+        "bossPhases": [
+            0,
+            2,
+            3,
+            4
+        ],
+        "bossScalingVariable": 0,
+        "bossDamage": 1,
+        "isRepeatable": true,
+        "skipCompletedStory": true,
+        "tooltip": "Offense is the best defense!",
+        "completedStory": ""
+    },
+    "293": {
+        "id": 293,
+        "name": "Dodge titan",
+        "skillId": 3,
+        "requiredProgress": "20000000000000",
+        "multiplierRequirement": "10000000000",
+        "failDamage": "1000000",
+        "bossId": 0,
+        "bossPhases": [
+            0,
+            2,
+            3,
+            4
+        ],
+        "bossScalingVariable": 1,
+        "isRepeatable": true,
+        "skipCompletedStory": true,
+        "tooltip": "This thing is coming at you with big swings! But what doesn't hit you won't hurt you!",
+        "completedStory": ""
+    },
+    "294": {
+        "id": 294,
+        "name": "Backshot titan",
+        "skillId": 8,
+        "requiredProgress": "15000000000000",
+        "automationRequirement": 8,
+        "multiplierRequirement": "7500000000",
+        "failDamage": "1000000",
+        "bossId": 0,
+        "bossPhases": [
+            0,
+            2,
+            3,
+            4
+        ],
+        "bossScalingVariable": 1,
+        "bossScalingVariableIncrease": 0,
+        "bossDamage": 2.5,
+        "isRepeatable": true,
+        "skipCompletedStory": true,
+        "tooltip": "After successfully dodging the titan three times, you see a chance to fire an arrow at its back!",
+        "completedStory": ""
+    },
+    "295": {
+        "id": 295,
+        "name": "Trip titan",
+        "skillId": 3,
+        "requiredProgress": "5000000000000",
+        "completionDamage": "17500000",
+        "bossId": 0,
+        "bossPhases": [
+            0,
+            2,
+            3,
+            4
+        ],
+        "bossScalingVariable": 2,
+        "tooltip": "After successfully dodging the titan three times, you see a chance to trip it, causing it to lose its balance! That might just result in something useful",
+        "completedStory": "When you tripped the titan, it lost its balance for a step or two, smashing one of the surrounding walls. This caused parts of the ceiling to fall down, some of which hit you. However, you do notice some shells attached to it!"
+    },
+    "296": {
+        "id": 296,
+        "name": "Block titan",
+        "skillId": 7,
+        "requiredProgress": "10000000000000",
+        "completionDamage": "40000000",
+        "bossId": 0,
+        "bossPhases": [
+            0,
+            2,
+            3,
+            4
+        ],
+        "bossScalingVariable": 2,
+        "isRepeatable": true,
+        "skipCompletedStory": true,
+        "tooltip": "If this thing is going to hit you, you'd better be prepared!",
+        "completedStory": ""
+    },
+    "297": {
+        "id": 297,
+        "name": "Counter titan",
+        "skillId": 7,
+        "requiredProgress": "12500000000000",
+        "automationRequirement": 8,
+        "additionalDamagePerMs": "2000",
+        "bossId": 0,
+        "bossPhases": [
+            0,
+            2,
+            3,
+            4
+        ],
+        "bossScalingVariable": 0,
+        "automationUnlockAlternative": 294,
+        "bossDamage": 5,
+        "isRepeatable": true,
+        "skipCompletedStory": true,
+        "tooltip": "Following five successive blocks, the titan seems to have lost its balance for a bit, giving you a nice opening to strike!",
+        "completedStory": ""
+    },
+    "298": {
+        "id": 298,
+        "name": "Approach debris",
+        "skillId": 3,
+        "requiredProgress": "200000000000000",
+        "bossId": 0,
+        "bossPhases": [
+            1
+        ],
+        "tooltip": "With the titan staggered for a bit, you've spotted some sort of leftover construction site a little further in. This is your chance to run to it!",
+        "completedStory": "At first glance, it looks as if this was left over by the creator of the Titan. Some resources are hard to identify, but you should find some use for them! But wait, the titan has recollected itself and starts taking aim at you from a distance!"
+    },
+    "299": {
+        "id": 299,
+        "name": "Fire at titan",
+        "skillId": 8,
+        "requiredProgress": "200000000000000",
+        "bossId": 0,
+        "bossPhases": [
+            1
+        ],
+        "bossScalingVariable": 6,
+        "bossDamage": 3,
+        "isRepeatable": true,
+        "skipCompletedStory": true,
+        "tooltip": "Fire your catapult at the titan to damage it from a distance! This requires a loaded catapult to work<br/>>Can be completed up to ten times before the titan learns to dodge your shots",
+        "completedStory": ""
+    },
+    "300": {
+        "id": 300,
+        "name": "Fire at ceiling",
+        "skillId": 8,
+        "requiredProgress": "600000000000000",
+        "bossId": 0,
+        "bossPhases": [
+            1
+        ],
+        "tooltip": "You notice some insects flying in and out of a small opening in the ceiling. You could fire your catapult at it to see what that does? Requires a loaded catapult to work",
+        "completedStory": "That did the trick! A fairly big part of the ceiling, certainly more than you intended to, came crashing down after you hit it. You notice some sort of insect hives that were previously behind the crack in the ceiling, now fully exposed. They didn't quite fall down though, so you'll need a more accurate ranged tool to shoot those down"
+    },
+    "301": {
+        "id": 301,
+        "name": "Return to titan",
+        "skillId": 3,
+        "requiredProgress": "200000000000000",
+        "bossId": 0,
+        "bossPhases": [
+            1
+        ],
+        "skipCompletedStory": true,
+        "tooltip": "Return to the Titan to continue combat and stop its ranged barrage. You'll probably want to complete as many constructions as you can, before its arrows become overwhelming",
+        "completedStory": "Now that you've returned to the Titan, it fully moved back to melee combat! While you're glad that it stopped shooting arrows, you can't help but still feel intimidated by it"
+    },
+    "302": {
+        "id": 302,
+        "name": "Read inscription",
+        "skillId": 10,
+        "requiredProgress": "500000000000000",
+        "tooltip": "You notice an inscription within the inside of the titan's chestplate, now that it dropped off of its body",
+        "completedStory": "\"If anyone ever reads this, my suspicion may have proven true. I just hope I've managed to protect the artifact long enough not to fall into the hands of greed. If you're one of the good ones, or maybe even one like us, please find a way to disable the core. It should have remained stable for long enough by powering the titan. But without a way to channel its power, it may not remain stable for long. If you do succeed, please find me after. I'll be heading west, through the passage that should reopen when the core deactivates.\""
+    },
+    "303": {
+        "id": 303,
+        "name": "Inspect core",
+        "skillId": 10,
+        "requiredProgress": "500000000000000",
+        "tooltip": "Inspect the mechanical core within the chest of the stone titan",
+        "completedStory": "This thing is like nothing you've seen before, it's a combination of lights and cogs that seems to function as some sort of self-powering energy source. At this point, your hourglass has started to tremble in a way you've only seen a couple of times before. You have a strong feeling that your hourglass can funnel some of the power from this core. Yet you feel inclined to disable it before moving on. Even if you're not fully sure why the inscription warned for this source of power, you feel inclined to oblige"
+    },
+    "304": {
+        "id": 304,
+        "name": "Funnel titan core",
+        "skillId": 11,
+        "requiredProgress": "500000",
+        "additionalDamagePerMs": "2000",
+        "completionScaling": "1.1",
+        "tooltip": "Funnel some of the power of the titan's energy source into your hourglass</br>Completing this permanently reduces the damage on completion (not on failure) of explorations, jobs and hostile actions by 1% for all future generations, as well as your current generation.<br/>Completing this exploration in multiple generations compounds the permanent bonus, but the difficulty increases per completion",
+        "completedStory": "You have successfully funneled some of the titan core's power into your hourglass! While limited on its own, the effect persists through generations permanently. Future generations will be able to funnel even more of its power into your hourglass, but it will be even harder next time"
+    },
+    "305": {
+        "id": 305,
+        "name": "Disable titan core",
+        "skillId": 11,
+        "requiredProgress": "200000",
+        "completionDamage": "150000000",
+        "decayMultiplier": "4",
+        "tooltip": "Use your hourglass to disable the titan core. There's no way around it, this is going to hurt<br/>Disabling the core will create a fiery shockwave that will blast away most of what's left of the vault, any leftover resources in your carts, and will quadruple your <i class='far fa-heart-broken'></i> health decay",
+        "completedStory": "Oof, that was quite the shockwave! Everything around you moved back by a fair distance all of a sudden. Most of the vault's remaining pillars collapsed, if you can even call it a vault at this point. As the inscriptions indicated, a passage opened in a corner of the vault. Passage is a big word though, it seems that that wall was just a little weaker by design<br/><span style='font-weight: 500;'>Your <i class='far fa-heart-broken'></i> health decay has quadrupled</span>"
+    },
+    "306": {
+        "id": 306,
+        "name": "Exit the vault",
+        "skillId": 3,
+        "requiredProgress": "500000000000000",
+        "tooltip": "Exit the vault through the passage that was created by the blast of disabling the titan's core",
+        "completedStory": "It takes your eyes a second to adapt to the light after being in the vault for so long. Even if light managed to shine through the holes in the ceiling, this direct sunlight is a little uneasy on the eyes, yet feels quite welcome. After your eyes have had a chance to adapt, you see that this side of the vault was certainly never a regular passage, but only water finds its way down here. Let's see if you can find a way down!"
+    }
+}

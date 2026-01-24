@@ -1,0 +1,406 @@
+.settings-page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  flex: 1;
+  background: white;
+}
+
+.settings-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e0e0e0;
+  flex-shrink: 0;
+}
+
+.settings-header-content {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  max-width: 800px;
+}
+
+.settings-header h2 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.back-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-size: 14px;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.back-button:hover {
+  background: #f5f5f5;
+  border-color: #bbb;
+}
+
+.settings-content {
+  padding: 20px 40px;
+  overflow-y: auto;
+  flex: 1;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.settings-section {
+  margin-bottom: 24px;
+}
+
+.settings-section:last-child {
+  margin-bottom: 0;
+}
+
+.settings-section h3 {
+  margin: 0 0 12px 0;
+  font-size: 16px;
+  color: #333;
+}
+
+.section-description {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  color: #666;
+}
+
+.radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.radio-option,
+.checkbox-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.radio-label,
+.checkbox-label {
+  font-size: 14px;
+  color: #333;
+}
+
+.radio-option input,
+.checkbox-option input {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.quick-actions {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.quick-action-btn {
+  padding: 6px 12px;
+  background: #f5f5f5;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.quick-action-btn:hover {
+  background: #e0e0e0;
+  border-color: #bbb;
+}
+
+/* Skills table layout */
+.skills-table {
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.skills-table-header {
+  display: grid;
+  grid-template-columns: 1fr repeat(3, 80px);
+  gap: 0;
+  background: #f5f5f5;
+  border-bottom: 1px solid #e0e0e0;
+  font-weight: 500;
+  font-size: 13px;
+}
+
+.skill-name-header {
+  padding: 10px 12px;
+  border-right: 1px solid #e0e0e0;
+}
+
+.action-type-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 4px;
+  text-align: center;
+  border-right: 1px solid #e0e0e0;
+  font-size: 12px;
+}
+
+.action-type-header:last-child {
+  border-right: none;
+}
+
+.skills-table-body {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.skill-row {
+  display: grid;
+  grid-template-columns: 1fr repeat(3, 80px);
+  gap: 0;
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.skill-row:last-child {
+  border-bottom: none;
+}
+
+.skill-row:hover {
+  background: #fafafa;
+}
+
+.skill-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-right: 1px solid #e8e8e8;
+}
+
+.skill-info i {
+  width: 20px;
+  text-align: center;
+  color: #666;
+}
+
+.skill-name {
+  font-size: 13px;
+}
+
+.skill-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-right: 1px solid #e8e8e8;
+  cursor: default;
+}
+
+.skill-cell:last-child {
+  border-right: none;
+}
+
+.skill-cell-unset {
+  opacity: 0.5;
+}
+
+.skill-unset-icon {
+  color: #999;
+  font-size: 16px;
+}
+
+/* Chapter Progress Section */
+.chapter-progress {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.chapter-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 40px;
+  height: 40px;
+  padding: 0 8px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.chapter-badge.unlocked {
+  background: #4caf50;
+  color: white;
+}
+
+.chapter-badge.locked {
+  background: #e0e0e0;
+  color: #999;
+}
+
+.chapter-badge i {
+  font-size: 10px;
+}
+
+.unlock-form {
+  margin-top: 12px;
+}
+
+.unlock-chapter-select {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.unlock-chapter-select label {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.unlock-chapter-select select {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  background: white;
+  cursor: pointer;
+}
+
+.unlock-chapter-select select:focus {
+  outline: none;
+  border-color: #2196f3;
+}
+
+.unlock-input-row {
+  display: flex;
+  gap: 8px;
+}
+
+.unlock-input-row input {
+  flex: 1;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.unlock-input-row input:focus {
+  outline: none;
+  border-color: #2196f3;
+}
+
+.unlock-input-row input:disabled {
+  background: #f5f5f5;
+}
+
+.unlock-input-row button {
+  padding: 10px 20px;
+  background: #2196f3;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.unlock-input-row button:hover:not(:disabled) {
+  background: #1976d2;
+}
+
+.unlock-input-row button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.unlock-error {
+  color: #f44336;
+  font-size: 13px;
+  margin: 8px 0 0 0;
+}
+
+.unlock-success {
+  color: #4caf50;
+  font-size: 13px;
+  margin: 8px 0 0 0;
+}
+
+.all-unlocked {
+  color: #4caf50;
+  font-weight: 500;
+  margin: 8px 0 0 0;
+}
+
+/* Danger Zone Section */
+.settings-section.danger-zone {
+  margin-top: 40px;
+  padding-top: 24px;
+  border-top: 1px solid #fecaca;
+}
+
+.settings-section.danger-zone h3 {
+  color: #dc2626;
+}
+
+.danger-zone-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 16px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+}
+
+.danger-zone-info {
+  flex: 1;
+}
+
+.danger-zone-title {
+  margin: 0 0 4px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+}
+
+.danger-zone-description {
+  margin: 0;
+  font-size: 13px;
+  color: #666;
+}
+
+.delete-account-button {
+  padding: 10px 20px;
+  background: white;
+  color: #dc2626;
+  border: 1px solid #dc2626;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.delete-account-button:hover {
+  background: #dc2626;
+  color: white;
+}

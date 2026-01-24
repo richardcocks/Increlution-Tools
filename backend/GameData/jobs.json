@@ -1,0 +1,1029 @@
+{
+    "0": {
+        "id": 0,
+        "name": "Gather berries",
+        "icon": "fa-leaf",
+        "skillId": 0,
+        "requiredProgress": "2000",
+        "automationRequirement": 200,
+        "rewardedItems": {
+            "0": {
+                "itemType": 0,
+                "itemId": 0
+            }
+        },
+        "tooltip": "Provides 1 berry per completion (+5 health when eaten)"
+    },
+    "1": {
+        "id": 1,
+        "name": "Cut wood",
+        "icon": "fa-leaf",
+        "skillId": 1,
+        "requiredProgress": "5000",
+        "automationRequirement": 200,
+        "rewardedItems": {
+            "0": {
+                "itemType": 1,
+                "itemId": 0
+            }
+        },
+        "tooltip": "Provides 1 wood per completion (Used for construction)"
+    },
+    "2": {
+        "id": 2,
+        "name": "Catch fish",
+        "icon": "fa-leaf",
+        "skillId": 4,
+        "requiredProgress": "7500",
+        "automationRequirement": 300,
+        "rewardedItems": {
+            "0": {
+                "itemType": 1,
+                "itemId": 1
+            }
+        },
+        "tooltip": "Provides 1 raw fish per completion (Yuck, perhaps it's edible when cooked)"
+    },
+    "3": {
+        "id": 3,
+        "name": "Cook fish",
+        "icon": "fa-leaf",
+        "skillId": 5,
+        "requiredProgress": "2500",
+        "automationRequirement": 300,
+        "requiredResourceId": 1,
+        "rewardedItems": {
+            "0": {
+                "itemType": 0,
+                "itemId": 1
+            }
+        },
+        "tooltip": "Cooks 1 fish per completion (+20 health when eaten), requires a raw fish to cook"
+    },
+    "4": {
+        "id": 4,
+        "name": "Dig stone",
+        "icon": "fa-leaf",
+        "skillId": 6,
+        "requiredProgress": "10000",
+        "automationRequirement": 300,
+        "rewardedItems": {
+            "0": {
+                "itemType": 1,
+                "itemId": 2
+            }
+        },
+        "tooltip": "Provides 1 stone per completion (Used for construction)"
+    },
+    "5": {
+        "id": 5,
+        "name": "Pick apples",
+        "icon": "fa-leaf",
+        "skillId": 0,
+        "requiredProgress": "20000",
+        "rewardedItems": {
+            "0": {
+                "itemType": 0,
+                "itemId": 2
+            }
+        },
+        "tooltip": "Provides 1 apple per completion (+35 health when eaten)"
+    },
+    "6": {
+        "id": 6,
+        "name": "Hunt rabbit",
+        "icon": "fa-leaf",
+        "skillId": 8,
+        "requiredProgress": "24000",
+        "rewardedItems": {
+            "0": {
+                "itemType": 1,
+                "itemId": 3
+            }
+        },
+        "tooltip": "Provides 1 dead rabbit per completion (Not for raw consumption)"
+    },
+    "7": {
+        "id": 7,
+        "name": "Cook rabbit",
+        "icon": "fa-leaf",
+        "skillId": 5,
+        "requiredProgress": "8000",
+        "requiredResourceId": 3,
+        "rewardedItems": {
+            "0": {
+                "itemType": 0,
+                "itemId": 3
+            }
+        },
+        "tooltip": "Cooks 1 rabbit per completion (+60 health when eaten), requires a dead rabbit to cook"
+    },
+    "8": {
+        "id": 8,
+        "name": "Catch herring",
+        "icon": "fa-leaf",
+        "skillId": 4,
+        "requiredProgress": "45000",
+        "rewardedItems": {
+            "0": {
+                "itemType": 0,
+                "itemId": 4
+            }
+        },
+        "tooltip": "Provides 1 herring per completion (+80 health when eaten)"
+    },
+    "9": {
+        "id": 9,
+        "name": "Gather grain",
+        "icon": "fa-leaf",
+        "skillId": 0,
+        "requiredProgress": "20000",
+        "rewardedItems": {
+            "0": {
+                "itemType": 1,
+                "itemId": 4
+            }
+        },
+        "tooltip": "Provides 1 grain per completion (Useful for baking)"
+    },
+    "10": {
+        "id": 10,
+        "name": "Bake bread",
+        "icon": "fa-leaf",
+        "skillId": 5,
+        "requiredProgress": "70000",
+        "requiredResourceId": 4,
+        "rewardedItems": {
+            "0": {
+                "itemType": 0,
+                "itemId": 5
+            }
+        },
+        "tooltip": "Bakes 1 bread per completion (+100 health when eaten), requires a grain to bake"
+    },
+    "11": {
+        "id": 11,
+        "name": "Dig copper",
+        "icon": "fa-leaf",
+        "skillId": 6,
+        "requiredProgress": "150000",
+        "automationRequirement": 100,
+        "rewardedItems": {
+            "0": {
+                "itemType": 1,
+                "itemId": 5
+            }
+        },
+        "tooltip": "Provides 1 copper per completion (Used for construction)"
+    },
+    "12": {
+        "id": 12,
+        "name": "Bake cake",
+        "icon": "fa-leaf",
+        "skillId": 5,
+        "requiredProgress": "210000",
+        "requiredResourceId": 4,
+        "rewardedItems": {
+            "0": {
+                "itemType": 0,
+                "itemId": 6
+            }
+        },
+        "tooltip": "Bakes 1 cake per completion (+150 health when eaten), requires a grain to bake"
+    },
+    "13": {
+        "id": 13,
+        "name": "Hunt boar",
+        "icon": "fa-leaf",
+        "skillId": 8,
+        "requiredProgress": "240000",
+        "rewardedItems": {
+            "0": {
+                "itemType": 1,
+                "itemId": 6
+            },
+            "1": {
+                "itemType": 1,
+                "itemId": 7
+            }
+        },
+        "tooltip": "Provides 1 dead boar (Not for raw consumption) and 1 hide (Used for construction) per completion"
+    },
+    "14": {
+        "id": 14,
+        "name": "Cook boar",
+        "icon": "fa-leaf",
+        "skillId": 5,
+        "requiredProgress": "80000",
+        "requiredResourceId": 6,
+        "rewardedItems": {
+            "0": {
+                "itemType": 0,
+                "itemId": 7
+            }
+        },
+        "tooltip": "Cooks 1 boar per completion (+300 health when eaten), requires a dead boar to cook"
+    },
+    "15": {
+        "id": 15,
+        "name": "Catch crab",
+        "icon": "fa-leaf",
+        "skillId": 4,
+        "requiredProgress": "480000",
+        "rewardedItems": {
+            "0": {
+                "itemType": 1,
+                "itemId": 8
+            }
+        },
+        "tooltip": "Provides 1 raw crab per completion (Can be cooked)"
+    },
+    "16": {
+        "id": 16,
+        "name": "Cook crab",
+        "icon": "fa-leaf",
+        "skillId": 5,
+        "requiredProgress": "160000",
+        "requiredResourceId": 8,
+        "rewardedItems": {
+            "0": {
+                "itemType": 0,
+                "itemId": 8
+            }
+        },
+        "tooltip": "Cooks 1 crab per completion (+500 health when eaten), requires a raw crab to cook"
+    },
+    "17": {
+        "id": 17,
+        "name": "Catch coconut",
+        "icon": "fa-leaf",
+        "skillId": 0,
+        "requiredProgress": "850000",
+        "rewardedItems": {
+            "0": {
+                "itemType": 0,
+                "itemId": 9
+            }
+        },
+        "tooltip": "Shake tree, catch what falls out! Provides 1 coconut per completion (+600 health when eaten)"
+    },
+    "18": {
+        "id": 18,
+        "name": "Cut cocowood",
+        "icon": "fa-leaf",
+        "skillId": 1,
+        "requiredProgress": "1200000",
+        "rewardedItems": {
+            "0": {
+                "itemType": 1,
+                "itemId": 9
+            }
+        },
+        "tooltip": "Provides 1 cocowood per completion (Used for construction)"
+    },
+    "19": {
+        "id": 19,
+        "name": "Dig iron",
+        "icon": "fa-leaf",
+        "skillId": 6,
+        "requiredProgress": "1800000",
+        "automationUnlockAlternative": 20,
+        "rewardedItems": {
+            "0": {
+                "itemType": 1,
+                "itemId": 10
+            }
+        },
+        "tooltip": "Provides 1 iron per completion (Used for construction)"
+    },
+    "20": {
+        "id": 20,
+        "name": "Pick banana",
+        "icon": "fa-leaf",
+        "skillId": 0,
+        "requiredProgress": "1700000",
+        "automationUnlockAlternative": 19,
+        "rewardedItems": {
+            "0": {
+                "itemType": 0,
+                "itemId": 10
+            }
+        },
+        "tooltip": "Provides 1 banana per completion (+800 health when eaten)"
+    },
+    "21": {
+        "id": 21,
+        "name": "Hunt goat",
+        "icon": "fa-leaf",
+        "skillId": 8,
+        "requiredProgress": "2700000",
+        "rewardedItems": {
+            "0": {
+                "itemType": 1,
+                "itemId": 11
+            }
+        },
+        "tooltip": "Provides 1 dead goat per completion (Not for raw consumption)"
+    },
+    "22": {
+        "id": 22,
+        "name": "Cook goat",
+        "icon": "fa-leaf",
+        "skillId": 5,
+        "requiredProgress": "900000",
+        "requiredResourceId": 11,
+        "rewardedItems": {
+            "0": {
+                "itemType": 0,
+                "itemId": 11
+            }
+        },
+        "tooltip": "Cooks 1 goat per completion (+1500 health when eaten), requires a dead goat to cook"
+    },
+    "23": {
+        "id": 23,
+        "name": "Hunt vulture",
+        "icon": "fa-leaf",
+        "skillId": 8,
+        "requiredProgress": "7500000",
+        "rewardedItems": {
+            "0": {
+                "itemType": 1,
+                "itemId": 12
+            }
+        },
+        "tooltip": "Who's the predator and the prey now?<br/>Provides 1 raw vulture per completion (Tastes somewhat like very tough chicken when cooked)"
+    },
+    "24": {
+        "id": 24,
+        "name": "Cook vulture",
+        "icon": "fa-leaf",
+        "skillId": 5,
+        "requiredProgress": "2500000",
+        "requiredResourceId": 12,
+        "rewardedItems": {
+            "0": {
+                "itemType": 0,
+                "itemId": 12
+            }
+        },
+        "tooltip": "Cooks 1 vulture per completion (+3000 health when eaten), requires a raw vulture to cook"
+    },
+    "25": {
+        "id": 25,
+        "name": "Gather moss",
+        "icon": "fa-leaf",
+        "skillId": 0,
+        "requiredProgress": "20000000",
+        "rewardedItems": {
+            "0": {
+                "itemType": 0,
+                "itemId": 13
+            }
+        },
+        "tooltip": "Provides 1 moss per completion (+4000 health when eaten), full of vitamins and .. flavors"
+    },
+    "26": {
+        "id": 26,
+        "name": "Dig clay",
+        "icon": "fa-leaf",
+        "skillId": 6,
+        "requiredProgress": "15000000",
+        "rewardedItems": {
+            "0": {
+                "itemType": 1,
+                "itemId": 14
+            }
+        },
+        "tooltip": "Provides 1 clay per completion (Used for construction)"
+    },
+    "27": {
+        "id": 27,
+        "name": "Catch eel",
+        "icon": "fa-leaf",
+        "skillId": 4,
+        "requiredProgress": "30000000",
+        "rewardedItems": {
+            "0": {
+                "itemType": 1,
+                "itemId": 15
+            }
+        },
+        "tooltip": "Provides 1 raw eel per completion (Slippery, but edible when cooked)"
+    },
+    "28": {
+        "id": 28,
+        "name": "Cook eel",
+        "icon": "fa-leaf",
+        "skillId": 5,
+        "requiredProgress": "10000000",
+        "requiredResourceId": 15,
+        "rewardedItems": {
+            "0": {
+                "itemType": 0,
+                "itemId": 14
+            }
+        },
+        "tooltip": "Cooks 1 eel per completion (+5000 health when eaten), requires a raw eel to cook"
+    },
+    "29": {
+        "id": 29,
+        "name": "Cut citrus wood",
+        "icon": "fa-leaf",
+        "skillId": 1,
+        "requiredProgress": "150000000",
+        "rewardedItems": {
+            "0": {
+                "itemType": 1,
+                "itemId": 16
+            }
+        },
+        "tooltip": "Provides 1 citrus wood per completion (Used for construction)"
+    },
+    "30": {
+        "id": 30,
+        "name": "Get dough",
+        "icon": "fa-leaf",
+        "skillId": 6,
+        "requiredProgress": "62500000",
+        "rewardedItems": {
+            "0": {
+                "itemType": 1,
+                "itemId": 17
+            }
+        },
+        "tooltip": "Provides 1 portion of dough per completion (Used for baking). It should be fine. It wasn't on the floor <span style='font-style: italic;'>that</span> long"
+    },
+    "31": {
+        "id": 31,
+        "name": "Bake biscuit",
+        "icon": "fa-leaf",
+        "skillId": 5,
+        "requiredProgress": "187500000",
+        "requiredResourceId": 17,
+        "rewardedItems": {
+            "0": {
+                "itemType": 0,
+                "itemId": 15
+            }
+        },
+        "tooltip": "Bakes 1 biscuit per completion (+7500 health when eaten), requires dough to bake"
+    },
+    "32": {
+        "id": 32,
+        "name": "Pick orange",
+        "icon": "fa-leaf",
+        "skillId": 0,
+        "requiredProgress": "500000000",
+        "rewardedItems": {
+            "0": {
+                "itemType": 0,
+                "itemId": 16
+            }
+        },
+        "tooltip": "Provides 1 orange per completion (+10000 health when eaten)"
+    },
+    "33": {
+        "id": 33,
+        "name": "Catch lobster",
+        "icon": "fa-leaf",
+        "skillId": 4,
+        "requiredProgress": "750000000",
+        "rewardedItems": {
+            "0": {
+                "itemType": 1,
+                "itemId": 18
+            }
+        },
+        "tooltip": "Provides 1 raw lobster per completion (Should be cooked before consumption)"
+    },
+    "34": {
+        "id": 34,
+        "name": "Cook lobster",
+        "icon": "fa-leaf",
+        "skillId": 5,
+        "requiredProgress": "250000000",
+        "requiredResourceId": 18,
+        "rewardedItems": {
+            "0": {
+                "itemType": 0,
+                "itemId": 17
+            }
+        },
+        "tooltip": "Cooks 1 lobster per completion (+12500 health when eaten), requires a raw lobster to cook"
+    },
+    "35": {
+        "id": 35,
+        "name": "Cook egg",
+        "icon": "fa-leaf",
+        "skillId": 5,
+        "requiredProgress": "2500000000",
+        "automationRequirement": 150,
+        "rewardedItems": {
+            "0": {
+                "itemType": 1,
+                "itemId": 20
+            }
+        },
+        "tooltip": "Provides 1 cooked egg per completion (It's for the children. Eating it would be very rude)"
+    },
+    "36": {
+        "id": 36,
+        "name": "Bake pie",
+        "icon": "fa-leaf",
+        "skillId": 5,
+        "requiredProgress": "1937500000",
+        "requiredResourceId": 17,
+        "rewardedItems": {
+            "0": {
+                "itemType": 0,
+                "itemId": 18
+            }
+        },
+        "tooltip": "Bakes 1 pie per completion (+15000 health when eaten), requires dough to bake"
+    },
+    "37": {
+        "id": 37,
+        "name": "Pick tomato",
+        "icon": "fa-leaf",
+        "skillId": 0,
+        "requiredProgress": "4000000000",
+        "rewardedItems": {
+            "0": {
+                "itemType": 0,
+                "itemId": 19
+            }
+        },
+        "tooltip": "Provides 1 tomato per completion (+20000 health when eaten)"
+    },
+    "38": {
+        "id": 38,
+        "name": "Catch shark",
+        "icon": "fa-leaf",
+        "skillId": 4,
+        "requiredProgress": "12000000000",
+        "rewardedItems": {
+            "0": {
+                "itemType": 1,
+                "itemId": 21
+            }
+        },
+        "tooltip": "Provides 1 raw shark per completion (Remove teeth before cooking)"
+    },
+    "39": {
+        "id": 39,
+        "name": "Cook shark",
+        "icon": "fa-leaf",
+        "skillId": 5,
+        "requiredProgress": "4000000000",
+        "requiredResourceId": 21,
+        "rewardedItems": {
+            "0": {
+                "itemType": 0,
+                "itemId": 20
+            }
+        },
+        "tooltip": "Cooks 1 shark per completion (+50000 health when eaten), requires a raw shark to cook"
+    },
+    "40": {
+        "id": 40,
+        "name": "Hunt pelican",
+        "icon": "fa-leaf",
+        "skillId": 8,
+        "requiredProgress": "24000000000",
+        "rewardedItems": {
+            "0": {
+                "itemType": 1,
+                "itemId": 22
+            }
+        },
+        "tooltip": "Provides 1 dead pelican per completion (Can be cooked)"
+    },
+    "41": {
+        "id": 41,
+        "name": "Cook pelican",
+        "icon": "fa-leaf",
+        "skillId": 5,
+        "requiredProgress": "8000000000",
+        "requiredResourceId": 22,
+        "rewardedItems": {
+            "0": {
+                "itemType": 0,
+                "itemId": 21
+            }
+        },
+        "tooltip": "Cooks 1 pelican per completion (+75000 health when eaten), requires a dead pelican to cook. Tastes surprisingly close to fish, for a bird"
+    },
+    "42": {
+        "id": 42,
+        "name": "Gather vegetable",
+        "icon": "fa-leaf",
+        "skillId": 0,
+        "requiredProgress": "50000000000",
+        "rewardedItems": {
+            "0": {
+                "itemType": 1,
+                "itemId": 23
+            }
+        },
+        "tooltip": "Provides 1 vegetable per completion (It has roots, leaves and a hard center. Honestly, you can't really tell what sort of vegetable this is)"
+    },
+    "43": {
+        "id": 43,
+        "name": "Cook soup",
+        "icon": "fa-leaf",
+        "skillId": 5,
+        "requiredProgress": "64000000000",
+        "automationRequirement": 200,
+        "rewardedItems": {
+            "0": {
+                "itemType": 0,
+                "itemId": 22
+            }
+        },
+        "tooltip": "Cooks 1 portion of soup per completion (+100000 health when drunk). You already put all the ingredients in the pot! Only available in camp"
+    },
+    "44": {
+        "id": 44,
+        "name": "Gather liana",
+        "icon": "fa-leaf",
+        "skillId": 0,
+        "requiredProgress": "100000000000",
+        "rewardedItems": {
+            "0": {
+                "itemType": 1,
+                "itemId": 24
+            }
+        },
+        "tooltip": "Provides 1 liana per completion (A specific type of vine, far sturdier than most)"
+    },
+    "45": {
+        "id": 45,
+        "name": "Get stew",
+        "icon": "fa-leaf",
+        "skillId": 4,
+        "requiredProgress": "100000000000",
+        "rewardedItems": {
+            "0": {
+                "itemType": 0,
+                "itemId": 23
+            }
+        },
+        "tooltip": "Gives you 1 portion of stew per completion (+150000 health when consumed). It's gray and has some bean-like things in it. Fishing out the parts that seem somewhat edible takes some effort. Best eaten with nose closed"
+    },
+    "46": {
+        "id": 46,
+        "name": "Salvage ships",
+        "icon": "fa-leaf",
+        "skillId": 1,
+        "requiredProgress": "50000000000",
+        "rewardedItems": {
+            "0": {
+                "itemType": 1,
+                "itemId": 25
+            }
+        },
+        "tooltip": "Provides 1 salvaged shipwood per completion (Salvaged from old ships. Used for construction). It seems like they are scrapping the ships of stranded people for materials"
+    },
+    "47": {
+        "id": 47,
+        "name": "Cook bull",
+        "icon": "fa-leaf",
+        "skillId": 5,
+        "requiredProgress": "50000000000",
+        "automationRequirement": 250,
+        "requiredResourceId": 26,
+        "rewardedItems": {
+            "0": {
+                "itemType": 0,
+                "itemId": 24
+            }
+        },
+        "tooltip": "Cooks 1 piece of bull meat per completion (+175000 health when eaten), requires bull meat to cook"
+    },
+    "48": {
+        "id": 48,
+        "name": "Hunt falcon",
+        "icon": "fa-leaf",
+        "skillId": 8,
+        "requiredProgress": "180000000000",
+        "rewardedItems": {
+            "0": {
+                "itemType": 1,
+                "itemId": 27
+            }
+        },
+        "tooltip": "Provides 1 dead falcon per completion (Can be cooked)"
+    },
+    "49": {
+        "id": 49,
+        "name": "Cook falcon",
+        "icon": "fa-leaf",
+        "skillId": 5,
+        "requiredProgress": "60000000000",
+        "requiredResourceId": 27,
+        "rewardedItems": {
+            "0": {
+                "itemType": 0,
+                "itemId": 25
+            }
+        },
+        "tooltip": "Cooks 1 falcon per completion (+200000 health when eaten), requires a dead falcon to cook"
+    },
+    "50": {
+        "id": 50,
+        "name": "Dig limestone",
+        "icon": "fa-leaf",
+        "skillId": 6,
+        "requiredProgress": "200000000000",
+        "rewardedItems": {
+            "0": {
+                "itemType": 1,
+                "itemId": 28
+            }
+        },
+        "tooltip": "Provides 1 limestone per completion (Used for construction)"
+    },
+    "51": {
+        "id": 51,
+        "name": "Catch seal",
+        "icon": "fa-leaf",
+        "skillId": 4,
+        "requiredProgress": "240000000000",
+        "completionDamage": "220000",
+        "lookAheadSafetyExplorations": [
+            217,
+            218
+        ],
+        "rewardedItems": {
+            "0": {
+                "itemType": 1,
+                "itemId": 29
+            }
+        },
+        "tooltip": "These beasts may look harmless, but they definitely aren't. Every completion causes 200 K damage, reduces all active food cooldowns by 10% of your maximum cooldown, and provides 1 raw seal per completion (Can be cooked)"
+    },
+    "52": {
+        "id": 52,
+        "name": "Cook seal",
+        "icon": "fa-leaf",
+        "skillId": 5,
+        "requiredProgress": "90000000000",
+        "requiredResourceId": 29,
+        "rewardedItems": {
+            "0": {
+                "itemType": 0,
+                "itemId": 26
+            }
+        },
+        "tooltip": "Cooks 1 seal per completion (+250000 health when eaten), requires a raw seal to cook"
+    },
+    "53": {
+        "id": 53,
+        "name": "Gather corn",
+        "icon": "fa-leaf",
+        "skillId": 0,
+        "requiredProgress": "500000000000",
+        "automationRequirement": 250,
+        "rewardedItems": {
+            "0": {
+                "itemType": 0,
+                "itemId": 27
+            }
+        },
+        "tooltip": "Provides 1 corncob per completion (+300000 health when eaten)"
+    },
+    "54": {
+        "id": 54,
+        "name": "Dig magma",
+        "icon": "fa-leaf",
+        "skillId": 6,
+        "requiredProgress": "500000000000",
+        "completionDamage": "100000",
+        "rewardedItems": {
+            "0": {
+                "itemType": 1,
+                "itemId": 30
+            }
+        },
+        "tooltip": "Very hot. Every completion causes 100 K damage, reduces all active food cooldowns by 10% of your maximum cooldown, and provides 1 magma block per completion (Used for construction)"
+    },
+    "55": {
+        "id": 55,
+        "name": "Catch koi",
+        "icon": "fa-leaf",
+        "skillId": 4,
+        "requiredProgress": "3750000000000",
+        "rewardedItems": {
+            "0": {
+                "itemType": 1,
+                "itemId": 31
+            }
+        },
+        "tooltip": "Provides 1 raw koi carp per completion (Colorful and cookable)"
+    },
+    "56": {
+        "id": 56,
+        "name": "Cook koi",
+        "icon": "fa-leaf",
+        "skillId": 5,
+        "requiredProgress": "1250000000000",
+        "requiredResourceId": 31,
+        "rewardedItems": {
+            "0": {
+                "itemType": 0,
+                "itemId": 28
+            }
+        },
+        "tooltip": "Cooks 1 koi carp per completion (+500000 health when eaten), requires a raw koi carp to cook"
+    },
+    "57": {
+        "id": 57,
+        "name": "Gather mushroom",
+        "icon": "fa-leaf",
+        "skillId": 0,
+        "requiredProgress": "10000000000000",
+        "automationRequirement": 200,
+        "rewardedItems": {
+            "0": {
+                "itemType": 0,
+                "itemId": 29
+            }
+        },
+        "tooltip": "Provides 1 edible mushroom per completion (+750000 health when eaten)"
+    },
+    "58": {
+        "id": 58,
+        "name": "Shovel coal",
+        "icon": "fa-leaf",
+        "skillId": 6,
+        "requiredProgress": "10000000000000",
+        "rewardedItems": {
+            "0": {
+                "itemType": 1,
+                "itemId": 32
+            }
+        },
+        "tooltip": "Shovel some coal from the big pile they've prepared in the main square (Used to ignite fires)"
+    },
+    "59": {
+        "id": 59,
+        "name": "Sell food",
+        "icon": "fa-leaf",
+        "skillId": 10,
+        "requiredProgress": "10000000000000",
+        "automationRequirement": 200,
+        "foodTrade": {
+            "requiredFoodValue": "1000000",
+            "maxId": 29,
+            "maxBonusId": 27,
+            "bonusAmount": "2"
+        },
+        "rewardedItems": {
+            "0": {
+                "itemType": 1,
+                "itemId": 33
+            }
+        },
+        "tooltip": "Sell some of your food in return for a wooden chip (A simple coin used for trading during the trade fair)"
+    },
+    "60": {
+        "id": 60,
+        "name": "Buy mixed salad",
+        "icon": "fa-leaf",
+        "skillId": 10,
+        "requiredProgress": "20000000000000",
+        "automationRequirement": 200,
+        "requiredResourceId": 33,
+        "requiredResourceAmount": "2",
+        "automationUnlockAlternative": 59,
+        "rewardedItems": {
+            "0": {
+                "itemType": 0,
+                "itemId": 33
+            }
+        },
+        "isExcludedFromPassiveJobs": true,
+        "tooltip": "Spend two wooden chips to buy a mixed salad (+1.50M health when eaten), filled with five types of fruit and lettuce!<br/>To keep competition fair, you're not allowed to resell this food"
+    },
+    "61": {
+        "id": 61,
+        "name": "Buy packed meal",
+        "icon": "fa-leaf",
+        "skillId": 10,
+        "requiredProgress": "50000000000000",
+        "automationRequirement": 200,
+        "requiredResourceId": 33,
+        "requiredResourceAmount": "5",
+        "automationUnlockAlternative": 59,
+        "rewardedItems": {
+            "0": {
+                "itemType": 0,
+                "itemId": 34
+            }
+        },
+        "isExcludedFromPassiveJobs": true,
+        "tooltip": "Spend five wooden chips to buy a packed meal (+2.50M health when eaten), contains all major food groups!<br/>To keep competition fair, you're not allowed to resell this food"
+    },
+    "62": {
+        "id": 62,
+        "name": "Gather steel",
+        "icon": "fa-leaf",
+        "skillId": 6,
+        "requiredProgress": "10000000000000",
+        "completionDamage": "500000",
+        "rewardedItems": {
+            "0": {
+                "itemType": 1,
+                "itemId": 34
+            }
+        },
+        "tooltip": "Shovel molten steel right out of the furnace! There must be a safer way to obtain this...<br/>Every completion causes 1.00 M damage, reduces all active food cooldowns by 10% of your maximum cooldown, and provides 1 steel per completion (Used for construction)"
+    },
+    "63": {
+        "id": 63,
+        "name": "Gather clam",
+        "icon": "fa-leaf",
+        "skillId": 4,
+        "requiredProgress": "5000000000000",
+        "rewardedItems": {
+            "0": {
+                "itemType": 1,
+                "itemId": 35
+            }
+        },
+        "tooltip": "Provides 1 gollum clam per completion (A thick shell, with something edible inside)"
+    },
+    "64": {
+        "id": 64,
+        "name": "Cook clam",
+        "icon": "fa-leaf",
+        "skillId": 5,
+        "requiredProgress": "15000000000000",
+        "requiredResourceId": 35,
+        "rewardedItems": {
+            "0": {
+                "itemType": 0,
+                "itemId": 30
+            }
+        },
+        "tooltip": "Cooks 1 gollum clam per completion (+900K health when eaten), requires a gollum clam to cook"
+    },
+    "65": {
+        "id": 65,
+        "name": "Cut moldy wood",
+        "icon": "fa-leaf",
+        "skillId": 1,
+        "requiredProgress": "50000000000000",
+        "rewardedItems": {
+            "0": {
+                "itemType": 1,
+                "itemId": 36
+            }
+        },
+        "tooltip": "There's some wood left among the debris, but it appears to be rather ancient. You should still be able to salvage some usable pieces from it. Provides 1 moldy wood per completion (Not in the best shape, but it should be viable for construction)"
+    },
+    "66": {
+        "id": 66,
+        "name": "Dig titan stone",
+        "icon": "fa-leaf",
+        "skillId": 6,
+        "requiredProgress": "100000000000000",
+        "automationRequirement": 150,
+        "rewardedItems": {
+            "0": {
+                "itemType": 1,
+                "itemId": 37
+            }
+        },
+        "tooltip": "A pile of massive stones that appear to have been used for the construction of the Titan itself. Provides 1 titan stone per completion (This can probably be used for constructions other than titans too)"
+    },
+    "67": {
+        "id": 67,
+        "name": "Shoot beehive",
+        "icon": "fa-leaf",
+        "skillId": 8,
+        "requiredProgress": "40000000000000",
+        "rewardedItems": {
+            "0": {
+                "itemType": 0,
+                "itemId": 31
+            }
+        },
+        "tooltip": "Provides 1 portion of honey per completion (+1.1M health when eaten)<br/>Requires a slingshot to fire with enough accuracy"
+    },
+    "68": {
+        "id": 68,
+        "name": "Pick portobello",
+        "icon": "fa-leaf",
+        "skillId": 0,
+        "requiredProgress": "80000000000000",
+        "rewardedItems": {
+            "0": {
+                "itemType": 0,
+                "itemId": 32
+            }
+        },
+        "tooltip": "Provides 1 portobello mushroom per completion (+1.25M health when eaten)"
+    }
+}

@@ -1,0 +1,115 @@
+.app {
+  flex: 1;
+  background: #fafafa;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background: #24283b;
+  color: #c0caf5;
+  border-bottom: 1px solid #414868;
+}
+
+.app-title {
+  font-weight: 600;
+  font-size: 1.125rem;
+  text-decoration: none;
+  color: inherit;
+}
+
+.app-title:hover {
+  opacity: 0.8;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.user-email {
+  color: #a9b1d6;
+  font-size: 0.875rem;
+}
+
+.help-button,
+.favourites-button,
+.shares-button,
+.settings-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: transparent;
+  border: 1px solid #414868;
+  border-radius: 4px;
+  color: #c0caf5;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.help-button:hover,
+.favourites-button:hover,
+.shares-button:hover,
+.settings-button:hover {
+  background: #414868;
+  border-color: #565f89;
+}
+
+.help-button:hover {
+  color: #22c55e;
+}
+
+.favourites-button:hover {
+  color: #f59e0b;
+}
+
+.shares-button:hover {
+  color: #3b82f6;
+}
+
+.logout-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: transparent;
+  border: 1px solid #414868;
+  border-radius: 4px;
+  color: #c0caf5;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.logout-button:hover {
+  background: #414868;
+  border-color: #565f89;
+}
+
+.app-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.app-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  font-size: 18px;
+  color: #666;
+}
+
+.main-content {
+  flex: 1;
+  overflow-y: auto;
+}

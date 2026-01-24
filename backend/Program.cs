@@ -1,0 +1,1466 @@
+using System.Net.Http.Headers;
+using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Text.Json.Serialization;
+using System.Threading.RateLimiting;
+using IncrelutionAutomationEditor.Api.Configuration;
+using IncrelutionAutomationEditor.Api.Data;
+using IncrelutionAutomationEditor.Api.DTOs;
+using IncrelutionAutomationEditor.Api.Models;
+using IncrelutionAutomationEditor.Api.Services;
+using IncrelutionAutomationEditor.Api.Utils;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+
+var builder = WebApplication.CreateBuilder(args);
+
+// Configure request body size limits (1MB max)
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.Limits.MaxRequestBodySize = 1_048_576; // 1 MB
+});
+
+// Add services to the container
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Add Identity DbContext (separate database)
+builder.Services.AddDbContext<IdentityAppDbContext>(options =>
+    options.UseSqlite(builder.Configuration.GetConnectionString("IdentityConnection")));
+
+// Configure Discord OAuth
+builder.Services.Configure<DiscordOptions>(
+    builder.Configuration.GetSection(DiscordOptions.SectionName));
+builder.Services.AddSingleton(sp =>
+    sp.GetRequiredService<IOptions<DiscordOptions>>().Value);
+
+// Add HttpClient for Discord API calls
+builder.Services.AddHttpClient();
+
+// Configure DataProtection to persist keys (for session cookies to survive restarts)
+var keysDirectory = builder.Configuration["DataProtection:KeysDirectory"];
+if (!string.IsNullOrEmpty(keysDirectory))
+{
+    builder.Services.AddDataProtection()
+        .PersistKeysToFileSystem(new DirectoryInfo(keysDirectory))
+        .SetApplicationName("IncrelutionAutomationEditor");
+}
+
+// Configure cookie authentication (replaces Identity)
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.Cookie.HttpOnly = true;
+        options.Cookie.SameSite = SameSiteMode.None;
+        options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+        options.ExpireTimeSpan = TimeSpan.FromDays(30);
+        options.SlidingExpiration = true;
+        options.Events.OnRedirectToLogin = context =>
+        {
+            context.Response.StatusCode = 401;
+            return Task.CompletedTask;
+        };
+        options.Events.OnRedirectToAccessDenied = context =>
+        {
+            context.Response.StatusCode = 403;
+            return Task.CompletedTask;
+        };
+    });
+
+// Add game data service (loads JSON files into memory)
+builder.Services.AddSingleton<GameDataService>();
+
+// Configure AppLimits
+builder.Services.Configure<AppLimits>(
+    builder.Configuration.GetSection(AppLimits.SectionName));
+builder.Services.AddSingleton(sp =>
+    sp.GetRequiredService<IOptions<AppLimits>>().Value);
+
+// Configure rate limiting
+var rateLimitConfig = builder.Configuration.GetSection(AppLimits.SectionName).Get<AppLimits>() ?? new AppLimits();
+
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+    // Auth endpoints - strict limit (login, register)
+    options.AddFixedWindowLimiter("auth", limiterOptions =>
+    {
+        limiterOptions.PermitLimit = rateLimitConfig.AuthRateLimitPermitCount;
+        limiterOptions.Window = TimeSpan.FromSeconds(rateLimitConfig.AuthRateLimitWindowSeconds);
+        limiterOptions.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+        limiterOptions.QueueLimit = rateLimitConfig.AuthRateLimitQueueLimit;
+    });
+
+    // General API - token bucket for burst tolerance (rapid wheel adjustments)
+    options.AddTokenBucketLimiter("api", limiterOptions =>
+    {
+        limiterOptions.TokenLimit = rateLimitConfig.ApiRateLimitTokenLimit;
+        limiterOptions.TokensPerPeriod = rateLimitConfig.ApiRateLimitTokensPerPeriod;
+        limiterOptions.ReplenishmentPeriod = TimeSpan.FromSeconds(rateLimitConfig.ApiRateLimitReplenishSeconds);
+        limiterOptions.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+        limiterOptions.QueueLimit = rateLimitConfig.ApiRateLimitQueueLimit;
+        limiterOptions.AutoReplenishment = true;
+    });
+
+    // Public endpoints - moderate limit for anonymous access
+    options.AddSlidingWindowLimiter("public", limiterOptions =>
+    {
+        limiterOptions.PermitLimit = rateLimitConfig.PublicRateLimitPermitCount;
+        limiterOptions.Window = TimeSpan.FromSeconds(rateLimitConfig.PublicRateLimitWindowSeconds);
+        limiterOptions.SegmentsPerWindow = 4;
+        limiterOptions.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+        limiterOptions.QueueLimit = rateLimitConfig.PublicRateLimitQueueLimit;
+    });
+
+    // Global fallback policy using client IP (token bucket for burst tolerance)
+    options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
+    {
+        var clientIp = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+        return RateLimitPartition.GetTokenBucketLimiter(clientIp, _ => new TokenBucketRateLimiterOptions
+        {
+            TokenLimit = rateLimitConfig.ApiRateLimitTokenLimit,
+            TokensPerPeriod = rateLimitConfig.ApiRateLimitTokensPerPeriod,
+            ReplenishmentPeriod = TimeSpan.FromSeconds(rateLimitConfig.ApiRateLimitReplenishSeconds),
+            QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+            QueueLimit = rateLimitConfig.ApiRateLimitQueueLimit,
+            AutoReplenishment = true
+        });
+    });
+
+    options.OnRejected = async (context, cancellationToken) =>
+    {
+        context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
+        context.HttpContext.Response.ContentType = "application/json";
+
+        var retryAfter = context.Lease.TryGetMetadata(MetadataName.RetryAfter, out var retryAfterValue)
+            ? retryAfterValue.TotalSeconds
+            : 60;
+
+        context.HttpContext.Response.Headers.RetryAfter = ((int)retryAfter).ToString();
+
+        await context.HttpContext.Response.WriteAsJsonAsync(new
+        {
+            error = "Too many requests. Please try again later.",
+            retryAfterSeconds = (int)retryAfter
+        }, cancellationToken);
+    };
+});
+
+// Configure JSON options to handle circular references
+builder.Services.ConfigureHttpJsonOptions(options =>
+{
+    options.SerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+});
+
+// Add CORS for frontend
+var frontendUrl = builder.Configuration.GetSection("Discord")["FrontendUrl"] ?? "http://localhost:5173";
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins(frontendUrl)
+              .AllowAnyMethod()
+              .AllowAnyHeader()
+              .AllowCredentials();
+    });
+});
+
+builder.Services.AddOpenApi();
+builder.Services.AddAuthorization();
+
+var app = builder.Build();
+
+// Apply pending migrations on startup
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        var appDb = services.GetRequiredService<AppDbContext>();
+        appDb.Database.Migrate();
+
+        var identityDb = services.GetRequiredService<IdentityAppDbContext>();
+        identityDb.Database.Migrate();
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred while migrating the database.");
+        throw;
+    }
+}
+
+// Configure the HTTP request pipeline
+if (app.Environment.IsDevelopment())
+{
+    app.MapOpenApi();
+}
+
+// Skip HTTPS redirect in production (Caddy handles TLS termination)
+if (app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
+app.UseCors("AllowFrontend");
+app.UseRateLimiter();
+app.UseAuthentication();
+app.UseAuthorization();
+
+// Serve static files (frontend) in production
+if (!app.Environment.IsDevelopment())
+{
+    app.UseDefaultFiles();
+    app.UseStaticFiles();
+}
+
+// Helper to get current user ID
+int GetUserId(ClaimsPrincipal user) => int.Parse(user.FindFirstValue(ClaimTypes.NameIdentifier)!);
+
+// === Auth Endpoints (Discord OAuth2) ===
+
+// GET /api/auth/discord - Initiate Discord OAuth2 flow
+app.MapGet("/api/auth/discord", (DiscordOptions discord, HttpContext httpContext) =>
+{
+    // Generate CSRF state token
+    var state = Convert.ToBase64String(RandomNumberGenerator.GetBytes(32));
+
+    // Store state in HTTP-only cookie for validation
+    httpContext.Response.Cookies.Append("oauth_state", state, new CookieOptions
+    {
+        HttpOnly = true,
+        Secure = true,
+        SameSite = SameSiteMode.Lax,
+        MaxAge = TimeSpan.FromMinutes(10)
+    });
+
+    var url = $"{discord.AuthorizationEndpoint}" +
+              $"?client_id={discord.ClientId}" +
+              $"&redirect_uri={Uri.EscapeDataString(discord.RedirectUri)}" +
+              $"&response_type=code" +
+              $"&scope=identify" +
+              $"&state={Uri.EscapeDataString(state)}";
+
+    return Results.Redirect(url);
+})
+.RequireRateLimiting("auth")
+.WithName("DiscordLogin");
+
+// GET /api/auth/discord/callback - Handle Discord OAuth2 callback
+app.MapGet("/api/auth/discord/callback", async (
+    string? code,
+    string? state,
+    string? error,
+    DiscordOptions discord,
+    IdentityAppDbContext identityDb,
+    AppDbContext db,
+    GameDataService gameData,
+    IHttpClientFactory httpClientFactory,
+    HttpContext httpContext) =>
+{
+    // Handle Discord errors
+    if (!string.IsNullOrEmpty(error))
+    {
+        return Results.Redirect($"{discord.FrontendUrl}/login?error={Uri.EscapeDataString(error)}");
+    }
+
+    if (string.IsNullOrEmpty(code) || string.IsNullOrEmpty(state))
+    {
+        return Results.Redirect($"{discord.FrontendUrl}/login?error=missing_params");
+    }
+
+    // Validate CSRF state
+    var savedState = httpContext.Request.Cookies["oauth_state"];
+    if (savedState != state)
+    {
+        return Results.Redirect($"{discord.FrontendUrl}/login?error=invalid_state");
+    }
+
+    // Clear the state cookie
+    httpContext.Response.Cookies.Delete("oauth_state");
+
+    try
+    {
+        var client = httpClientFactory.CreateClient();
+
+        // Exchange code for access token
+        var tokenResponse = await client.PostAsync(discord.TokenEndpoint,
+            new FormUrlEncodedContent(new Dictionary<string, string>
+            {
+                ["client_id"] = discord.ClientId,
+                ["client_secret"] = discord.ClientSecret,
+                ["grant_type"] = "authorization_code",
+                ["code"] = code,
+                ["redirect_uri"] = discord.RedirectUri
+            }));
+
+        if (!tokenResponse.IsSuccessStatusCode)
+        {
+            return Results.Redirect($"{discord.FrontendUrl}/login?error=token_exchange_failed");
+        }
+
+        var tokenJson = await tokenResponse.Content.ReadFromJsonAsync<DiscordTokenResponse>();
+        if (tokenJson == null)
+        {
+            return Results.Redirect($"{discord.FrontendUrl}/login?error=invalid_token_response");
+        }
+
+        // Fetch user info from Discord
+        client.DefaultRequestHeaders.Authorization =
+            new AuthenticationHeaderValue("Bearer", tokenJson.AccessToken);
+        var userResponse = await client.GetAsync(discord.UserInfoEndpoint);
+
+        if (!userResponse.IsSuccessStatusCode)
+        {
+            return Results.Redirect($"{discord.FrontendUrl}/login?error=user_info_failed");
+        }
+
+        var discordUser = await userResponse.Content.ReadFromJsonAsync<DiscordUser>();
+        if (discordUser == null)
+        {
+            return Results.Redirect($"{discord.FrontendUrl}/login?error=invalid_user_response");
+        }
+
+        // Find or create user
+        var user = await identityDb.Users
+            .FirstOrDefaultAsync(u => u.DiscordId == discordUser.Id);
+
+        if (user == null)
+        {
+            // New user - create account
+            var displayName = discordUser.GlobalName ?? discordUser.Username;
+            user = new ApplicationUser
+            {
+                UserName = discordUser.Id,
+                DiscordId = discordUser.Id,
+                DiscordUsername = displayName,
+                NormalizedUserName = discordUser.Id.ToUpperInvariant(),
+                SecurityStamp = Guid.NewGuid().ToString()
+            };
+
+            // Initialize default settings
+            var skills = gameData.GetAllSkills();
+            var actionTypes = new[] { 0, 1, 2 };
+            var defaultPriorities = new Dictionary<string, int>();
+            foreach (var skillId in skills.Keys)
+            {
+                foreach (var actionType in actionTypes)
+                {
+                    defaultPriorities[$"{skillId}-{actionType}"] = 2;
+                }
+            }
+            var defaultSettings = new UserSettings
+            {
+                DefaultSkillPriorities = defaultPriorities,
+                SkillPrioritiesInitialized = true
+            };
+            user.Settings = System.Text.Json.JsonSerializer.Serialize(defaultSettings);
+
+            identityDb.Users.Add(user);
+            await identityDb.SaveChangesAsync();
+
+            // Create root folder for the new user
+            var rootFolder = new Folder
+            {
+                Name = "My Loadouts",
+                ParentId = null,
+                UserId = user.Id,
+                CreatedAt = DateTime.UtcNow
+            };
+            db.Folders.Add(rootFolder);
+            await db.SaveChangesAsync();
+        }
+        else
+        {
+            // Returning user - update Discord username if changed
+            var displayName = discordUser.GlobalName ?? discordUser.Username;
+            if (user.DiscordUsername != displayName)
+            {
+                user.DiscordUsername = displayName;
+                await identityDb.SaveChangesAsync();
+            }
+        }
+
+        // Create claims and sign in
+        var claims = new List<Claim>
+        {
+            new(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new("DiscordId", user.DiscordId),
+            new("DiscordUsername", user.DiscordUsername ?? "")
+        };
+
+        var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+        var principal = new ClaimsPrincipal(identity);
+
+        await httpContext.SignInAsync(
+            CookieAuthenticationDefaults.AuthenticationScheme,
+            principal,
+            new AuthenticationProperties { IsPersistent = true });
+
+        return Results.Redirect($"{discord.FrontendUrl}/loadouts");
+    }
+    catch (Exception)
+    {
+        return Results.Redirect($"{discord.FrontendUrl}/login?error=auth_failed");
+    }
+})
+.RequireRateLimiting("auth")
+.WithName("DiscordCallback");
+
+// POST /api/auth/logout - Sign out
+app.MapPost("/api/auth/logout", async (HttpContext httpContext) =>
+{
+    await httpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+    return Results.Ok(new AuthResponse(true));
+})
+.RequireAuthorization()
+.WithName("Logout");
+
+// GET /api/auth/me - Get current user info
+app.MapGet("/api/auth/me", (ClaimsPrincipal user) =>
+{
+    var userId = int.Parse(user.FindFirstValue(ClaimTypes.NameIdentifier)!);
+    var username = user.FindFirstValue("DiscordUsername") ?? "Unknown";
+    return Results.Ok(new UserInfo(userId, username));
+})
+.RequireAuthorization()
+.WithName("GetCurrentUser");
+
+// DELETE /api/auth/account - Delete user account and all data
+app.MapDelete("/api/auth/account", async (
+    ClaimsPrincipal user,
+    IdentityAppDbContext identityDb,
+    AppDbContext db,
+    HttpContext httpContext) =>
+{
+    var userId = GetUserId(user);
+    var appUser = await identityDb.Users.FindAsync(userId);
+    if (appUser == null)
+        return Results.NotFound();
+
+    // Delete in order to respect foreign key constraints
+    // 1. Delete saved shares (references to other users' shares)
+    var savedShares = await db.SavedShares.Where(s => s.UserId == userId).ToListAsync();
+    db.SavedShares.RemoveRange(savedShares);
+
+    // 2. Delete shares created by user (and cascade deletes others' saved references)
+    var shares = await db.LoadoutShares.Where(s => s.OwnerUserId == userId).ToListAsync();
+    db.LoadoutShares.RemoveRange(shares);
+
+    // 3. Delete all loadouts
+    var loadouts = await db.Loadouts.Where(l => l.UserId == userId).ToListAsync();
+    db.Loadouts.RemoveRange(loadouts);
+
+    // 4. Delete all folders
+    var folders = await db.Folders.Where(f => f.UserId == userId).ToListAsync();
+    db.Folders.RemoveRange(folders);
+
+    await db.SaveChangesAsync();
+
+    // 5. Sign out and delete user account
+    await httpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+    identityDb.Users.Remove(appUser);
+    await identityDb.SaveChangesAsync();
+
+    return Results.Ok(new AuthResponse(true));
+})
+.RequireAuthorization()
+.WithName("DeleteAccount");
+
+// === Settings Endpoints ===
+
+// GET /api/settings - Get user settings
+app.MapGet("/api/settings", async (ClaimsPrincipal user, IdentityAppDbContext identityDb) =>
+{
+    var userId = GetUserId(user);
+    var appUser = await identityDb.Users.FindAsync(userId);
+    if (appUser == null)
+        return Results.NotFound();
+
+    if (string.IsNullOrEmpty(appUser.Settings))
+        return Results.Ok(new UserSettings());
+
+    try
+    {
+        var settings = System.Text.Json.JsonSerializer.Deserialize<UserSettings>(appUser.Settings);
+        return Results.Ok(settings ?? new UserSettings());
+    }
+    catch
+    {
+        return Results.Ok(new UserSettings());
+    }
+})
+.RequireAuthorization()
+.WithName("GetSettings");
+
+// PUT /api/settings - Update user settings
+app.MapPut("/api/settings", async (UserSettings settings, ClaimsPrincipal user, IdentityAppDbContext identityDb) =>
+{
+    var userId = GetUserId(user);
+    var appUser = await identityDb.Users.FindAsync(userId);
+    if (appUser == null)
+        return Results.NotFound();
+
+    appUser.Settings = System.Text.Json.JsonSerializer.Serialize(settings);
+    await identityDb.SaveChangesAsync();
+
+    return Results.Ok(settings);
+})
+.RequireAuthorization()
+.WithName("UpdateSettings");
+
+// POST /api/settings/unlock-chapter - Attempt to unlock a chapter by providing the first exploration name
+app.MapPost("/api/settings/unlock-chapter", async (
+    UnlockChapterRequest request,
+    ClaimsPrincipal user,
+    IdentityAppDbContext identityDb,
+    GameDataService gameData) =>
+{
+    var userId = GetUserId(user);
+    var appUser = await identityDb.Users.FindAsync(userId);
+    if (appUser == null)
+        return Results.NotFound();
+
+    // Validate chapter number (1-10, chapter 0 is always unlocked)
+    if (request.Chapter < 1 || request.Chapter > 10)
+        return Results.BadRequest(new UnlockChapterResponse(false, "Invalid chapter number"));
+
+    // Get the expected exploration name for this chapter
+    var expectedName = gameData.GetFirstExplorationName(request.Chapter);
+    if (expectedName == null)
+        return Results.BadRequest(new UnlockChapterResponse(false, "Chapter not found"));
+
+    // Validate the guess using fuzzy matching
+    if (!StringUtils.FuzzyMatch(request.ExplorationName, expectedName))
+        return Results.Ok(new UnlockChapterResponse(false, "Incorrect exploration name"));
+
+    // Load current settings
+    UserSettings settings;
+    try
+    {
+        settings = string.IsNullOrEmpty(appUser.Settings)
+            ? new UserSettings()
+            : System.Text.Json.JsonSerializer.Deserialize<UserSettings>(appUser.Settings) ?? new UserSettings();
+    }
+    catch
+    {
+        settings = new UserSettings();
+    }
+
+    // Ensure unlocked chapters includes 0 and add new chapter + all previous
+    var unlocked = new HashSet<int>(settings.UnlockedChapters) { 0 };
+    for (var i = 0; i <= request.Chapter; i++)
+    {
+        unlocked.Add(i);
+    }
+
+    // Update settings with new unlocked chapters
+    var newSettings = settings with { UnlockedChapters = unlocked.OrderBy(c => c).ToList() };
+    appUser.Settings = System.Text.Json.JsonSerializer.Serialize(newSettings);
+    await identityDb.SaveChangesAsync();
+
+    return Results.Ok(new UnlockChapterResponse(true, "Chapter unlocked!", newSettings.UnlockedChapters));
+})
+.RequireAuthorization()
+.RequireRateLimiting("auth")
+.WithName("UnlockChapter");
+
+// === Game Data Endpoints (public) ===
+
+// GET /api/actions - Get all Increlution actions (from in-memory data)
+app.MapGet("/api/actions", (GameDataService gameData) =>
+{
+    return gameData.GetAllActions();
+})
+.RequireRateLimiting("public")
+.WithName("GetActions");
+
+// GET /api/skills - Get all skills (from in-memory data)
+app.MapGet("/api/skills", (GameDataService gameData) =>
+{
+    return gameData.GetAllSkills();
+})
+.RequireRateLimiting("public")
+.WithName("GetSkills");
+
+// === Protected Endpoints ===
+
+// GET /api/folders/tree - Get folder tree with all folders and loadouts
+app.MapGet("/api/folders/tree", async (ClaimsPrincipal user, AppDbContext db) =>
+{
+    var userId = GetUserId(user);
+
+    var folders = await db.Folders
+        .Where(f => f.UserId == userId)
+        .Include(f => f.SubFolders)
+        .Include(f => f.Loadouts)
+        .ToListAsync();
+
+    var loadouts = await db.Loadouts
+        .Where(l => l.UserId == userId)
+        .ToListAsync();
+
+    // Find root folder (the one with ParentId == null for this user)
+    var rootFolder = folders.FirstOrDefault(f => f.ParentId == null);
+    if (rootFolder == null)
+    {
+        return Results.NotFound("Root folder not found");
+    }
+
+    FolderTreeNode BuildTree(int folderId)
+    {
+        var folder = folders.First(f => f.Id == folderId);
+
+        return new FolderTreeNode(
+            folder.Id,
+            folder.Name,
+            folder.ParentId,
+            folders.Where(f => f.ParentId == folder.Id)
+                .Select(f => BuildTree(f.Id))
+                .ToList(),
+            loadouts.Where(l => l.FolderId == folder.Id)
+                .Select(l => new LoadoutSummary(l.Id, l.Name, l.UpdatedAt, l.IsProtected))
+                .ToList()
+        );
+    }
+
+    return Results.Ok(BuildTree(rootFolder.Id));
+})
+.RequireAuthorization()
+.WithName("GetFolderTree");
+
+// GET /api/loadout/{id} - Get specific loadout
+app.MapGet("/api/loadout/{id}", async (int id, ClaimsPrincipal user, AppDbContext db) =>
+{
+    var userId = GetUserId(user);
+    var loadout = await db.Loadouts.FirstOrDefaultAsync(l => l.Id == id && l.UserId == userId);
+    if (loadout == null)
+        return Results.NotFound();
+
+    return Results.Ok(new
+    {
+        loadout.Id,
+        loadout.Name,
+        loadout.FolderId,
+        loadout.CreatedAt,
+        loadout.UpdatedAt,
+        loadout.IsProtected,
+        Data = loadout.GetData()
+    });
+})
+.RequireAuthorization()
+.WithName("GetLoadout");
+
+// POST /api/folders - Create new folder
+app.MapPost("/api/folders", async (CreateFolderRequest request, ClaimsPrincipal user, AppDbContext db, AppLimits limits) =>
+{
+    var userId = GetUserId(user);
+
+    // Check folder count limit
+    var folderCount = await db.Folders.CountAsync(f => f.UserId == userId);
+    if (folderCount >= limits.MaxFoldersPerUser)
+        return Results.BadRequest($"Maximum folder limit ({limits.MaxFoldersPerUser}) reached");
+
+    // Verify parent folder belongs to user
+    var parentFolder = await db.Folders.FirstOrDefaultAsync(f => f.Id == request.ParentId && f.UserId == userId);
+    if (parentFolder == null)
+        return Results.NotFound("Parent folder not found");
+
+    // Check folder depth limit
+    var allFolders = await db.Folders.Where(f => f.UserId == userId).ToListAsync();
+    int GetDepth(int? parentId)
+    {
+        int depth = 0;
+        while (parentId != null)
+        {
+            depth++;
+            var parent = allFolders.FirstOrDefault(f => f.Id == parentId);
+            parentId = parent?.ParentId;
+        }
+        return depth;
+    }
+    var currentDepth = GetDepth(request.ParentId);
+    if (currentDepth >= limits.MaxFolderDepth)
+        return Results.BadRequest($"Maximum folder depth ({limits.MaxFolderDepth}) reached");
+
+    var folder = new Folder
+    {
+        Name = request.Name.Trim(),
+        ParentId = request.ParentId,
+        UserId = userId,
+        CreatedAt = DateTime.UtcNow
+    };
+    db.Folders.Add(folder);
+    await db.SaveChangesAsync();
+
+    return Results.Ok(folder);
+})
+.RequireAuthorization()
+.WithName("CreateFolder");
+
+// PUT /api/folders/{id} - Rename folder
+app.MapPut("/api/folders/{id}", async (int id, RenameFolderRequest request, ClaimsPrincipal user, AppDbContext db) =>
+{
+    var userId = GetUserId(user);
+    var folder = await db.Folders.FirstOrDefaultAsync(f => f.Id == id && f.UserId == userId);
+    if (folder == null)
+        return Results.NotFound();
+
+    // Prevent renaming root folder
+    if (folder.ParentId == null)
+        return Results.BadRequest("Cannot rename root folder");
+
+    folder.Name = request.Name.Trim();
+    await db.SaveChangesAsync();
+
+    return Results.Ok(folder);
+})
+.RequireAuthorization()
+.WithName("RenameFolder");
+
+// DELETE /api/folders/{id} - Delete folder
+app.MapDelete("/api/folders/{id}", async (int id, ClaimsPrincipal user, AppDbContext db) =>
+{
+    var userId = GetUserId(user);
+    var folder = await db.Folders
+        .Include(f => f.SubFolders)
+        .Include(f => f.Loadouts)
+        .FirstOrDefaultAsync(f => f.Id == id && f.UserId == userId);
+
+    if (folder == null)
+        return Results.NotFound();
+
+    // Prevent deleting root folder
+    if (folder.ParentId == null)
+        return Results.BadRequest("Cannot delete root folder");
+
+    // Prevent deleting folder with children
+    if (folder.SubFolders.Any() || folder.Loadouts.Any())
+        return Results.BadRequest("Cannot delete folder with contents");
+
+    db.Folders.Remove(folder);
+    await db.SaveChangesAsync();
+
+    return Results.Ok();
+})
+.RequireAuthorization()
+.WithName("DeleteFolder");
+
+// PUT /api/folders/{id}/parent - Move folder to a different parent
+app.MapPut("/api/folders/{id}/parent", async (int id, MoveFolderRequest request, ClaimsPrincipal user, AppDbContext db, AppLimits limits) =>
+{
+    var userId = GetUserId(user);
+    var folder = await db.Folders.FirstOrDefaultAsync(f => f.Id == id && f.UserId == userId);
+    if (folder == null)
+        return Results.NotFound("Folder not found");
+
+    // Cannot move root folder
+    if (folder.ParentId == null)
+        return Results.BadRequest("Cannot move root folder");
+
+    var targetFolder = await db.Folders.FirstOrDefaultAsync(f => f.Id == request.ParentId && f.UserId == userId);
+    if (targetFolder == null)
+        return Results.NotFound("Target folder not found");
+
+    // Cannot move to same parent
+    if (folder.ParentId == request.ParentId)
+        return Results.Ok();
+
+    // Cannot move folder into itself
+    if (id == request.ParentId)
+        return Results.BadRequest("Cannot move folder into itself");
+
+    // Check if target is a descendant of the folder being moved (would create cycle)
+    var allFolders = await db.Folders.Where(f => f.UserId == userId).ToListAsync();
+    bool IsDescendant(int? parentId, int ancestorId)
+    {
+        while (parentId != null)
+        {
+            if (parentId == ancestorId) return true;
+            var parent = allFolders.FirstOrDefault(f => f.Id == parentId);
+            parentId = parent?.ParentId;
+        }
+        return false;
+    }
+
+    if (IsDescendant(request.ParentId, id))
+        return Results.BadRequest("Cannot move folder into its own descendant");
+
+    // Check folder depth limit after move
+    int GetDepth(int? parentId)
+    {
+        int depth = 0;
+        while (parentId != null)
+        {
+            depth++;
+            var parent = allFolders.FirstOrDefault(f => f.Id == parentId);
+            parentId = parent?.ParentId;
+        }
+        return depth;
+    }
+
+    int GetMaxSubfolderDepth(int folderId)
+    {
+        int maxDepth = 0;
+        var subfolders = allFolders.Where(f => f.ParentId == folderId).ToList();
+        foreach (var sub in subfolders)
+        {
+            var subDepth = 1 + GetMaxSubfolderDepth(sub.Id);
+            if (subDepth > maxDepth) maxDepth = subDepth;
+        }
+        return maxDepth;
+    }
+
+    var targetDepth = GetDepth(request.ParentId);
+    var folderSubDepth = GetMaxSubfolderDepth(id);
+    var newTotalDepth = targetDepth + 1 + folderSubDepth;
+
+    if (newTotalDepth > limits.MaxFolderDepth)
+        return Results.BadRequest($"Move would exceed maximum folder depth ({limits.MaxFolderDepth})");
+
+    folder.ParentId = request.ParentId;
+    await db.SaveChangesAsync();
+    return Results.Ok();
+})
+.RequireAuthorization()
+.WithName("MoveFolder");
+
+// POST /api/loadouts - Create new loadout
+app.MapPost("/api/loadouts", async (
+    CreateLoadoutRequest request,
+    ClaimsPrincipal user,
+    AppDbContext db,
+    IdentityAppDbContext identityDb,
+    GameDataService gameData,
+    AppLimits limits) =>
+{
+    var userId = GetUserId(user);
+
+    // Check loadout count limit
+    var loadoutCount = await db.Loadouts.CountAsync(l => l.UserId == userId);
+    if (loadoutCount >= limits.MaxLoadoutsPerUser)
+        return Results.BadRequest($"Maximum loadout limit ({limits.MaxLoadoutsPerUser}) reached");
+
+    // Verify folder belongs to user
+    var folder = await db.Folders.FirstOrDefaultAsync(f => f.Id == request.FolderId && f.UserId == userId);
+    if (folder == null)
+        return Results.NotFound("Folder not found");
+
+    // Get user's default skill priorities and unlocked chapters
+    var data = new Dictionary<string, Dictionary<string, int>>();
+    var appUser = await identityDb.Users.FindAsync(userId);
+    if (appUser?.Settings != null)
+    {
+        try
+        {
+            var settings = System.Text.Json.JsonSerializer.Deserialize<UserSettings>(appUser.Settings);
+            if (settings?.DefaultSkillPriorities?.Count > 0)
+            {
+                // Get unlocked chapters (default to just chapter 0)
+                var unlockedChapters = new HashSet<int>(settings.UnlockedChapters ?? new List<int> { 0 });
+
+                // Apply default priorities based on skill and action type, but only for unlocked chapters
+                var allActions = gameData.GetAllActions();
+                foreach (var action in allActions)
+                {
+                    // Skip actions from locked chapters
+                    if (!unlockedChapters.Contains(action.Chapter))
+                        continue;
+
+                    var key = $"{action.SkillId}-{action.Type}";
+                    if (settings.DefaultSkillPriorities.TryGetValue(key, out var priority))
+                    {
+                        var typeKey = action.Type.ToString();
+                        if (!data.ContainsKey(typeKey))
+                            data[typeKey] = new Dictionary<string, int>();
+                        data[typeKey][action.OriginalId.ToString()] = priority;
+                    }
+                }
+            }
+        }
+        catch
+        {
+            // Ignore settings parse errors
+        }
+    }
+
+    var loadout = new Loadout
+    {
+        Name = request.Name.Trim(),
+        FolderId = request.FolderId,
+        UserId = userId,
+        CreatedAt = DateTime.UtcNow,
+        UpdatedAt = DateTime.UtcNow,
+        Data = System.Text.Json.JsonSerializer.Serialize(data)
+    };
+    db.Loadouts.Add(loadout);
+    await db.SaveChangesAsync();
+
+    return Results.Ok(loadout);
+})
+.RequireAuthorization()
+.WithName("CreateLoadout");
+
+// DELETE /api/loadouts/{id} - Delete loadout
+app.MapDelete("/api/loadouts/{id}", async (int id, ClaimsPrincipal user, AppDbContext db) =>
+{
+    var userId = GetUserId(user);
+    var loadout = await db.Loadouts.FirstOrDefaultAsync(l => l.Id == id && l.UserId == userId);
+    if (loadout == null)
+        return Results.NotFound();
+
+    if (loadout.IsProtected)
+        return Results.BadRequest("Cannot delete a protected loadout");
+
+    db.Loadouts.Remove(loadout);
+    await db.SaveChangesAsync();
+
+    return Results.Ok();
+})
+.RequireAuthorization()
+.WithName("DeleteLoadout");
+
+// PUT /api/loadout/action - Update automation level for an action
+app.MapPut("/api/loadout/action", async (
+    UpdateActionRequest request,
+    ClaimsPrincipal user,
+    AppDbContext db,
+    AppLimits limits) =>
+{
+    var userId = GetUserId(user);
+
+    // Validate action type
+    if (request.ActionType < 0 || request.ActionType > 2)
+        return Results.BadRequest("Action type must be 0, 1, or 2");
+
+    // Validate automation level
+    if (request.AutomationLevel.HasValue &&
+        (request.AutomationLevel.Value < limits.MinAutomationLevel ||
+         request.AutomationLevel.Value > limits.MaxAutomationLevel))
+        return Results.BadRequest($"Automation level must be between {limits.MinAutomationLevel} and {limits.MaxAutomationLevel}");
+
+    var loadout = await db.Loadouts.FirstOrDefaultAsync(l => l.Id == request.LoadoutId && l.UserId == userId);
+
+    if (loadout == null)
+        return Results.NotFound("Loadout not found");
+
+    if (loadout.IsProtected)
+        return Results.BadRequest("Cannot modify a protected loadout");
+
+    var data = loadout.GetData();
+
+    // Ensure the action type dictionary exists
+    if (!data.ContainsKey(request.ActionType))
+    {
+        data[request.ActionType] = new Dictionary<int, int?>();
+    }
+
+    // Update or remove the automation level
+    if (request.AutomationLevel == null)
+    {
+        data[request.ActionType].Remove(request.ActionId);
+    }
+    else
+    {
+        data[request.ActionType][request.ActionId] = request.AutomationLevel;
+    }
+
+    loadout.SetData(data);
+    loadout.UpdatedAt = DateTime.UtcNow;
+    await db.SaveChangesAsync();
+
+    return Results.Ok();
+})
+.RequireAuthorization()
+.WithName("UpdateActionAutomationLevel");
+
+// PUT /api/loadouts/{id}/name - Update loadout name
+app.MapPut("/api/loadouts/{id}/name", async (
+    int id,
+    UpdateLoadoutNameRequest request,
+    ClaimsPrincipal user,
+    AppDbContext db) =>
+{
+    var userId = GetUserId(user);
+    var loadout = await db.Loadouts.FirstOrDefaultAsync(l => l.Id == id && l.UserId == userId);
+    if (loadout == null)
+        return Results.NotFound("Loadout not found");
+
+    if (loadout.IsProtected)
+        return Results.BadRequest("Cannot modify a protected loadout");
+
+    loadout.Name = request.Name.Trim();
+    loadout.UpdatedAt = DateTime.UtcNow;
+    await db.SaveChangesAsync();
+
+    return Results.Ok(loadout);
+})
+.RequireAuthorization()
+.WithName("UpdateLoadoutName");
+
+// PUT /api/loadouts/{id}/protection - Toggle loadout protection
+app.MapPut("/api/loadouts/{id}/protection", async (
+    int id,
+    UpdateLoadoutProtectionRequest request,
+    ClaimsPrincipal user,
+    AppDbContext db) =>
+{
+    var userId = GetUserId(user);
+    var loadout = await db.Loadouts.FirstOrDefaultAsync(l => l.Id == id && l.UserId == userId);
+    if (loadout == null)
+        return Results.NotFound("Loadout not found");
+
+    loadout.IsProtected = request.IsProtected;
+    await db.SaveChangesAsync();
+
+    return Results.Ok(new { loadout.IsProtected });
+})
+.RequireAuthorization()
+.WithName("UpdateLoadoutProtection");
+
+// POST /api/loadouts/{id}/import - Import loadout data
+app.MapPost("/api/loadouts/{id}/import", async (
+    int id,
+    ImportLoadoutRequest request,
+    ClaimsPrincipal user,
+    AppDbContext db,
+    AppLimits limits) =>
+{
+    var userId = GetUserId(user);
+    var loadout = await db.Loadouts.FirstOrDefaultAsync(l => l.Id == id && l.UserId == userId);
+    if (loadout == null)
+        return Results.NotFound("Loadout not found");
+
+    if (loadout.IsProtected)
+        return Results.BadRequest("Cannot modify a protected loadout");
+
+    // Validate imported data
+    if (request.Data != null)
+    {
+        foreach (var (actionType, actions) in request.Data)
+        {
+            // Validate action type
+            if (actionType < 0 || actionType > 2)
+                return Results.BadRequest("Invalid action type in import data");
+
+            // Validate automation levels
+            foreach (var (actionId, level) in actions)
+            {
+                if (level.HasValue &&
+                    (level.Value < limits.MinAutomationLevel || level.Value > limits.MaxAutomationLevel))
+                    return Results.BadRequest($"Invalid automation level in import data (must be {limits.MinAutomationLevel}-{limits.MaxAutomationLevel})");
+            }
+        }
+    }
+
+    loadout.SetData(request.Data);
+    loadout.UpdatedAt = DateTime.UtcNow;
+    await db.SaveChangesAsync();
+
+    return Results.Ok();
+})
+.RequireAuthorization()
+.WithName("ImportLoadout");
+
+// GET /api/loadouts/{id}/export - Export loadout data
+app.MapGet("/api/loadouts/{id}/export", async (int id, ClaimsPrincipal user, AppDbContext db) =>
+{
+    var userId = GetUserId(user);
+    var loadout = await db.Loadouts.FirstOrDefaultAsync(l => l.Id == id && l.UserId == userId);
+    if (loadout == null)
+        return Results.NotFound("Loadout not found");
+
+    return Results.Ok(loadout.GetData());
+})
+.RequireAuthorization()
+.WithName("ExportLoadout");
+
+// PUT /api/loadouts/{id}/folder - Move loadout to a different folder
+app.MapPut("/api/loadouts/{id}/folder", async (int id, MoveLoadoutRequest request, ClaimsPrincipal user, AppDbContext db) =>
+{
+    var userId = GetUserId(user);
+    var loadout = await db.Loadouts.FirstOrDefaultAsync(l => l.Id == id && l.UserId == userId);
+    if (loadout == null)
+        return Results.NotFound("Loadout not found");
+
+    var targetFolder = await db.Folders.FirstOrDefaultAsync(f => f.Id == request.FolderId && f.UserId == userId);
+    if (targetFolder == null)
+        return Results.NotFound("Target folder not found");
+
+    if (loadout.FolderId == request.FolderId)
+        return Results.Ok();
+
+    loadout.FolderId = request.FolderId;
+    loadout.UpdatedAt = DateTime.UtcNow;
+    await db.SaveChangesAsync();
+    return Results.Ok();
+})
+.RequireAuthorization()
+.WithName("MoveLoadout");
+
+// === Sharing Endpoints ===
+
+// Helper function to generate share token
+string GenerateShareToken()
+{
+    const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    var data = new byte[16];
+    RandomNumberGenerator.Fill(data);
+    var result = new char[16];
+    for (int i = 0; i < 16; i++)
+    {
+        result[i] = chars[data[i] % chars.Length];
+    }
+    return new string(result);
+}
+
+// Helper function to filter loadout data by unlocked chapters
+LoadoutData FilterLoadoutByChapters(LoadoutData data, IEnumerable<IncrelutionAction> actions, HashSet<int> unlockedChapters)
+{
+    // Build lookup: type -> originalId -> chapter
+    var chapterLookup = new Dictionary<int, Dictionary<int, int>>();
+    foreach (var action in actions)
+    {
+        if (!chapterLookup.ContainsKey(action.Type))
+            chapterLookup[action.Type] = new Dictionary<int, int>();
+        chapterLookup[action.Type][action.OriginalId] = action.Chapter;
+    }
+
+    var result = new LoadoutData();
+    foreach (var (actionType, typeData) in data)
+    {
+        result[actionType] = new Dictionary<int, int?>();
+        if (!chapterLookup.TryGetValue(actionType, out var typeLookup))
+        {
+            // No actions for this type, include all
+            foreach (var (originalId, level) in typeData)
+                result[actionType][originalId] = level;
+            continue;
+        }
+
+        foreach (var (originalId, level) in typeData)
+        {
+            // Only include if chapter is unlocked (or if we can't find chapter info)
+            if (!typeLookup.TryGetValue(originalId, out var chapter) || unlockedChapters.Contains(chapter))
+            {
+                result[actionType][originalId] = level;
+            }
+        }
+    }
+    return result;
+}
+
+// POST /api/loadouts/{id}/share - Create share link
+app.MapPost("/api/loadouts/{id}/share", async (
+    int id,
+    CreateShareRequest request,
+    ClaimsPrincipal user,
+    AppDbContext db,
+    IdentityAppDbContext identityDb,
+    AppLimits limits) =>
+{
+    var userId = GetUserId(user);
+    var loadout = await db.Loadouts.FirstOrDefaultAsync(l => l.Id == id && l.UserId == userId);
+    if (loadout == null)
+        return Results.NotFound("Loadout not found");
+
+    // Check share count limit per loadout
+    var shareCount = await db.LoadoutShares.CountAsync(s => s.LoadoutId == id);
+    if (shareCount >= limits.MaxSharesPerLoadout)
+        return Results.BadRequest($"Maximum shares per loadout ({limits.MaxSharesPerLoadout}) reached");
+
+    // Validate expiration hours
+    if (request.ExpiresInHours.HasValue &&
+        (request.ExpiresInHours.Value < 1 || request.ExpiresInHours.Value > limits.MaxShareExpirationHours))
+        return Results.BadRequest($"Expiration must be between 1 and {limits.MaxShareExpirationHours} hours");
+
+    // Get user's unlocked chapters
+    var unlockedChapters = new List<int> { 0 };
+    var appUser = await identityDb.Users.FindAsync(userId);
+    if (appUser?.Settings != null)
+    {
+        try
+        {
+            var settings = System.Text.Json.JsonSerializer.Deserialize<UserSettings>(appUser.Settings);
+            if (settings?.UnlockedChapters?.Count > 0)
+            {
+                unlockedChapters = settings.UnlockedChapters;
+            }
+        }
+        catch
+        {
+            // Use default
+        }
+    }
+
+    // Generate unique token (retry on collision)
+    string token;
+    do
+    {
+        token = GenerateShareToken();
+    } while (await db.LoadoutShares.AnyAsync(s => s.ShareToken == token));
+
+    var share = new LoadoutShare
+    {
+        LoadoutId = id,
+        OwnerUserId = userId,
+        ShareToken = token,
+        CreatedAt = DateTime.UtcNow,
+        ExpiresAt = request.ExpiresInHours.HasValue
+            ? DateTime.UtcNow.AddHours(request.ExpiresInHours.Value)
+            : null,
+        ShowAttribution = request.ShowAttribution
+    };
+    share.SetUnlockedChapters(unlockedChapters);
+
+    db.LoadoutShares.Add(share);
+    await db.SaveChangesAsync();
+
+    return Results.Ok(new LoadoutShareResponse(
+        share.Id,
+        share.ShareToken,
+        share.CreatedAt,
+        share.ExpiresAt,
+        share.ShowAttribution
+    ));
+})
+.RequireAuthorization()
+.WithName("CreateShare");
+
+// GET /api/loadouts/{id}/shares - List active shares for loadout
+app.MapGet("/api/loadouts/{id}/shares", async (int id, ClaimsPrincipal user, AppDbContext db) =>
+{
+    var userId = GetUserId(user);
+    var loadout = await db.Loadouts.FirstOrDefaultAsync(l => l.Id == id && l.UserId == userId);
+    if (loadout == null)
+        return Results.NotFound("Loadout not found");
+
+    var shares = await db.LoadoutShares
+        .Where(s => s.LoadoutId == id && s.OwnerUserId == userId)
+        .Select(s => new LoadoutShareResponse(
+            s.Id,
+            s.ShareToken,
+            s.CreatedAt,
+            s.ExpiresAt,
+            s.ShowAttribution
+        ))
+        .ToListAsync();
+
+    return Results.Ok(shares);
+})
+.RequireAuthorization()
+.WithName("GetLoadoutShares");
+
+// GET /api/shares - List all shares for current user
+app.MapGet("/api/shares", async (ClaimsPrincipal user, AppDbContext db) =>
+{
+    var userId = GetUserId(user);
+
+    var shares = await db.LoadoutShares
+        .Where(s => s.OwnerUserId == userId)
+        .Include(s => s.Loadout)
+        .Select(s => new UserShareResponse(
+            s.Id,
+            s.ShareToken,
+            s.LoadoutId,
+            s.Loadout.Name,
+            s.CreatedAt,
+            s.ExpiresAt,
+            s.ShowAttribution
+        ))
+        .ToListAsync();
+
+    return Results.Ok(shares);
+})
+.RequireAuthorization()
+.WithName("GetAllUserShares");
+
+// DELETE /api/shares/{shareId} - Revoke share link
+app.MapDelete("/api/shares/{shareId}", async (int shareId, ClaimsPrincipal user, AppDbContext db) =>
+{
+    var userId = GetUserId(user);
+    var share = await db.LoadoutShares.FirstOrDefaultAsync(s => s.Id == shareId && s.OwnerUserId == userId);
+    if (share == null)
+        return Results.NotFound("Share not found");
+
+    db.LoadoutShares.Remove(share);
+    await db.SaveChangesAsync();
+
+    return Results.Ok();
+})
+.RequireAuthorization()
+.WithName("RevokeShare");
+
+// GET /api/share/{token} - View shared loadout (public)
+app.MapGet("/api/share/{token}", async (
+    string token,
+    AppDbContext db,
+    IdentityAppDbContext identityDb,
+    GameDataService gameData) =>
+{
+    var share = await db.LoadoutShares
+        .Include(s => s.Loadout)
+        .FirstOrDefaultAsync(s => s.ShareToken == token);
+
+    if (share == null)
+        return Results.NotFound(new SharedLoadoutErrorResponse("Share not found"));
+
+    // Check expiration
+    if (share.ExpiresAt.HasValue && share.ExpiresAt.Value < DateTime.UtcNow)
+        return Results.BadRequest(new SharedLoadoutErrorResponse("This share link has expired"));
+
+    // Get owner name if attribution is enabled
+    string? ownerName = null;
+    if (share.ShowAttribution)
+    {
+        var owner = await identityDb.Users.FindAsync(share.OwnerUserId);
+        ownerName = owner?.DiscordUsername;
+    }
+
+    // Filter loadout data by sharer's unlocked chapters
+    var unlockedChapters = new HashSet<int>(share.GetUnlockedChapters());
+    var allActions = gameData.GetAllActions();
+    var loadoutData = share.Loadout.GetData();
+    var filteredData = FilterLoadoutByChapters(loadoutData, allActions, unlockedChapters);
+
+    return Results.Ok(new SharedLoadoutResponse(
+        share.Loadout.Name,
+        filteredData,
+        share.Loadout.UpdatedAt,
+        ownerName
+    ));
+})
+.RequireRateLimiting("public")
+.WithName("GetSharedLoadout");
+
+// POST /api/share/{token}/save - Save to "Others' Loadouts"
+app.MapPost("/api/share/{token}/save", async (
+    string token,
+    ClaimsPrincipal user,
+    AppDbContext db,
+    IdentityAppDbContext identityDb,
+    AppLimits limits) =>
+{
+    var userId = GetUserId(user);
+
+    // Check saved share limit
+    var savedCount = await db.SavedShares.CountAsync(s => s.UserId == userId);
+    if (savedCount >= limits.MaxSavedSharesPerUser)
+        return Results.BadRequest($"Maximum saved shares ({limits.MaxSavedSharesPerUser}) reached");
+
+    var share = await db.LoadoutShares
+        .Include(s => s.Loadout)
+        .FirstOrDefaultAsync(s => s.ShareToken == token);
+
+    if (share == null)
+        return Results.NotFound("Share not found");
+
+    // Check expiration
+    if (share.ExpiresAt.HasValue && share.ExpiresAt.Value < DateTime.UtcNow)
+        return Results.BadRequest("This share link has expired");
+
+    // Check if already saved
+    var existing = await db.SavedShares
+        .FirstOrDefaultAsync(s => s.UserId == userId && s.LoadoutShareId == share.Id);
+
+    if (existing != null)
+        return Results.BadRequest("Already saved to your collection");
+
+    // Can't save your own loadout
+    if (share.OwnerUserId == userId)
+        return Results.BadRequest("Cannot save your own loadout");
+
+    var savedShare = new SavedShare
+    {
+        UserId = userId,
+        LoadoutShareId = share.Id,
+        SavedAt = DateTime.UtcNow
+    };
+
+    db.SavedShares.Add(savedShare);
+    await db.SaveChangesAsync();
+
+    // Get owner name if attribution is enabled
+    string? ownerName = null;
+    if (share.ShowAttribution)
+    {
+        var owner = await identityDb.Users.FindAsync(share.OwnerUserId);
+        ownerName = owner?.DiscordUsername;
+    }
+
+    return Results.Ok(new SavedShareResponse(
+        savedShare.Id,
+        share.ShareToken,
+        share.Loadout.Name,
+        ownerName,
+        savedShare.SavedAt
+    ));
+})
+.RequireAuthorization()
+.WithName("SaveShare");
+
+// GET /api/saved-shares - List user's saved shares
+app.MapGet("/api/saved-shares", async (
+    ClaimsPrincipal user,
+    AppDbContext db,
+    IdentityAppDbContext identityDb) =>
+{
+    var userId = GetUserId(user);
+
+    var savedShares = await db.SavedShares
+        .Where(s => s.UserId == userId)
+        .Include(s => s.LoadoutShare)
+        .ThenInclude(ls => ls.Loadout)
+        .ToListAsync();
+
+    var results = new List<SavedShareResponse>();
+    foreach (var saved in savedShares)
+    {
+        string? ownerName = null;
+        if (saved.LoadoutShare.ShowAttribution)
+        {
+            var owner = await identityDb.Users.FindAsync(saved.LoadoutShare.OwnerUserId);
+            ownerName = owner?.DiscordUsername;
+        }
+
+        results.Add(new SavedShareResponse(
+            saved.Id,
+            saved.LoadoutShare.ShareToken,
+            saved.LoadoutShare.Loadout.Name,
+            ownerName,
+            saved.SavedAt
+        ));
+    }
+
+    return Results.Ok(results);
+})
+.RequireAuthorization()
+.WithName("GetSavedShares");
+
+// DELETE /api/saved-shares/{id} - Remove from saved
+app.MapDelete("/api/saved-shares/{id}", async (int id, ClaimsPrincipal user, AppDbContext db) =>
+{
+    var userId = GetUserId(user);
+    var savedShare = await db.SavedShares.FirstOrDefaultAsync(s => s.Id == id && s.UserId == userId);
+    if (savedShare == null)
+        return Results.NotFound("Saved share not found");
+
+    db.SavedShares.Remove(savedShare);
+    await db.SaveChangesAsync();
+
+    return Results.Ok();
+})
+.RequireAuthorization()
+.WithName("RemoveSavedShare");
+
+// SPA fallback for client-side routing (production only)
+if (!app.Environment.IsDevelopment())
+{
+    app.MapFallbackToFile("index.html");
+}
+
+app.Run();

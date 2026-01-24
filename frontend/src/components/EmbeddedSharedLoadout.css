@@ -1,0 +1,165 @@
+.embedded-shared-loadout {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.embedded-shared-loading,
+.embedded-shared-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 50vh;
+  text-align: center;
+  color: #666;
+}
+
+.embedded-shared-loading i,
+.embedded-shared-error i {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.embedded-shared-error i {
+  color: #dc2626;
+}
+
+.embedded-shared-error h2 {
+  margin: 0 0 8px 0;
+  color: #333;
+}
+
+.embedded-shared-error p {
+  margin: 0 0 24px 0;
+}
+
+.embedded-shared-header {
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.embedded-shared-title-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.embedded-shared-back {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #f3f4f6;
+  border: none;
+  border-radius: 6px;
+  color: #374151;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.embedded-shared-back:hover {
+  background: #e5e7eb;
+}
+
+.embedded-shared-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.embedded-shared-title h1 {
+  margin: 0;
+  font-size: 28px;
+  color: #333;
+}
+
+.embedded-shared-badge {
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #0ea5e9 0%, #0369a1 100%);
+  color: white;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 4px rgba(3, 105, 161, 0.3);
+}
+
+.embedded-shared-meta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 16px;
+}
+
+.embedded-shared-owner {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.embedded-shared-meta i {
+  margin-right: 4px;
+}
+
+.embedded-shared-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.embedded-action-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.embedded-action-button.primary {
+  background: #1976d2;
+  color: white;
+}
+
+.embedded-action-button.primary:hover:not(:disabled) {
+  background: #1565c0;
+}
+
+.embedded-action-button.primary:disabled {
+  background: #93c5fd;
+  cursor: default;
+}
+
+.embedded-action-button.secondary {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.embedded-action-button.secondary:hover {
+  background: #d1d5db;
+}
+
+.embedded-shared-content {
+  /* Uses existing LoadoutEditor styles for type-headers, chapter-section, etc. */
+}
+
+/* Make interactions disabled for read-only */
+.embedded-readonly .action-row {
+  cursor: default;
+}
+
+.embedded-readonly .automation-wheel {
+  pointer-events: none;
+  opacity: 0.8;
+}
