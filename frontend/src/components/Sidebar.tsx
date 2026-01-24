@@ -35,12 +35,6 @@ function TreeNode({ node, level, dragState, dropTargetFolderId, onLoadoutDragSta
     selectedFolderId,
     onLoadoutSelect,
     onFolderSelect,
-    onCreateFolder,
-    onRenameFolder,
-    onDeleteFolder,
-    onCreateLoadout,
-    onDeleteLoadout,
-    onRenameLoadout,
     onQuickExport
   } = useSidebarActions();
 
@@ -125,55 +119,6 @@ function TreeNode({ node, level, dragState, dropTargetFolderId, onLoadoutDragSta
           <i className="fas fa-folder folder-icon" />
           <span className="folder-name">{node.name}</span>
         </div>
-
-        <div className="folder-actions">
-          {!isRootFolder && (
-            <button
-              className="action-button"
-              onClick={(e) => {
-                e.stopPropagation();
-                onCreateLoadout(node.id);
-              }}
-              title="New Loadout"
-            >
-              <i className="fas fa-file-medical" />
-            </button>
-          )}
-          <button
-            className="action-button"
-            onClick={(e) => {
-              e.stopPropagation();
-              onCreateFolder(node.id);
-            }}
-            title="New Folder"
-          >
-            <i className="fas fa-folder-plus" />
-          </button>
-          {!isRootFolder && (
-            <>
-              <button
-                className="action-button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onRenameFolder(node.id);
-                }}
-                title="Rename"
-              >
-                <i className="fas fa-edit" />
-              </button>
-              <button
-                className="action-button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDeleteFolder(node.id);
-                }}
-                title="Delete"
-              >
-                <i className="fas fa-trash" />
-              </button>
-            </>
-          )}
-        </div>
       </div>
 
       {expanded && (
@@ -223,30 +168,6 @@ function TreeNode({ node, level, dragState, dropTargetFolderId, onLoadoutDragSta
               {loadout.isProtected && (
                 <i className="fas fa-lock loadout-protected-icon" title="Protected" />
               )}
-              <div className="loadout-item-actions">
-                <button
-                  className="action-button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onRenameLoadout(loadout.id);
-                  }}
-                  title="Rename"
-                  disabled={loadout.isProtected}
-                >
-                  <i className="fas fa-edit" />
-                </button>
-                <button
-                  className="action-button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onDeleteLoadout(loadout.id);
-                  }}
-                  title="Delete"
-                  disabled={loadout.isProtected}
-                >
-                  <i className="fas fa-trash" />
-                </button>
-              </div>
             </div>
           ))}
         </div>

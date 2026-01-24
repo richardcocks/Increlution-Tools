@@ -19,13 +19,15 @@ interface LoadoutEditorProps {
   onNameChange?: (loadoutId: number, name: string) => void;
   onProtectionChange?: (loadoutId: number, isProtected: boolean) => void;
   onCreateLoadout?: () => void;
+  onDuplicate?: () => void;
+  onDelete?: () => void;
 }
 
 export interface LoadoutEditorHandle {
   startEditingName: () => void;
 }
 
-const LoadoutEditor = forwardRef<LoadoutEditorHandle, LoadoutEditorProps>(({ loadoutId, folderBreadcrumb, onNameChange, onProtectionChange, onCreateLoadout }, ref) => {
+const LoadoutEditor = forwardRef<LoadoutEditorHandle, LoadoutEditorProps>(({ loadoutId, folderBreadcrumb, onNameChange, onProtectionChange, onCreateLoadout, onDuplicate, onDelete }, ref) => {
   const { actions, skills, loading: gameDataLoading, error: gameDataError } = useGameData();
   const [loadout, setLoadout] = useState<Loadout | null>(null);
   const [loadoutLoading, setLoadoutLoading] = useState(true);
@@ -510,6 +512,8 @@ const LoadoutEditor = forwardRef<LoadoutEditorHandle, LoadoutEditorProps>(({ loa
         onImport={handleImport}
         onExportClipboard={handleExportClipboard}
         onToggleProtection={toggleProtection}
+        onDuplicate={onDuplicate ?? (() => {})}
+        onDelete={onDelete ?? (() => {})}
       />
 
       {/* Search Bar */}

@@ -100,11 +100,82 @@
   margin-top: 8px;
 }
 
+.delete-info {
+  display: flex;
+  gap: 16px;
+  padding: 16px 20px;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  margin-bottom: 24px;
+}
+
+.delete-info > i {
+  font-size: 20px;
+  color: #2563eb;
+  flex-shrink: 0;
+}
+
+.delete-info p {
+  margin: 0;
+  color: #1e40af;
+  line-height: 1.5;
+}
+
+[data-theme="dark"] .delete-info {
+  background: #1e3a5f;
+  border-color: #2563eb;
+}
+
+[data-theme="dark"] .delete-info > i {
+  color: #60a5fa;
+}
+
+[data-theme="dark"] .delete-info p {
+  color: #93c5fd;
+}
+
 .delete-message {
   color: var(--color-text-secondary);
   font-size: 15px;
   line-height: 1.6;
   margin-bottom: 32px;
+}
+
+.delete-confirm-input {
+  margin-bottom: 24px;
+}
+
+.delete-confirm-input label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+.delete-confirm-input strong {
+  color: var(--color-text-primary);
+  font-weight: 600;
+}
+
+.delete-confirm-input input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid var(--color-border-default);
+  border-radius: 6px;
+  font-size: 15px;
+  background: var(--color-bg-base);
+  color: var(--color-text-primary);
+  transition: border-color 0.2s;
+}
+
+.delete-confirm-input input:focus {
+  outline: none;
+  border-color: #dc2626;
+}
+
+.delete-confirm-input input::placeholder {
+  color: var(--color-text-muted);
 }
 
 .delete-actions {

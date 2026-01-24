@@ -68,15 +68,24 @@ function App() {
     try {
       const tree = await api.getFolderTree()
       setFolderTree(tree)
+      return tree
     } catch (err) {
       console.error('Error fetching folder tree:', err)
+      return null
     } finally {
       setLoading(false)
     }
   }
 
   useEffect(() => {
-    fetchFolderTree()
+    const initFolderTree = async () => {
+      const tree = await fetchFolderTree()
+      // Select root folder by default on initial load
+      if (tree) {
+        setSelectedFolderId(tree.id)
+      }
+    }
+    initFolderTree()
   }, [])
 
   const handleLogout = async () => {
@@ -108,21 +117,6 @@ function App() {
     }
   }
 
-  const handleRenameFolder = (folderId: number) => {
-    setPendingDelete(null)
-    // Find current folder name
-    const findFolderName = (node: FolderTreeNode): string | null => {
-      if (node.id === folderId) return node.name
-      for (const sub of node.subFolders) {
-        const found = findFolderName(sub)
-        if (found) return found
-      }
-      return null
-    }
-    const currentName = folderTree ? findFolderName(folderTree) ?? '' : ''
-    setFolderModal({ type: 'rename', folderId, currentName })
-  }
-
   const handleRenameFolderSubmit = async (name: string) => {
     if (!folderModal || folderModal.type !== 'rename') return
     const { folderId } = folderModal
@@ -150,16 +144,31 @@ function App() {
     setPendingDelete({ type: 'folder', id: folderId })
   }
 
-  const confirmDeleteFolder = async (folderId: number) => {
+  const confirmDeleteFolder = async (folderId: number, force = false) => {
     try {
-      await api.deleteFolder(folderId)
+      const result = await api.deleteFolder(folderId, force)
       if (selectedFolderId === folderId) {
-        setSelectedFolderId(null)
+        // Navigate to parent folder or root
+        setSelectedFolderId(folderTree?.id ?? null)
       }
       await fetchFolderTree()
+
+      // Build toast message
+      const parts: string[] = []
+      if (result.foldersDeleted > 0) {
+        parts.push(`${result.foldersDeleted} folder${result.foldersDeleted !== 1 ? 's' : ''}`)
+      }
+      if (result.loadoutsDeleted > 0) {
+        parts.push(`${result.loadoutsDeleted} loadout${result.loadoutsDeleted !== 1 ? 's' : ''}`)
+      }
+      let message = parts.length > 0 ? `Deleted ${parts.join(' and ')}` : 'Folder deleted'
+      if (result.protectedLoadoutsMoved > 0) {
+        message += `. ${result.protectedLoadoutsMoved} protected loadout${result.protectedLoadoutsMoved !== 1 ? 's' : ''} moved to parent folder`
+      }
+      showToast(message, 'success')
     } catch (err) {
       console.error('Error deleting folder:', err)
-      showToast('Failed to delete folder. Make sure it is empty.', 'error')
+      showToast('Failed to delete folder', 'error')
     }
   }
 
@@ -377,28 +386,16 @@ function App() {
     }
   }
 
-  const handleConfirmDelete = () => {
-    if (!pendingDelete) return
-    if (pendingDelete.type === 'folder') {
-      confirmDeleteFolder(pendingDelete.id)
-    } else {
-      confirmDeleteLoadout(pendingDelete.id)
-    }
+  const handleConfirmDeleteFolder = (force: boolean) => {
+    if (!pendingDelete || pendingDelete.type !== 'folder') return
+    confirmDeleteFolder(pendingDelete.id, force)
     setPendingDelete(null)
   }
 
-  const handleRenameLoadout = (loadoutId: number) => {
+  const handleConfirmDeleteLoadout = () => {
+    if (!pendingDelete || pendingDelete.type !== 'loadout') return
+    confirmDeleteLoadout(pendingDelete.id)
     setPendingDelete(null)
-    if (loadoutId === selectedLoadoutId) {
-      // Already selected, trigger inline editing
-      loadoutEditorRef.current?.startEditingName()
-    } else {
-      // Select first, then trigger edit after a brief delay for editor to load
-      setSelectedLoadoutId(loadoutId)
-      setTimeout(() => {
-        loadoutEditorRef.current?.startEditingName()
-      }, 100)
-    }
   }
 
   const handleFolderSelect = (folderId: number) => {
@@ -499,6 +496,35 @@ function App() {
     }
   }
 
+  const handleDuplicateLoadout = async (loadoutId: number) => {
+    try {
+      const result = await api.duplicateLoadout(loadoutId)
+      // Optimistically add to tree
+      setFolderTree(prev => prev ? addLoadoutToTree(prev, result.folderId, {
+        id: result.id,
+        name: result.name,
+        updatedAt: result.updatedAt,
+        isProtected: result.isProtected
+      }) : prev)
+      showToast('Loadout duplicated', 'success')
+    } catch (err) {
+      console.error('Error duplicating loadout:', err)
+      showToast(err instanceof Error ? err.message : 'Failed to duplicate loadout', 'error')
+    }
+  }
+
+  const handleDuplicateFolder = async (folderId: number) => {
+    try {
+      const result = await api.duplicateFolder(folderId)
+      // Refresh tree to get the new folder structure
+      await fetchFolderTree()
+      showToast(`Duplicated ${result.totalFoldersCopied} folder${result.totalFoldersCopied !== 1 ? 's' : ''} and ${result.totalLoadoutsCopied} loadout${result.totalLoadoutsCopied !== 1 ? 's' : ''}`, 'success')
+    } catch (err) {
+      console.error('Error duplicating folder:', err)
+      showToast(err instanceof Error ? err.message : 'Failed to duplicate folder', 'error')
+    }
+  }
+
   // Quick export loadout to clipboard (middle-click on sidebar)
   const handleQuickExport = useCallback(async (loadoutId: number) => {
     try {
@@ -552,7 +578,7 @@ function App() {
             type="folder"
             folderId={pendingDelete.id}
             folderTree={folderTree}
-            onConfirm={handleConfirmDelete}
+            onConfirm={handleConfirmDeleteFolder}
             onCancel={() => setPendingDelete(null)}
           />
         );
@@ -562,7 +588,7 @@ function App() {
             type="loadout"
             loadoutId={pendingDelete.id}
             folderTree={folderTree}
-            onConfirm={handleConfirmDelete}
+            onConfirm={handleConfirmDeleteLoadout}
             onCancel={() => setPendingDelete(null)}
           />
         );
@@ -582,6 +608,8 @@ function App() {
             onCreateFolder={() => handleCreateFolder(selectedFolderId)}
             onCreateLoadout={() => handleCreateLoadout(selectedFolderId)}
             onSelectLoadout={(loadoutId) => handleLoadoutSelect(loadoutId, selectedFolderId)}
+            onDuplicateFolder={() => handleDuplicateFolder(selectedFolderId)}
+            onDeleteFolder={() => handleDeleteFolder(selectedFolderId)}
           />
         );
       }
@@ -595,6 +623,8 @@ function App() {
         onNameChange={handleLoadoutNameChange}
         onProtectionChange={handleLoadoutProtectionChange}
         onCreateLoadout={() => handleCreateLoadout(selectedFolderId ?? folderTree?.id ?? 0)}
+        onDuplicate={() => selectedLoadoutId && handleDuplicateLoadout(selectedLoadoutId)}
+        onDelete={() => selectedLoadoutId && handleDeleteLoadout(selectedLoadoutId)}
       />
     );
   };
@@ -659,12 +689,6 @@ function App() {
           selectedFolderId={selectedFolderId}
           onLoadoutSelect={handleLoadoutSelect}
           onFolderSelect={handleFolderSelect}
-          onCreateFolder={handleCreateFolder}
-          onRenameFolder={handleRenameFolder}
-          onDeleteFolder={handleDeleteFolder}
-          onCreateLoadout={handleCreateLoadout}
-          onDeleteLoadout={handleDeleteLoadout}
-          onRenameLoadout={handleRenameLoadout}
           onMoveLoadout={handleMoveLoadout}
           onMoveFolder={handleMoveFolder}
           onQuickExport={handleQuickExport}

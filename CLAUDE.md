@@ -117,6 +117,27 @@ BrowserRouter
 │   │   │               └── ManageSharesPage
 ```
 
+### Sidebar and Page Views
+The sidebar shows a tree of folders and loadouts. Action buttons (rename, duplicate, delete) are in the page views, not the sidebar:
+
+- **FolderView**: Shown when a folder is selected. Contains:
+  - New Loadout / New Folder buttons
+  - Duplicate / Delete buttons (for non-root folders)
+  - Inline folder name editing
+  - List of loadouts in the folder
+
+- **LoadoutEditor**: Shown when a loadout is selected. The LoadoutHeader contains:
+  - Set Readonly/Writeable, Paste from Game, Copy for Game, Share
+  - Duplicate / Delete buttons
+
+On initial load, the root folder ("My Loadouts") is selected by default.
+
+### Folder Deletion
+- Empty folders: Simple confirmation
+- Non-empty folders: Requires typing the folder name to confirm (force delete)
+- Protected loadouts are **moved to the parent folder** instead of deleted
+- Unprotected loadouts and all subfolders are permanently deleted
+
 ### AutomationWheel Component
 Visual gauge replacing dropdown for setting automation levels:
 - **Click**: Increase level (Off → Low → Regular → High → Top)
@@ -197,9 +218,11 @@ Users can choose between light, dark, or system theme preference. The setting pe
 | POST | `/api/folders` | Create folder |
 | PUT | `/api/folders/{id}` | Rename folder |
 | PUT | `/api/folders/{id}/parent` | Move folder |
-| DELETE | `/api/folders/{id}` | Delete folder (must be empty) |
+| POST | `/api/folders/{id}/duplicate` | Duplicate folder with all contents |
+| DELETE | `/api/folders/{id}?force=bool` | Delete folder (force=true for recursive delete, protected loadouts moved to parent) |
 | POST | `/api/loadouts` | Create loadout |
 | DELETE | `/api/loadouts/{id}` | Delete loadout |
+| POST | `/api/loadouts/{id}/duplicate` | Duplicate loadout |
 | PUT | `/api/loadout/action` | Update single action automation level |
 | PUT | `/api/loadouts/{id}/name` | Update loadout name |
 | PUT | `/api/loadouts/{id}/folder` | Move loadout to folder |

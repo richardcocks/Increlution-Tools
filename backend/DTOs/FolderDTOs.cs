@@ -42,3 +42,25 @@ public record CreateLoadoutRequest(
 
     int FolderId
 );
+
+public record DuplicateLoadoutResponse(
+    int Id,
+    string Name,
+    int FolderId,
+    DateTime UpdatedAt,
+    bool IsProtected
+);
+
+public record DuplicateFolderResponse(
+    int Id,
+    string Name,
+    int? ParentId,
+    int TotalFoldersCopied,
+    int TotalLoadoutsCopied
+);
+
+public record DeleteFolderResponse(
+    int FoldersDeleted,
+    int LoadoutsDeleted,
+    int ProtectedLoadoutsMoved
+);

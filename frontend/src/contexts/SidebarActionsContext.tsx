@@ -7,12 +7,6 @@ interface SidebarActionsContextValue {
   selectedFolderId: number | null;
   onLoadoutSelect: (id: number, folderId: number) => void;
   onFolderSelect: (id: number) => void;
-  onCreateFolder: (parentId: number) => void;
-  onRenameFolder: (folderId: number) => void;
-  onDeleteFolder: (folderId: number) => void;
-  onCreateLoadout: (folderId: number) => void;
-  onDeleteLoadout: (loadoutId: number) => void;
-  onRenameLoadout: (loadoutId: number) => void;
   onMoveLoadout: (loadoutId: number, targetFolderId: number, sourceFolderId: number) => void;
   onMoveFolder: (folderId: number, targetParentId: number, sourceParentId: number) => void;
   onQuickExport: (loadoutId: number) => void;
@@ -26,12 +20,6 @@ interface SidebarActionsProviderProps {
   selectedFolderId: number | null;
   onLoadoutSelect: (id: number, folderId: number) => void;
   onFolderSelect: (id: number) => void;
-  onCreateFolder: (parentId: number) => void;
-  onRenameFolder: (folderId: number) => void;
-  onDeleteFolder: (folderId: number) => void;
-  onCreateLoadout: (folderId: number) => void;
-  onDeleteLoadout: (loadoutId: number) => void;
-  onRenameLoadout: (loadoutId: number) => void;
   onMoveLoadout: (loadoutId: number, targetFolderId: number, sourceFolderId: number) => void;
   onMoveFolder: (folderId: number, targetParentId: number, sourceParentId: number) => void;
   onQuickExport: (loadoutId: number) => void;
@@ -43,12 +31,6 @@ export function SidebarActionsProvider({
   selectedFolderId,
   onLoadoutSelect,
   onFolderSelect,
-  onCreateFolder,
-  onRenameFolder,
-  onDeleteFolder,
-  onCreateLoadout,
-  onDeleteLoadout,
-  onRenameLoadout,
   onMoveLoadout,
   onMoveFolder,
   onQuickExport
@@ -58,12 +40,6 @@ export function SidebarActionsProvider({
     selectedFolderId,
     onLoadoutSelect,
     onFolderSelect,
-    onCreateFolder,
-    onRenameFolder,
-    onDeleteFolder,
-    onCreateLoadout,
-    onDeleteLoadout,
-    onRenameLoadout,
     onMoveLoadout,
     onMoveFolder,
     onQuickExport
@@ -72,12 +48,6 @@ export function SidebarActionsProvider({
     selectedFolderId,
     onLoadoutSelect,
     onFolderSelect,
-    onCreateFolder,
-    onRenameFolder,
-    onDeleteFolder,
-    onCreateLoadout,
-    onDeleteLoadout,
-    onRenameLoadout,
     onMoveLoadout,
     onMoveFolder,
     onQuickExport

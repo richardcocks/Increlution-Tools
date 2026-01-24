@@ -108,14 +108,15 @@ export const api = {
     }
   },
 
-  async deleteFolder(id: number): Promise<void> {
-    const response = await fetch(`${API_BASE}/folders/${id}`, {
+  async deleteFolder(id: number, force = false): Promise<{ foldersDeleted: number; loadoutsDeleted: number; protectedLoadoutsMoved: number }> {
+    const response = await fetch(`${API_BASE}/folders/${id}?force=${force}`, {
       method: 'DELETE',
       credentials: 'include'
     });
     if (!response.ok) {
       throw new Error(`Failed to delete folder: ${response.statusText}`);
     }
+    return response.json();
   },
 
   async moveFolder(id: number, parentId: number): Promise<void> {
@@ -201,6 +202,30 @@ export const api = {
     if (!response.ok) {
       throw new Error(`Failed to move loadout: ${response.statusText}`);
     }
+  },
+
+  async duplicateLoadout(id: number): Promise<{ id: number; name: string; folderId: number; updatedAt: string; isProtected: boolean }> {
+    const response = await fetch(`${API_BASE}/loadouts/${id}/duplicate`, {
+      method: 'POST',
+      credentials: 'include'
+    });
+    if (!response.ok) {
+      const text = await response.text();
+      throw new Error(text || `Failed to duplicate loadout: ${response.statusText}`);
+    }
+    return response.json();
+  },
+
+  async duplicateFolder(id: number): Promise<{ id: number; name: string; parentId: number | null; totalFoldersCopied: number; totalLoadoutsCopied: number }> {
+    const response = await fetch(`${API_BASE}/folders/${id}/duplicate`, {
+      method: 'POST',
+      credentials: 'include'
+    });
+    if (!response.ok) {
+      const text = await response.text();
+      throw new Error(text || `Failed to duplicate folder: ${response.statusText}`);
+    }
+    return response.json();
   },
 
   async exportLoadout(id: number): Promise<LoadoutData> {
