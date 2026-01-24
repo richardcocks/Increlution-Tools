@@ -1,0 +1,28 @@
+# Caddy configuration for Red/Green deployment
+# The switch.sh script updates the port (5000 for red, 5002 for green)
+
+# Production - Red/Green
+automations.eterm.uk {
+    # Points to currently active environment
+    # Red = localhost:5000, Green = localhost:5002
+    reverse_proxy localhost:5000
+
+    encode gzip zstd
+
+    log {
+        output file /var/log/caddy/automations.eterm.uk.log
+        format json
+    }
+}
+
+# Staging - Always separate
+staging.automations.eterm.uk {
+    reverse_proxy localhost:5001
+
+    encode gzip zstd
+
+    log {
+        output file /var/log/caddy/staging.automations.eterm.uk.log
+        format json
+    }
+}
