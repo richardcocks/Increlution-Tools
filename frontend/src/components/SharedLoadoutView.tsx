@@ -173,9 +173,10 @@ export function SharedLoadoutView() {
             <button
               className={`shared-action-button ${user ? 'secondary' : 'primary copy-prominent'}`}
               onClick={handleExportClipboard}
+              title="Copy loadout data to paste into Increlution"
             >
               <i className="fas fa-copy" />
-              Copy to Clipboard
+              Copy for Game
             </button>
             {user && (
               <button
@@ -209,7 +210,7 @@ export function SharedLoadoutView() {
         <div className="shared-loadout-content">
           <div className="read-only-notice">
             <i className="fas fa-eye" />
-            This is a read-only view. Copy the data to your clipboard to import into your own loadout.
+            This is a read-only view. Use "Copy for Game" to paste into Increlution, or save to your collection to edit in the Loadout Manager.
           </div>
 
           {!user && (

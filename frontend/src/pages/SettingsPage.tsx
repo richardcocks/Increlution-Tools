@@ -352,7 +352,7 @@ export function SettingsPage({ onClose }: { onClose: () => void }) {
         </section>
 
         <section className="settings-section">
-          <h3>Import Behavior</h3>
+          <h3>Paste from Game Behavior</h3>
           <label className="checkbox-option">
             <input
               type="checkbox"
@@ -360,7 +360,7 @@ export function SettingsPage({ onClose }: { onClose: () => void }) {
               onChange={e => handleApplyDefaultsOnImportChange(e.target.checked)}
             />
             <span className="checkbox-label">
-              Apply default priorities to unset values when importing
+              Apply default priorities to unset values when pasting from Increlution
             </span>
           </label>
         </section>

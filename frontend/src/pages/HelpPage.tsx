@@ -39,31 +39,31 @@ export function HelpPage({ onClose }: { onClose: () => void }) {
             </div>
             <div className="shortcut-row">
               <span className="shortcut-key">Ctrl + V</span>
-              <span className="shortcut-desc">Import loadout from clipboard</span>
+              <span className="shortcut-desc">Paste loadout data exported from Increlution</span>
             </div>
             <div className="shortcut-row">
               <span className="shortcut-key">Middle-click (sidebar)</span>
-              <span className="shortcut-desc">Quick export loadout to clipboard</span>
+              <span className="shortcut-desc">Quick copy loadout data (to paste into Increlution)</span>
             </div>
           </div>
         </section>
 
         <section className="help-section">
-          <h3>Getting Started</h3>
+          <h3>Copy to Increlution</h3>
           <ol className="help-list">
             <li>Create a new loadout using the sidebar or folder view</li>
             <li>Click on the automation wheel next to each action to set its level</li>
-            <li>Use "Export (Clipboard)" to copy your loadout</li>
+            <li>Click "Copy for Game" to copy the loadout data</li>
             <li>In Increlution, press F1 to open Automations and click Import</li>
           </ol>
         </section>
 
         <section className="help-section">
-          <h3>Import from Game</h3>
+          <h3>Paste from Increlution</h3>
           <ol className="help-list">
             <li>In Increlution, press F1 to open the Automations screen</li>
             <li>Click Export to copy the JSON</li>
-            <li>In the editor, press Ctrl+V anywhere on the loadout page</li>
+            <li>In the Loadout Manager, press Ctrl+V anywhere on the loadout page</li>
           </ol>
         </section>
 
