@@ -15,6 +15,7 @@ A visual editor for managing automation loadouts in the [Increlution](https://st
 - **Chapter Progress**: Unlock chapters by proving you've reached them (prevents spoilers)
 - **Favourites**: Save and quickly access favourite loadout configurations
 - **Default Priorities**: Configure default skill priorities for new loadouts
+- **Dark Mode**: Light, dark, or system theme preference
 - **Multi-user Support**: Each user has their own isolated loadouts
 
 ## Quick Start

@@ -154,6 +154,16 @@ Chapters 2-11 are locked by default to prevent spoilers. Users unlock chapters b
 - **SettingsContext**: Provides `unlockedChaptersSet` to all components
 - Chapter filtering applied to: exports, imports, new loadout defaults, share creation
 
+### Dark Mode / Theme System
+Users can choose between light, dark, or system theme preference. The setting persists server-side in `UserSettings.themePreference`.
+
+- **ThemePreference**: `'system' | 'dark' | 'light'` - stored in user settings
+- **ThemeContext**: Provides `themePreference`, `effectiveTheme`, `setThemePreference`, and `cycleTheme`
+- **Implementation**: Sets `data-theme` attribute on `<html>` element, CSS uses `[data-theme="dark"]` selectors
+- **System detection**: Uses `prefers-color-scheme` media query, listens for changes when preference is `'system'`
+- **FOUC prevention**: Theme preference cached in localStorage and applied in `index.html` before React loads
+- **Cycling**: Header button cycles through system → dark → light → system
+
 ## API Endpoints
 
 ### Authentication (Discord OAuth2)
@@ -219,7 +229,7 @@ Chapters 2-11 are locked by default to prevent spoilers. Users unlock chapters b
 
 **SavedShares**: `Id`, `UserId`, `LoadoutShareId` (FK), `SavedAt` - tracks which shares a user has saved to "Others' Loadouts"
 
-**UserSettings**: `Id`, `UserId`, `InvertMouse`, `ApplyDefaultsOnImport`, `DefaultSkillPriorities` (JSON), `UnlockedChapters` (JSON array)
+**UserSettings**: `Id`, `UserId`, `InvertMouse`, `ApplyDefaultsOnImport`, `DefaultSkillPriorities` (JSON), `UnlockedChapters` (JSON array), `ThemePreference` (system/dark/light)
 
 Each user gets their own root folder on first login.
 
