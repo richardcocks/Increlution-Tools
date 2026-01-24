@@ -7,7 +7,7 @@ export default function AboutPage() {
       <div className="static-page-content">
         <h1>About</h1>
         <p>
-          Increlution Automation Editor is a visual editor for configuring
+          Loadout Manager for Increlution is a visual editor for configuring
           automation loadouts in the Increlution incremental game.
         </p>
         <p>

@@ -39,7 +39,7 @@ export function LoginPage() {
     <div className="auth-page">
       <div className="auth-container login-container">
         <div className="login-header">
-          <h1>Increlution Automation Editor</h1>
+          <h1>Loadout Manager for Increlution</h1>
           <p className="login-subtitle">
             Create and manage your automation loadouts
           </p>

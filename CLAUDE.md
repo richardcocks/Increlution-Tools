@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Increlution Automation Editor is a visual editor for Increlution automation loadouts. It's a web application with a .NET backend and React frontend that allows users to configure automation priorities for all actions in the Increlution incremental game.
+Loadout Manager for Increlution is a visual editor for Increlution automation loadouts. It's a web application with a .NET backend and React frontend that allows users to configure automation priorities for all actions in the Increlution incremental game.
 
 ## Tech Stack
 
