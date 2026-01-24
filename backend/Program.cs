@@ -1168,6 +1168,177 @@ app.MapPut("/api/loadouts/{id}/folder", async (int id, MoveLoadoutRequest reques
 .RequireAuthorization()
 .WithName("MoveLoadout");
 
+// POST /api/loadouts/{id}/duplicate - Duplicate a loadout
+app.MapPost("/api/loadouts/{id}/duplicate", async (int id, ClaimsPrincipal user, AppDbContext db, AppLimits limits) =>
+{
+    var userId = GetUserId(user);
+    var loadout = await db.Loadouts.FirstOrDefaultAsync(l => l.Id == id && l.UserId == userId);
+    if (loadout == null)
+        return Results.NotFound("Loadout not found");
+
+    // Check loadout count limit
+    var loadoutCount = await db.Loadouts.CountAsync(l => l.UserId == userId);
+    if (loadoutCount >= limits.MaxLoadoutsPerUser)
+        return Results.BadRequest($"Maximum loadout limit ({limits.MaxLoadoutsPerUser}) reached");
+
+    var newLoadout = new Loadout
+    {
+        Name = GenerateCopyName(loadout.Name),
+        FolderId = loadout.FolderId,
+        UserId = userId,
+        CreatedAt = DateTime.UtcNow,
+        UpdatedAt = DateTime.UtcNow,
+        Data = loadout.Data, // Copy the JSON data as-is
+        IsProtected = false  // New duplicates are unprotected
+    };
+    db.Loadouts.Add(newLoadout);
+    await db.SaveChangesAsync();
+
+    return Results.Ok(new DuplicateLoadoutResponse(
+        newLoadout.Id,
+        newLoadout.Name,
+        newLoadout.FolderId,
+        newLoadout.UpdatedAt,
+        newLoadout.IsProtected
+    ));
+})
+.RequireAuthorization()
+.WithName("DuplicateLoadout");
+
+// POST /api/folders/{id}/duplicate - Duplicate a folder and all its contents
+app.MapPost("/api/folders/{id}/duplicate", async (int id, ClaimsPrincipal user, AppDbContext db, AppLimits limits) =>
+{
+    var userId = GetUserId(user);
+    var folder = await db.Folders.FirstOrDefaultAsync(f => f.Id == id && f.UserId == userId);
+    if (folder == null)
+        return Results.NotFound("Folder not found");
+
+    // Cannot duplicate root folder
+    if (folder.ParentId == null)
+        return Results.BadRequest("Cannot duplicate root folder");
+
+    // Load all user's folders and loadouts to check limits and calculate depth
+    var allFolders = await db.Folders.Where(f => f.UserId == userId).ToListAsync();
+    var allLoadouts = await db.Loadouts.Where(l => l.UserId == userId).ToListAsync();
+
+    // Count subfolders and loadouts in the folder to duplicate
+    int CountFoldersRecursive(int folderId)
+    {
+        var subFolders = allFolders.Where(f => f.ParentId == folderId).ToList();
+        return 1 + subFolders.Sum(f => CountFoldersRecursive(f.Id));
+    }
+
+    int CountLoadoutsRecursive(int folderId)
+    {
+        var folderLoadouts = allLoadouts.Count(l => l.FolderId == folderId);
+        var subFolders = allFolders.Where(f => f.ParentId == folderId).ToList();
+        return folderLoadouts + subFolders.Sum(f => CountLoadoutsRecursive(f.Id));
+    }
+
+    var foldersToCreate = CountFoldersRecursive(id);
+    var loadoutsToCreate = CountLoadoutsRecursive(id);
+
+    // Check folder limit
+    if (allFolders.Count + foldersToCreate > limits.MaxFoldersPerUser)
+        return Results.BadRequest($"Duplicating would exceed maximum folder limit ({limits.MaxFoldersPerUser})");
+
+    // Check loadout limit
+    if (allLoadouts.Count + loadoutsToCreate > limits.MaxLoadoutsPerUser)
+        return Results.BadRequest($"Duplicating would exceed maximum loadout limit ({limits.MaxLoadoutsPerUser})");
+
+    // Check depth limit
+    int GetDepth(int? parentId)
+    {
+        int depth = 0;
+        while (parentId != null)
+        {
+            depth++;
+            var parent = allFolders.FirstOrDefault(f => f.Id == parentId);
+            parentId = parent?.ParentId;
+        }
+        return depth;
+    }
+
+    int GetMaxSubfolderDepth(int folderId)
+    {
+        int maxDepth = 0;
+        var subfolders = allFolders.Where(f => f.ParentId == folderId).ToList();
+        foreach (var sub in subfolders)
+        {
+            var subDepth = 1 + GetMaxSubfolderDepth(sub.Id);
+            if (subDepth > maxDepth) maxDepth = subDepth;
+        }
+        return maxDepth;
+    }
+
+    var parentDepth = GetDepth(folder.ParentId);
+    var subfolderDepth = GetMaxSubfolderDepth(id);
+    // New folder will be at parentDepth + 1, plus its subfolders
+    var newTotalDepth = parentDepth + 1 + subfolderDepth;
+    if (newTotalDepth > limits.MaxFolderDepth)
+        return Results.BadRequest($"Duplicating would exceed maximum folder depth ({limits.MaxFolderDepth})");
+
+    // Recursively duplicate the folder structure
+    var totalFoldersCopied = 0;
+    var totalLoadoutsCopied = 0;
+
+    async Task<Folder> DuplicateFolderRecursive(int sourceFolderId, int? targetParentId, bool isTopLevel)
+    {
+        var sourceFolder = allFolders.First(f => f.Id == sourceFolderId);
+
+        var newFolder = new Folder
+        {
+            Name = isTopLevel ? GenerateCopyName(sourceFolder.Name) : sourceFolder.Name,
+            ParentId = targetParentId,
+            UserId = userId,
+            CreatedAt = DateTime.UtcNow
+        };
+        db.Folders.Add(newFolder);
+        await db.SaveChangesAsync();
+        totalFoldersCopied++;
+
+        // Duplicate loadouts in this folder
+        var folderLoadouts = allLoadouts.Where(l => l.FolderId == sourceFolderId).ToList();
+        foreach (var loadout in folderLoadouts)
+        {
+            var newLoadout = new Loadout
+            {
+                Name = loadout.Name, // Keep original name for child loadouts
+                FolderId = newFolder.Id,
+                UserId = userId,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
+                Data = loadout.Data,
+                IsProtected = false
+            };
+            db.Loadouts.Add(newLoadout);
+            totalLoadoutsCopied++;
+        }
+        await db.SaveChangesAsync();
+
+        // Duplicate subfolders
+        var subFolders = allFolders.Where(f => f.ParentId == sourceFolderId).ToList();
+        foreach (var subFolder in subFolders)
+        {
+            await DuplicateFolderRecursive(subFolder.Id, newFolder.Id, false);
+        }
+
+        return newFolder;
+    }
+
+    var newRootFolder = await DuplicateFolderRecursive(id, folder.ParentId, true);
+
+    return Results.Ok(new DuplicateFolderResponse(
+        newRootFolder.Id,
+        newRootFolder.Name,
+        newRootFolder.ParentId,
+        totalFoldersCopied,
+        totalLoadoutsCopied
+    ));
+})
+.RequireAuthorization()
+.WithName("DuplicateFolder");
+
 // === Sharing Endpoints ===
 
 // Helper function to generate share token
@@ -1182,6 +1353,61 @@ string GenerateShareToken()
         result[i] = chars[data[i] % chars.Length];
     }
     return new string(result);
+}
+
+// Helper function to generate copy name
+string GenerateCopyName(string originalName, int maxLength = 100)
+{
+    const string copySuffix = " (copy)";
+    const string copyPattern = " (copy) (";
+
+    // Check if name already ends with " (copy)" or " (copy) (N)"
+    if (originalName.EndsWith(copySuffix))
+    {
+        // Convert "Name (copy)" to "Name (copy) (2)"
+        var baseName = originalName;
+        var newName = $"{baseName} (2)";
+        if (newName.Length > maxLength)
+        {
+            var excess = newName.Length - maxLength;
+            baseName = baseName[..^excess];
+            newName = $"{baseName} (2)";
+        }
+        return newName;
+    }
+
+    var copyIndex = originalName.LastIndexOf(copyPattern);
+    if (copyIndex >= 0)
+    {
+        // Extract the number and increment
+        var afterPattern = originalName[(copyIndex + copyPattern.Length)..];
+        var closeParenIndex = afterPattern.IndexOf(')');
+        if (closeParenIndex > 0 && closeParenIndex == afterPattern.Length - 1)
+        {
+            var numberStr = afterPattern[..closeParenIndex];
+            if (int.TryParse(numberStr, out var num))
+            {
+                var baseName = originalName[..(copyIndex + copySuffix.Length)];
+                var newName = $"{baseName} ({num + 1})";
+                if (newName.Length > maxLength)
+                {
+                    var excess = newName.Length - maxLength;
+                    baseName = baseName[..^excess];
+                    newName = $"{baseName} ({num + 1})";
+                }
+                return newName;
+            }
+        }
+    }
+
+    // Just append " (copy)"
+    var result = originalName + copySuffix;
+    if (result.Length > maxLength)
+    {
+        var excess = result.Length - maxLength;
+        result = originalName[..^excess] + copySuffix;
+    }
+    return result;
 }
 
 // Helper function to filter loadout data by unlocked chapters

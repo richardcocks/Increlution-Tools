@@ -203,6 +203,30 @@ export const api = {
     }
   },
 
+  async duplicateLoadout(id: number): Promise<{ id: number; name: string; folderId: number; updatedAt: string; isProtected: boolean }> {
+    const response = await fetch(`${API_BASE}/loadouts/${id}/duplicate`, {
+      method: 'POST',
+      credentials: 'include'
+    });
+    if (!response.ok) {
+      const text = await response.text();
+      throw new Error(text || `Failed to duplicate loadout: ${response.statusText}`);
+    }
+    return response.json();
+  },
+
+  async duplicateFolder(id: number): Promise<{ id: number; name: string; parentId: number | null; totalFoldersCopied: number; totalLoadoutsCopied: number }> {
+    const response = await fetch(`${API_BASE}/folders/${id}/duplicate`, {
+      method: 'POST',
+      credentials: 'include'
+    });
+    if (!response.ok) {
+      const text = await response.text();
+      throw new Error(text || `Failed to duplicate folder: ${response.statusText}`);
+    }
+    return response.json();
+  },
+
   async exportLoadout(id: number): Promise<LoadoutData> {
     const response = await fetch(`${API_BASE}/loadouts/${id}/export`, {
       credentials: 'include'

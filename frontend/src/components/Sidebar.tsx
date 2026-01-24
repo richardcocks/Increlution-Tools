@@ -38,9 +38,11 @@ function TreeNode({ node, level, dragState, dropTargetFolderId, onLoadoutDragSta
     onCreateFolder,
     onRenameFolder,
     onDeleteFolder,
+    onDuplicateFolder,
     onCreateLoadout,
     onDeleteLoadout,
     onRenameLoadout,
+    onDuplicateLoadout,
     onQuickExport
   } = useSidebarActions();
 
@@ -165,6 +167,16 @@ function TreeNode({ node, level, dragState, dropTargetFolderId, onLoadoutDragSta
                 className="action-button"
                 onClick={(e) => {
                   e.stopPropagation();
+                  onDuplicateFolder(node.id);
+                }}
+                title="Duplicate"
+              >
+                <i className="fas fa-copy" />
+              </button>
+              <button
+                className="action-button"
+                onClick={(e) => {
+                  e.stopPropagation();
                   onDeleteFolder(node.id);
                 }}
                 title="Delete"
@@ -234,6 +246,16 @@ function TreeNode({ node, level, dragState, dropTargetFolderId, onLoadoutDragSta
                   disabled={loadout.isProtected}
                 >
                   <i className="fas fa-edit" />
+                </button>
+                <button
+                  className="action-button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDuplicateLoadout(loadout.id);
+                  }}
+                  title="Duplicate"
+                >
+                  <i className="fas fa-copy" />
                 </button>
                 <button
                   className="action-button"

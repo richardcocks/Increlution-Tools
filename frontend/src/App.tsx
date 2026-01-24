@@ -499,6 +499,35 @@ function App() {
     }
   }
 
+  const handleDuplicateLoadout = async (loadoutId: number) => {
+    try {
+      const result = await api.duplicateLoadout(loadoutId)
+      // Optimistically add to tree
+      setFolderTree(prev => prev ? addLoadoutToTree(prev, result.folderId, {
+        id: result.id,
+        name: result.name,
+        updatedAt: result.updatedAt,
+        isProtected: result.isProtected
+      }) : prev)
+      showToast('Loadout duplicated', 'success')
+    } catch (err) {
+      console.error('Error duplicating loadout:', err)
+      showToast(err instanceof Error ? err.message : 'Failed to duplicate loadout', 'error')
+    }
+  }
+
+  const handleDuplicateFolder = async (folderId: number) => {
+    try {
+      const result = await api.duplicateFolder(folderId)
+      // Refresh tree to get the new folder structure
+      await fetchFolderTree()
+      showToast(`Duplicated ${result.totalFoldersCopied} folder${result.totalFoldersCopied !== 1 ? 's' : ''} and ${result.totalLoadoutsCopied} loadout${result.totalLoadoutsCopied !== 1 ? 's' : ''}`, 'success')
+    } catch (err) {
+      console.error('Error duplicating folder:', err)
+      showToast(err instanceof Error ? err.message : 'Failed to duplicate folder', 'error')
+    }
+  }
+
   // Quick export loadout to clipboard (middle-click on sidebar)
   const handleQuickExport = useCallback(async (loadoutId: number) => {
     try {
@@ -662,9 +691,11 @@ function App() {
           onCreateFolder={handleCreateFolder}
           onRenameFolder={handleRenameFolder}
           onDeleteFolder={handleDeleteFolder}
+          onDuplicateFolder={handleDuplicateFolder}
           onCreateLoadout={handleCreateLoadout}
           onDeleteLoadout={handleDeleteLoadout}
           onRenameLoadout={handleRenameLoadout}
+          onDuplicateLoadout={handleDuplicateLoadout}
           onMoveLoadout={handleMoveLoadout}
           onMoveFolder={handleMoveFolder}
           onQuickExport={handleQuickExport}
