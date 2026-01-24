@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  background: white;
+  background: var(--color-bg-base);
   padding: 24px 32px;
   overflow-y: auto;
 }
@@ -19,17 +19,17 @@
   gap: 4px;
   margin-bottom: 8px;
   font-size: 13px;
-  color: #666;
+  color: var(--color-text-secondary);
 }
 
 .breadcrumb-separator {
   font-size: 10px;
-  color: #999;
+  color: var(--color-text-muted);
   margin: 0 4px;
 }
 
 .breadcrumb-segment {
-  color: #666;
+  color: var(--color-text-secondary);
 }
 
 .folder-view-title-row {
@@ -47,7 +47,7 @@
   margin: 0;
   font-size: 24px;
   font-weight: 600;
-  color: #333;
+  color: var(--color-text-primary);
 }
 
 .folder-view-title.editable {
@@ -63,7 +63,7 @@
 
 .folder-view-edit-icon {
   font-size: 14px;
-  color: #999;
+  color: var(--color-text-muted);
   opacity: 0;
   transition: opacity 0.2s;
 }
@@ -76,7 +76,7 @@
 .folder-view-name-input {
   font-size: 24px;
   font-weight: 600;
-  color: #333;
+  color: var(--color-text-primary);
   border: none;
   border-bottom: 2px solid #1976d2;
   background: transparent;
@@ -113,14 +113,14 @@
 }
 
 .folder-view-action-btn.secondary {
-  background: white;
-  color: #333;
-  border: 1px solid #ddd;
+  background: var(--color-bg-elevated);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border-default);
 }
 
 .folder-view-action-btn.secondary:hover {
-  background: #f5f5f5;
-  border-color: #bbb;
+  background: var(--color-bg-subtle);
+  border-color: var(--color-border-strong);
 }
 
 .folder-view-action-btn i {
@@ -136,7 +136,7 @@
   margin: 0 0 16px 0;
   font-size: 14px;
   font-weight: 600;
-  color: #666;
+  color: var(--color-text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -149,12 +149,12 @@
   justify-content: center;
   padding: 60px 20px;
   text-align: center;
-  color: #666;
+  color: var(--color-text-secondary);
 }
 
 .folder-view-empty i {
   font-size: 48px;
-  color: #ddd;
+  color: var(--color-border-default);
   margin-bottom: 16px;
 }
 
@@ -165,7 +165,7 @@
 
 .folder-view-empty .hint {
   font-size: 14px;
-  color: #999;
+  color: var(--color-text-muted);
 }
 
 /* Loadout cards */
@@ -180,15 +180,15 @@
   align-items: center;
   gap: 16px;
   padding: 16px;
-  background: #fafafa;
-  border: 1px solid #e8e8e8;
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border-subtle);
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .folder-view-loadout-card:hover {
-  background: #f0f7ff;
+  background: var(--color-sidebar-selected);
   border-color: #1976d2;
 }
 
@@ -198,10 +198,10 @@
   justify-content: center;
   width: 40px;
   height: 40px;
-  background: white;
-  border: 1px solid #e0e0e0;
+  background: var(--color-bg-base);
+  border: 1px solid var(--color-border-default);
   border-radius: 8px;
-  color: #666;
+  color: var(--color-text-secondary);
   font-size: 16px;
 }
 
@@ -221,7 +221,7 @@
 .loadout-card-name {
   font-size: 15px;
   font-weight: 500;
-  color: #333;
+  color: var(--color-text-primary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -229,7 +229,7 @@
 
 .loadout-card-date {
   font-size: 12px;
-  color: #999;
+  color: var(--color-text-muted);
 }
 
 .loadout-card-protected {
@@ -238,7 +238,7 @@
 }
 
 .loadout-card-arrow {
-  color: #ccc;
+  color: var(--color-text-muted);
   font-size: 14px;
   transition: color 0.2s;
 }
