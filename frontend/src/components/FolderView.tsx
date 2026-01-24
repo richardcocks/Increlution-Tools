@@ -10,6 +10,8 @@ interface FolderViewProps {
   onCreateFolder: () => void;
   onCreateLoadout: () => void;
   onSelectLoadout: (loadoutId: number) => void;
+  onDuplicateFolder: () => void;
+  onDeleteFolder: () => void;
 }
 
 export function FolderView({
@@ -19,7 +21,9 @@ export function FolderView({
   onRenameFolder,
   onCreateFolder,
   onCreateLoadout,
-  onSelectLoadout
+  onSelectLoadout,
+  onDuplicateFolder,
+  onDeleteFolder
 }: FolderViewProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedName, setEditedName] = useState('');
@@ -102,6 +106,18 @@ export function FolderView({
           <i className="fas fa-folder-plus" />
           New Folder
         </button>
+        {!isRootFolder && (
+          <>
+            <button className="folder-view-action-btn secondary" onClick={onDuplicateFolder}>
+              <i className="fas fa-copy" />
+              Duplicate
+            </button>
+            <button className="folder-view-action-btn danger" onClick={onDeleteFolder}>
+              <i className="fas fa-trash" />
+              Delete
+            </button>
+          </>
+        )}
       </div>
 
       <div className="folder-view-content">

@@ -68,15 +68,24 @@ function App() {
     try {
       const tree = await api.getFolderTree()
       setFolderTree(tree)
+      return tree
     } catch (err) {
       console.error('Error fetching folder tree:', err)
+      return null
     } finally {
       setLoading(false)
     }
   }
 
   useEffect(() => {
-    fetchFolderTree()
+    const initFolderTree = async () => {
+      const tree = await fetchFolderTree()
+      // Select root folder by default on initial load
+      if (tree) {
+        setSelectedFolderId(tree.id)
+      }
+    }
+    initFolderTree()
   }, [])
 
   const handleLogout = async () => {
@@ -106,21 +115,6 @@ function App() {
       console.error('Error creating folder:', err)
       showToast('Failed to create folder', 'error')
     }
-  }
-
-  const handleRenameFolder = (folderId: number) => {
-    setPendingDelete(null)
-    // Find current folder name
-    const findFolderName = (node: FolderTreeNode): string | null => {
-      if (node.id === folderId) return node.name
-      for (const sub of node.subFolders) {
-        const found = findFolderName(sub)
-        if (found) return found
-      }
-      return null
-    }
-    const currentName = folderTree ? findFolderName(folderTree) ?? '' : ''
-    setFolderModal({ type: 'rename', folderId, currentName })
   }
 
   const handleRenameFolderSubmit = async (name: string) => {
@@ -387,20 +381,6 @@ function App() {
     setPendingDelete(null)
   }
 
-  const handleRenameLoadout = (loadoutId: number) => {
-    setPendingDelete(null)
-    if (loadoutId === selectedLoadoutId) {
-      // Already selected, trigger inline editing
-      loadoutEditorRef.current?.startEditingName()
-    } else {
-      // Select first, then trigger edit after a brief delay for editor to load
-      setSelectedLoadoutId(loadoutId)
-      setTimeout(() => {
-        loadoutEditorRef.current?.startEditingName()
-      }, 100)
-    }
-  }
-
   const handleFolderSelect = (folderId: number) => {
     setSelectedFolderId(folderId)
     setSelectedLoadoutId(null)
@@ -611,6 +591,8 @@ function App() {
             onCreateFolder={() => handleCreateFolder(selectedFolderId)}
             onCreateLoadout={() => handleCreateLoadout(selectedFolderId)}
             onSelectLoadout={(loadoutId) => handleLoadoutSelect(loadoutId, selectedFolderId)}
+            onDuplicateFolder={() => handleDuplicateFolder(selectedFolderId)}
+            onDeleteFolder={() => handleDeleteFolder(selectedFolderId)}
           />
         );
       }
@@ -624,6 +606,8 @@ function App() {
         onNameChange={handleLoadoutNameChange}
         onProtectionChange={handleLoadoutProtectionChange}
         onCreateLoadout={() => handleCreateLoadout(selectedFolderId ?? folderTree?.id ?? 0)}
+        onDuplicate={() => selectedLoadoutId && handleDuplicateLoadout(selectedLoadoutId)}
+        onDelete={() => selectedLoadoutId && handleDeleteLoadout(selectedLoadoutId)}
       />
     );
   };
@@ -688,14 +672,6 @@ function App() {
           selectedFolderId={selectedFolderId}
           onLoadoutSelect={handleLoadoutSelect}
           onFolderSelect={handleFolderSelect}
-          onCreateFolder={handleCreateFolder}
-          onRenameFolder={handleRenameFolder}
-          onDeleteFolder={handleDeleteFolder}
-          onDuplicateFolder={handleDuplicateFolder}
-          onCreateLoadout={handleCreateLoadout}
-          onDeleteLoadout={handleDeleteLoadout}
-          onRenameLoadout={handleRenameLoadout}
-          onDuplicateLoadout={handleDuplicateLoadout}
           onMoveLoadout={handleMoveLoadout}
           onMoveFolder={handleMoveFolder}
           onQuickExport={handleQuickExport}

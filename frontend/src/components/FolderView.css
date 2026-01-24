@@ -123,6 +123,17 @@
   border-color: var(--color-border-strong);
 }
 
+.folder-view-action-btn.danger {
+  background: var(--color-bg-elevated);
+  color: #dc2626;
+  border: 1px solid #dc2626;
+}
+
+.folder-view-action-btn.danger:hover {
+  background: #dc2626;
+  color: white;
+}
+
 .folder-view-action-btn i {
   font-size: 14px;
 }

@@ -73,6 +73,8 @@ export function HelpPage({ onClose }: { onClose: () => void }) {
             <li>Create folders to organize your loadouts</li>
             <li>Drag and drop loadouts and folders to reorganize</li>
             <li>Click on a folder name to edit it inline</li>
+            <li>Click the copy icon to duplicate a loadout or folder</li>
+            <li>Duplicating a folder copies all subfolders and loadouts within it</li>
           </ul>
         </section>
 

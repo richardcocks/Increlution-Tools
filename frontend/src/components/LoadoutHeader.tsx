@@ -12,13 +12,15 @@ interface LoadoutHeaderProps {
   onImport: (data: LoadoutData) => void;
   onExportClipboard: () => void;
   onToggleProtection: () => void;
+  onDuplicate: () => void;
+  onDelete: () => void;
 }
 
 export interface LoadoutHeaderHandle {
   startEditing: () => void;
 }
 
-const LoadoutHeader = forwardRef<LoadoutHeaderHandle, LoadoutHeaderProps>(({ loadout, folderBreadcrumb, onNameChange, onImport, onExportClipboard, onToggleProtection }, ref) => {
+const LoadoutHeader = forwardRef<LoadoutHeaderHandle, LoadoutHeaderProps>(({ loadout, folderBreadcrumb, onNameChange, onImport, onExportClipboard, onToggleProtection, onDuplicate, onDelete }, ref) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedName, setEditedName] = useState('');
   const [isPasteMode, setIsPasteMode] = useState(false);
@@ -161,6 +163,21 @@ const LoadoutHeader = forwardRef<LoadoutHeaderHandle, LoadoutHeaderProps>(({ loa
           title="Share this loadout"
         >
           <i className="fas fa-share-alt"></i> Share
+        </button>
+        <button
+          onClick={onDuplicate}
+          className="loadout-button"
+          title="Duplicate this loadout"
+        >
+          <i className="fas fa-copy"></i> Duplicate
+        </button>
+        <button
+          onClick={onDelete}
+          className="loadout-button loadout-button-danger"
+          title="Delete this loadout"
+          disabled={loadout.isProtected}
+        >
+          <i className="fas fa-trash"></i> Delete
         </button>
       </div>
 

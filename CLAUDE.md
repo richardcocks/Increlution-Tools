@@ -197,9 +197,11 @@ Users can choose between light, dark, or system theme preference. The setting pe
 | POST | `/api/folders` | Create folder |
 | PUT | `/api/folders/{id}` | Rename folder |
 | PUT | `/api/folders/{id}/parent` | Move folder |
+| POST | `/api/folders/{id}/duplicate` | Duplicate folder with all contents |
 | DELETE | `/api/folders/{id}` | Delete folder (must be empty) |
 | POST | `/api/loadouts` | Create loadout |
 | DELETE | `/api/loadouts/{id}` | Delete loadout |
+| POST | `/api/loadouts/{id}/duplicate` | Duplicate loadout |
 | PUT | `/api/loadout/action` | Update single action automation level |
 | PUT | `/api/loadouts/{id}/name` | Update loadout name |
 | PUT | `/api/loadouts/{id}/folder` | Move loadout to folder |

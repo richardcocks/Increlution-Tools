@@ -193,6 +193,28 @@
   background: #5b21b6;
 }
 
+.loadout-button-danger {
+  background: transparent;
+  color: #dc2626;
+  border: 1px solid #dc2626;
+}
+
+.loadout-button-danger:hover {
+  background: #dc2626;
+  color: white;
+}
+
+.loadout-button-danger:active {
+  background: #b91c1c;
+}
+
+.loadout-button-danger:disabled {
+  background: transparent;
+  color: var(--color-text-muted);
+  border-color: var(--color-border-default);
+  cursor: not-allowed;
+}
+
 .paste-input {
   padding: 10px 16px;
   border: 2px solid #1976d2;

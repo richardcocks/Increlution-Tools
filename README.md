@@ -9,6 +9,7 @@ A visual editor for managing automation loadouts in the [Increlution](https://st
 - **Bulk Lock/Unlock**: Ctrl+click chapter tabs to lock/unlock all actions at once
 - **Chapter Tabs**: Quickly navigate between chapters
 - **Folder Organization**: Organize loadouts in folders with drag-and-drop
+- **Duplicate**: Clone loadouts or entire folder structures with one click
 - **Import/Export**:
   - Copy/paste loadouts directly (Ctrl+V to import)
   - Upload/download JSON files
@@ -98,6 +99,7 @@ Open http://localhost:5173 in your browser.
 ### Organizing Loadouts
 - Create folders using the folder+ button that appears on hover
 - Drag and drop loadouts and folders to reorganize
+- Duplicate loadouts or entire folders using the copy button (includes all subfolders and loadouts)
 - Use the action buttons that appear on hover to rename or delete
 
 ### Sharing Loadouts
