@@ -108,14 +108,15 @@ export const api = {
     }
   },
 
-  async deleteFolder(id: number): Promise<void> {
-    const response = await fetch(`${API_BASE}/folders/${id}`, {
+  async deleteFolder(id: number, force = false): Promise<{ foldersDeleted: number; loadoutsDeleted: number; protectedLoadoutsMoved: number }> {
+    const response = await fetch(`${API_BASE}/folders/${id}?force=${force}`, {
       method: 'DELETE',
       credentials: 'include'
     });
     if (!response.ok) {
       throw new Error(`Failed to delete folder: ${response.statusText}`);
     }
+    return response.json();
   },
 
   async moveFolder(id: number, parentId: number): Promise<void> {

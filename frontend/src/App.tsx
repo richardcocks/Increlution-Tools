@@ -144,16 +144,31 @@ function App() {
     setPendingDelete({ type: 'folder', id: folderId })
   }
 
-  const confirmDeleteFolder = async (folderId: number) => {
+  const confirmDeleteFolder = async (folderId: number, force = false) => {
     try {
-      await api.deleteFolder(folderId)
+      const result = await api.deleteFolder(folderId, force)
       if (selectedFolderId === folderId) {
-        setSelectedFolderId(null)
+        // Navigate to parent folder or root
+        setSelectedFolderId(folderTree?.id ?? null)
       }
       await fetchFolderTree()
+
+      // Build toast message
+      const parts: string[] = []
+      if (result.foldersDeleted > 0) {
+        parts.push(`${result.foldersDeleted} folder${result.foldersDeleted !== 1 ? 's' : ''}`)
+      }
+      if (result.loadoutsDeleted > 0) {
+        parts.push(`${result.loadoutsDeleted} loadout${result.loadoutsDeleted !== 1 ? 's' : ''}`)
+      }
+      let message = parts.length > 0 ? `Deleted ${parts.join(' and ')}` : 'Folder deleted'
+      if (result.protectedLoadoutsMoved > 0) {
+        message += `. ${result.protectedLoadoutsMoved} protected loadout${result.protectedLoadoutsMoved !== 1 ? 's' : ''} moved to parent folder`
+      }
+      showToast(message, 'success')
     } catch (err) {
       console.error('Error deleting folder:', err)
-      showToast('Failed to delete folder. Make sure it is empty.', 'error')
+      showToast('Failed to delete folder', 'error')
     }
   }
 
@@ -371,13 +386,15 @@ function App() {
     }
   }
 
-  const handleConfirmDelete = () => {
-    if (!pendingDelete) return
-    if (pendingDelete.type === 'folder') {
-      confirmDeleteFolder(pendingDelete.id)
-    } else {
-      confirmDeleteLoadout(pendingDelete.id)
-    }
+  const handleConfirmDeleteFolder = (force: boolean) => {
+    if (!pendingDelete || pendingDelete.type !== 'folder') return
+    confirmDeleteFolder(pendingDelete.id, force)
+    setPendingDelete(null)
+  }
+
+  const handleConfirmDeleteLoadout = () => {
+    if (!pendingDelete || pendingDelete.type !== 'loadout') return
+    confirmDeleteLoadout(pendingDelete.id)
     setPendingDelete(null)
   }
 
@@ -561,7 +578,7 @@ function App() {
             type="folder"
             folderId={pendingDelete.id}
             folderTree={folderTree}
-            onConfirm={handleConfirmDelete}
+            onConfirm={handleConfirmDeleteFolder}
             onCancel={() => setPendingDelete(null)}
           />
         );
@@ -571,7 +588,7 @@ function App() {
             type="loadout"
             loadoutId={pendingDelete.id}
             folderTree={folderTree}
-            onConfirm={handleConfirmDelete}
+            onConfirm={handleConfirmDeleteLoadout}
             onCancel={() => setPendingDelete(null)}
           />
         );

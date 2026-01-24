@@ -58,3 +58,9 @@ public record DuplicateFolderResponse(
     int TotalFoldersCopied,
     int TotalLoadoutsCopied
 );
+
+public record DeleteFolderResponse(
+    int FoldersDeleted,
+    int LoadoutsDeleted,
+    int ProtectedLoadoutsMoved
+);

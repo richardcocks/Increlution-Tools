@@ -97,10 +97,12 @@ Open http://localhost:5173 in your browser.
 3. Click Import (imports directly from clipboard)
 
 ### Organizing Loadouts
-- Create folders using the folder+ button that appears on hover
-- Drag and drop loadouts and folders to reorganize
-- Duplicate loadouts or entire folders using the copy button (includes all subfolders and loadouts)
-- Use the action buttons that appear on hover to rename or delete
+- Click a folder in the sidebar to view its contents
+- Create new folders and loadouts from the folder view
+- Drag and drop loadouts and folders in the sidebar to reorganize
+- Duplicate, rename, or delete folders/loadouts using buttons in the page view
+- Deleting a non-empty folder requires typing the folder name to confirm
+- Protected (readonly) loadouts are moved to the parent folder instead of deleted
 
 ### Sharing Loadouts
 1. Open a loadout and click the "Share" button

@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import type { FolderTreeNode } from '../types/models';
 import './DeleteConfirmation.css';
 
@@ -5,7 +6,7 @@ interface DeleteFolderProps {
   type: 'folder';
   folderId: number;
   folderTree: FolderTreeNode;
-  onConfirm: () => void;
+  onConfirm: (force: boolean) => void;
   onCancel: () => void;
 }
 
@@ -43,6 +44,7 @@ function findLoadoutPath(tree: FolderTreeNode, id: number, path: string[] = []):
 
 export function DeleteConfirmation(props: DeleteConfirmationProps) {
   const { type, folderTree, onConfirm, onCancel } = props;
+  const [confirmName, setConfirmName] = useState('');
 
   if (type === 'folder') {
     const result = findFolderPath(folderTree, props.folderId);
@@ -59,6 +61,24 @@ export function DeleteConfirmation(props: DeleteConfirmationProps) {
 
     const { folder, path } = result;
     const hasContents = folder.subFolders.length > 0 || folder.loadouts.length > 0;
+
+    // Count total items recursively
+    const countItems = (f: FolderTreeNode): { folders: number; loadouts: number; protectedLoadouts: number } => {
+      let folders = f.subFolders.length;
+      let loadouts = f.loadouts.length;
+      let protectedLoadouts = f.loadouts.filter(l => l.isProtected).length;
+      for (const sub of f.subFolders) {
+        const subCount = countItems(sub);
+        folders += subCount.folders;
+        loadouts += subCount.loadouts;
+        protectedLoadouts += subCount.protectedLoadouts;
+      }
+      return { folders, loadouts, protectedLoadouts };
+    };
+    const totalItems = hasContents ? countItems(folder) : { folders: 0, loadouts: 0, protectedLoadouts: 0 };
+    const unprotectedLoadouts = totalItems.loadouts - totalItems.protectedLoadouts;
+
+    const canForceDelete = confirmName === folder.name;
 
     return (
       <div className="delete-confirmation">
@@ -78,13 +98,44 @@ export function DeleteConfirmation(props: DeleteConfirmationProps) {
           </div>
 
           {hasContents ? (
-            <div className="delete-warning">
-              <i className="fas fa-exclamation-triangle" />
-              <div>
-                <p><strong>This folder is not empty.</strong></p>
-                <p>It contains {folder.subFolders.length} subfolder(s) and {folder.loadouts.length} loadout(s). You must delete or move these items before deleting this folder.</p>
+            <>
+              <div className="delete-warning">
+                <i className="fas fa-exclamation-triangle" />
+                <div>
+                  <p><strong>This folder is not empty.</strong></p>
+                  <p>
+                    It contains {totalItems.folders} subfolder{totalItems.folders !== 1 ? 's' : ''} and {totalItems.loadouts} loadout{totalItems.loadouts !== 1 ? 's' : ''} (including nested items).
+                  </p>
+                  {unprotectedLoadouts > 0 && (
+                    <p>
+                      {unprotectedLoadouts} loadout{unprotectedLoadouts !== 1 ? 's' : ''} will be permanently deleted.
+                    </p>
+                  )}
+                </div>
               </div>
-            </div>
+              {totalItems.protectedLoadouts > 0 && (
+                <div className="delete-info">
+                  <i className="fas fa-lock" />
+                  <div>
+                    <p>
+                      <strong>{totalItems.protectedLoadouts} protected loadout{totalItems.protectedLoadouts !== 1 ? 's' : ''}</strong> will be moved to the parent folder instead of deleted.
+                    </p>
+                  </div>
+                </div>
+              )}
+              <div className="delete-confirm-input">
+                <label>
+                  Type <strong>{folder.name}</strong> to confirm:
+                </label>
+                <input
+                  type="text"
+                  value={confirmName}
+                  onChange={(e) => setConfirmName(e.target.value)}
+                  placeholder={folder.name}
+                  autoFocus
+                />
+              </div>
+            </>
           ) : (
             <p className="delete-message">
               This folder is empty and can be safely deleted. This action cannot be undone.
@@ -97,10 +148,10 @@ export function DeleteConfirmation(props: DeleteConfirmationProps) {
             </button>
             <button
               className="delete-confirm-button"
-              onClick={onConfirm}
-              disabled={hasContents}
+              onClick={() => onConfirm(hasContents)}
+              disabled={hasContents && !canForceDelete}
             >
-              Delete Folder
+              {hasContents ? 'Delete Folder and Contents' : 'Delete Folder'}
             </button>
           </div>
         </div>

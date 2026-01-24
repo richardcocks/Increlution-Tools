@@ -777,7 +777,7 @@ app.MapPut("/api/folders/{id}", async (int id, RenameFolderRequest request, Clai
 .WithName("RenameFolder");
 
 // DELETE /api/folders/{id} - Delete folder
-app.MapDelete("/api/folders/{id}", async (int id, ClaimsPrincipal user, AppDbContext db) =>
+app.MapDelete("/api/folders/{id}", async (int id, bool force, ClaimsPrincipal user, AppDbContext db) =>
 {
     var userId = GetUserId(user);
     var folder = await db.Folders
@@ -792,14 +792,71 @@ app.MapDelete("/api/folders/{id}", async (int id, ClaimsPrincipal user, AppDbCon
     if (folder.ParentId == null)
         return Results.BadRequest("Cannot delete root folder");
 
-    // Prevent deleting folder with children
-    if (folder.SubFolders.Any() || folder.Loadouts.Any())
+    var hasContents = folder.SubFolders.Any() || folder.Loadouts.Any();
+
+    // If folder has contents and force is not set, reject
+    if (hasContents && !force)
         return Results.BadRequest("Cannot delete folder with contents");
 
-    db.Folders.Remove(folder);
+    var foldersDeleted = 0;
+    var loadoutsDeleted = 0;
+    var protectedLoadoutsMoved = 0;
+
+    if (force && hasContents)
+    {
+        // Recursive delete - load all folders and loadouts for this user
+        var allFolders = await db.Folders.Where(f => f.UserId == userId).ToListAsync();
+        var allLoadouts = await db.Loadouts.Where(l => l.UserId == userId).ToListAsync();
+        var allShares = await db.LoadoutShares.Where(s => s.OwnerUserId == userId).ToListAsync();
+
+        // Find all folder IDs to delete (including nested)
+        var folderIdsToDelete = new HashSet<int>();
+        void CollectFolderIds(int folderId)
+        {
+            folderIdsToDelete.Add(folderId);
+            foreach (var sub in allFolders.Where(f => f.ParentId == folderId))
+            {
+                CollectFolderIds(sub.Id);
+            }
+        }
+        CollectFolderIds(id);
+
+        // Find loadouts in these folders
+        var loadoutsInFolders = allLoadouts.Where(l => folderIdsToDelete.Contains(l.FolderId)).ToList();
+        var protectedLoadouts = loadoutsInFolders.Where(l => l.IsProtected).ToList();
+        var unprotectedLoadouts = loadoutsInFolders.Where(l => !l.IsProtected).ToList();
+
+        // Re-parent protected loadouts to the parent folder
+        foreach (var protectedLoadout in protectedLoadouts)
+        {
+            protectedLoadout.FolderId = folder.ParentId!.Value;
+            protectedLoadout.UpdatedAt = DateTime.UtcNow;
+        }
+        protectedLoadoutsMoved = protectedLoadouts.Count;
+
+        // Delete shares for unprotected loadouts only
+        var unprotectedLoadoutIds = unprotectedLoadouts.Select(l => l.Id).ToHashSet();
+        var sharesToDelete = allShares.Where(s => unprotectedLoadoutIds.Contains(s.LoadoutId)).ToList();
+        db.LoadoutShares.RemoveRange(sharesToDelete);
+
+        // Delete unprotected loadouts
+        db.Loadouts.RemoveRange(unprotectedLoadouts);
+        loadoutsDeleted = unprotectedLoadouts.Count;
+
+        // Delete all folders
+        var foldersToDelete = allFolders.Where(f => folderIdsToDelete.Contains(f.Id)).ToList();
+        db.Folders.RemoveRange(foldersToDelete);
+        foldersDeleted = foldersToDelete.Count;
+    }
+    else
+    {
+        db.Folders.Remove(folder);
+        foldersDeleted = 1;
+    }
+
     await db.SaveChangesAsync();
 
-    return Results.Ok();
+    return Results.Ok(new DeleteFolderResponse(foldersDeleted, loadoutsDeleted, protectedLoadoutsMoved));
 })
 .RequireAuthorization()
 .WithName("DeleteFolder");

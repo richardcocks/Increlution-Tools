@@ -70,11 +70,20 @@ export function HelpPage({ onClose }: { onClose: () => void }) {
         <section className="help-section">
           <h3>Organizing</h3>
           <ul className="help-list">
-            <li>Create folders to organize your loadouts</li>
-            <li>Drag and drop loadouts and folders to reorganize</li>
-            <li>Click on a folder name to edit it inline</li>
-            <li>Click the copy icon to duplicate a loadout or folder</li>
-            <li>Duplicating a folder copies all subfolders and loadouts within it</li>
+            <li>Click a folder in the sidebar to view and manage it</li>
+            <li>Create new folders and loadouts from the folder view</li>
+            <li>Drag and drop items in the sidebar to reorganize</li>
+            <li>Click on a folder or loadout name to rename it inline</li>
+            <li>Use Duplicate to copy a loadout or entire folder structure</li>
+          </ul>
+        </section>
+
+        <section className="help-section">
+          <h3>Deleting</h3>
+          <ul className="help-list">
+            <li>Delete buttons are in the folder view and loadout header</li>
+            <li>Non-empty folders require typing the folder name to confirm</li>
+            <li>Protected (readonly) loadouts are moved to the parent folder instead of deleted</li>
           </ul>
         </section>
 
