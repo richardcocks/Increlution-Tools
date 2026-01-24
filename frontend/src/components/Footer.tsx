@@ -5,6 +5,8 @@ export function Footer() {
   return (
     <footer className="app-footer">
       <Link to="/about">About</Link>
+      <span className="footer-separator">|</span>
+      <Link to="/privacy">Privacy</Link>
     </footer>
   );
 }

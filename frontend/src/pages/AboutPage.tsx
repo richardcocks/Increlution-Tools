@@ -1,7 +1,9 @@
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import './StaticPage.css';
 
 export default function AboutPage() {
+  const navigate = useNavigate();
+
   return (
     <div className="static-page">
       <div className="static-page-content">
@@ -13,7 +15,7 @@ export default function AboutPage() {
         <p>
           Created by <a href="https://github.com/richardcocks" target="_blank" rel="noopener noreferrer">Richard Cocks</a>
         </p>
-        <Link to="/">Back to Editor</Link>
+        <button onClick={() => navigate(-1)} className="back-button">Back</button>
       </div>
     </div>
   );

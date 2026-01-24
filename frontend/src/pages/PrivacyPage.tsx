@@ -1,7 +1,9 @@
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import './StaticPage.css';
 
 export default function PrivacyPage() {
+  const navigate = useNavigate();
+
   return (
     <div className="static-page">
       <div className="static-page-content">
@@ -9,7 +11,7 @@ export default function PrivacyPage() {
         <p>
           Privacy policy coming soon.
         </p>
-        <Link to="/">Back to Editor</Link>
+        <button onClick={() => navigate(-1)} className="back-button">Back</button>
       </div>
     </div>
   );

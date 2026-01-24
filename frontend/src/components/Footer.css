@@ -2,13 +2,13 @@
   padding: 12px 20px;
   text-align: center;
   font-size: 13px;
-  color: #a9b1d6;
-  border-top: 1px solid #414868;
-  background: #1a1b26;
+  color: var(--color-text-secondary);
+  border-top: 1px solid var(--color-border-default);
+  background: var(--color-bg-elevated);
 }
 
 .app-footer a {
-  color: #7aa2f7;
+  color: var(--color-text-primary);
   text-decoration: none;
 }
 
@@ -18,5 +18,5 @@
 
 .footer-separator {
   margin: 0 12px;
-  color: #414868;
+  color: var(--color-text-muted);
 }
