@@ -9,6 +9,7 @@ import { Footer } from './components/Footer.tsx'
 import { AuthProvider } from './contexts/AuthContext.tsx'
 import { GameDataProvider } from './contexts/GameDataContext.tsx'
 import { SettingsProvider } from './contexts/SettingsContext.tsx'
+import { ThemeProvider } from './contexts/ThemeContext.tsx'
 import { SavedSharesProvider } from './contexts/SavedSharesContext.tsx'
 import { ProtectedRoute } from './components/ProtectedRoute.tsx'
 import { LoginPage } from './pages/LoginPage.tsx'
@@ -23,6 +24,7 @@ createRoot(document.getElementById('root')!).render(
     <BrowserRouter>
       <AuthProvider>
         <SettingsProvider>
+          <ThemeProvider>
           <SavedSharesProvider>
             <ToastProvider>
               <div className="app-wrapper">
@@ -84,6 +86,7 @@ createRoot(document.getElementById('root')!).render(
               </div>
             </ToastProvider>
           </SavedSharesProvider>
+          </ThemeProvider>
         </SettingsProvider>
       </AuthProvider>
     </BrowserRouter>

@@ -2,13 +2,65 @@
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
-  color: #213547;
-  background-color: #ffffff;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  /* Light theme (default) */
+  --color-bg-base: #ffffff;
+  --color-bg-elevated: #fafafa;
+  --color-bg-muted: #f5f5f5;
+  --color-bg-subtle: #e8e8e8;
+
+  --color-text-primary: #333333;
+  --color-text-secondary: #666666;
+  --color-text-muted: #999999;
+
+  --color-border-default: #e0e0e0;
+  --color-border-subtle: #e8e8e8;
+  --color-border-strong: #ddd;
+
+  --color-sidebar-bg: #f5f5f5;
+  --color-sidebar-hover: #e8e8e8;
+  --color-sidebar-selected: #d3e3f3;
+
+  --color-modal-bg: #ffffff;
+  --color-modal-overlay: rgba(0, 0, 0, 0.5);
+
+  --color-input-bg: #ffffff;
+  --color-input-border: #ddd;
+  --color-input-focus-border: #2196f3;
+
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-base);
+}
+
+[data-theme="dark"] {
+  --color-bg-base: #1a1b26;
+  --color-bg-elevated: #24283b;
+  --color-bg-muted: #2a2e3f;
+  --color-bg-subtle: #363b50;
+
+  --color-text-primary: #c0caf5;
+  --color-text-secondary: #a9b1d6;
+  --color-text-muted: #787c99;
+
+  --color-border-default: #414868;
+  --color-border-subtle: #363b50;
+  --color-border-strong: #414868;
+
+  --color-sidebar-bg: #24283b;
+  --color-sidebar-hover: #2a2e3f;
+  --color-sidebar-selected: #3d4460;
+
+  --color-modal-bg: #24283b;
+  --color-modal-overlay: rgba(0, 0, 0, 0.7);
+
+  --color-input-bg: #1a1b26;
+  --color-input-border: #414868;
+  --color-input-focus-border: #7aa2f7;
 }
 
 body {

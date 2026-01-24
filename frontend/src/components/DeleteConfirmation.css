@@ -15,7 +15,7 @@
   margin: 0 0 24px 0;
   font-size: 28px;
   font-weight: 600;
-  color: #333;
+  color: var(--color-text-primary);
 }
 
 .delete-target {
@@ -23,7 +23,7 @@
   align-items: center;
   gap: 12px;
   padding: 20px;
-  background: #f5f5f5;
+  background: var(--color-bg-muted);
   border-radius: 8px;
   margin-bottom: 24px;
 }
@@ -38,7 +38,7 @@
 }
 
 .delete-target-icon.loadout {
-  color: #666;
+  color: var(--color-text-secondary);
 }
 
 .delete-target-name {
@@ -48,16 +48,16 @@
   gap: 8px;
   flex: 1;
   font-size: 18px;
-  color: #666;
+  color: var(--color-text-secondary);
 }
 
 .delete-path-separator {
   font-size: 12px;
-  color: #999;
+  color: var(--color-text-muted);
 }
 
 .delete-path-current {
-  color: #333;
+  color: var(--color-text-primary);
   font-weight: 600;
 }
 
@@ -101,7 +101,7 @@
 }
 
 .delete-message {
-  color: #666;
+  color: var(--color-text-secondary);
   font-size: 15px;
   line-height: 1.6;
   margin-bottom: 32px;
@@ -124,12 +124,12 @@
 }
 
 .delete-cancel-button {
-  background: #e5e7eb;
-  color: #374151;
+  background: var(--color-bg-subtle);
+  color: var(--color-text-primary);
 }
 
 .delete-cancel-button:hover {
-  background: #d1d5db;
+  background: var(--color-border-default);
 }
 
 .delete-confirm-button {

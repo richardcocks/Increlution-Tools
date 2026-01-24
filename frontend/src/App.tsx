@@ -10,6 +10,7 @@ import { TextInputModal } from './components/TextInputModal'
 import { FolderView } from './components/FolderView'
 import { useAuth } from './contexts/AuthContext'
 import { useSettings } from './contexts/SettingsContext'
+import { useTheme } from './contexts/ThemeContext'
 import { useGameData } from './contexts/GameDataContext'
 import { SidebarActionsProvider } from './contexts/SidebarActionsContext'
 import { api } from './services/api'
@@ -42,6 +43,7 @@ function App() {
   const { showToast } = useToast()
   const { user, logout } = useAuth()
   const { unlockedChaptersSet } = useSettings()
+  const { themePreference, effectiveTheme, cycleTheme } = useTheme()
   const { actions } = useGameData()
   const navigate = useNavigate()
   const location = useLocation()
@@ -611,6 +613,20 @@ function App() {
           </button>
           <button className="settings-button" onClick={() => { setPendingDelete(null); navigate('/settings'); }} title="Settings">
             <i className="fas fa-cog" />
+          </button>
+          <button
+            className="theme-toggle-button"
+            onClick={cycleTheme}
+            title={`Theme: ${themePreference} (currently ${effectiveTheme})`}
+          >
+            {themePreference === 'system' ? (
+              <span className="theme-icon-system">
+                <i className="fas fa-sun" />
+                <i className="fas fa-moon" />
+              </span>
+            ) : (
+              <i className={`fas ${effectiveTheme === 'dark' ? 'fa-moon' : 'fa-sun'}`} />
+            )}
           </button>
           <button className="logout-button" onClick={handleLogout}>
             <i className="fas fa-sign-out-alt" />

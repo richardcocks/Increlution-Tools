@@ -1,8 +1,8 @@
 .sidebar {
   width: 280px;
   height: 100vh;
-  background: #f5f5f5;
-  border-right: 1px solid #ddd;
+  background: var(--color-sidebar-bg);
+  border-right: 1px solid var(--color-border-strong);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -10,8 +10,8 @@
 
 .sidebar-header {
   padding: 16px;
-  background: #fff;
-  border-bottom: 1px solid #ddd;
+  background: var(--color-bg-base);
+  border-bottom: 1px solid var(--color-border-strong);
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -21,7 +21,7 @@
   margin: 0;
   font-size: 18px;
   font-weight: 600;
-  color: #333;
+  color: var(--color-text-primary);
 }
 
 .new-loadout-button {
@@ -68,7 +68,7 @@
 }
 
 .folder-item:hover {
-  background: #e8e8e8;
+  background: var(--color-sidebar-hover);
 }
 
 .folder-item:hover .folder-actions {
@@ -85,12 +85,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #666;
+  color: var(--color-text-secondary);
   margin-right: 4px;
 }
 
 .expand-button:hover {
-  color: #333;
+  color: var(--color-text-primary);
 }
 
 .expand-placeholder {
@@ -106,7 +106,7 @@
 }
 
 .folder-item.selected {
-  background: #d3e3f3;
+  background: var(--color-sidebar-selected);
 }
 
 .folder-icon {
@@ -119,7 +119,7 @@
 .folder-name {
   flex: 1;
   font-size: 14px;
-  color: #333;
+  color: var(--color-text-primary);
   font-weight: 500;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -143,7 +143,7 @@
 }
 
 .loadout-item:hover {
-  background: #e8e8e8;
+  background: var(--color-sidebar-hover);
 }
 
 .loadout-item:hover .loadout-item-actions {
@@ -151,12 +151,12 @@
 }
 
 .loadout-item.selected {
-  background: #d3e3f3;
+  background: var(--color-sidebar-selected);
   font-weight: 500;
 }
 
 .loadout-icon {
-  color: #666;
+  color: var(--color-text-secondary);
   margin-right: 8px;
   font-size: 13px;
 }
@@ -164,7 +164,7 @@
 .loadout-name {
   flex: 1;
   font-size: 13px;
-  color: #333;
+  color: var(--color-text-primary);
 }
 
 .loadout-protected-icon {
@@ -191,13 +191,13 @@
   align-items: center;
   justify-content: center;
   border-radius: 3px;
-  color: #666;
+  color: var(--color-text-secondary);
   transition: background-color 0.2s, color 0.2s;
 }
 
 .action-button:hover:not(:disabled) {
-  background: rgba(0, 0, 0, 0.1);
-  color: #333;
+  background: var(--color-bg-subtle);
+  color: var(--color-text-primary);
 }
 
 .action-button:disabled {
@@ -221,12 +221,12 @@
   top: 0;
   bottom: 0;
   width: 1px;
-  background: #ddd;
+  background: var(--color-border-strong);
 }
 
 /* Drag and drop styles */
 .drag-handle {
-  color: #999;
+  color: var(--color-text-muted);
   font-size: 10px;
   margin-right: 6px;
   cursor: grab;
@@ -272,7 +272,7 @@
 .others-loadouts-section {
   margin-top: 16px;
   padding-top: 16px;
-  border-top: 1px solid #ddd;
+  border-top: 1px solid var(--color-border-strong);
 }
 
 .others-loadouts-header {
@@ -284,7 +284,7 @@
 }
 
 .others-loadouts-header:hover {
-  background: #e8e8e8;
+  background: var(--color-sidebar-hover);
 }
 
 .others-icon {
@@ -297,12 +297,12 @@
   flex: 1;
   font-size: 14px;
   font-weight: 500;
-  color: #333;
+  color: var(--color-text-primary);
 }
 
 .others-count {
-  background: #e5e7eb;
-  color: #374151;
+  background: var(--color-bg-subtle);
+  color: var(--color-text-primary);
   font-size: 11px;
   padding: 2px 6px;
   border-radius: 10px;
@@ -322,7 +322,7 @@
 }
 
 .saved-share-item:hover {
-  background: #e8e8e8;
+  background: var(--color-sidebar-hover);
 }
 
 .saved-share-item.selected {
@@ -353,7 +353,7 @@
 
 .saved-share-name {
   font-size: 13px;
-  color: #333;
+  color: var(--color-text-primary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -361,7 +361,7 @@
 
 .saved-share-owner {
   font-size: 11px;
-  color: #666;
+  color: var(--color-text-secondary);
 }
 
 .saved-share-item .action-button {

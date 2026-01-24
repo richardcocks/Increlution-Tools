@@ -1,6 +1,8 @@
 // Key format: "${skillId}-${actionType}" e.g., "5-0" for skillId 5, Jobs (actionType 0)
 export type SkillActionKey = string;
 
+export type ThemePreference = 'system' | 'dark' | 'light';
+
 export interface UserSettings {
   invertMouse: boolean;
   defaultSkillPriorities: Record<SkillActionKey, number>;
@@ -8,6 +10,7 @@ export interface UserSettings {
   applyDefaultsOnImport: boolean;
   favouriteActions: number[];
   unlockedChapters: number[];
+  themePreference: ThemePreference;
 }
 
 export const defaultSettings: UserSettings = {
@@ -16,7 +19,8 @@ export const defaultSettings: UserSettings = {
   skillPrioritiesInitialized: false,
   applyDefaultsOnImport: false,
   favouriteActions: [],
-  unlockedChapters: [0]
+  unlockedChapters: [0],
+  themePreference: 'system'
 };
 
 // Helper functions for skill-action keys

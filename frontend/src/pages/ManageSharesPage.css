@@ -4,7 +4,7 @@
   height: 100%;
   width: 100%;
   flex: 1;
-  background: white;
+  background: var(--color-bg-base);
 }
 
 .shares-header {
@@ -13,7 +13,7 @@
   justify-content: center;
   gap: 16px;
   padding: 16px 20px;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid var(--color-border-default);
   flex-shrink: 0;
 }
 
@@ -28,6 +28,7 @@
 .shares-header h2 {
   margin: 0;
   font-size: 20px;
+  color: var(--color-text-primary);
 }
 
 .shares-content {
@@ -47,12 +48,12 @@
   justify-content: center;
   padding: 60px 20px;
   text-align: center;
-  color: #666;
+  color: var(--color-text-secondary);
 }
 
 .no-shares i {
   font-size: 48px;
-  color: #ddd;
+  color: var(--color-border-default);
   margin-bottom: 20px;
 }
 
@@ -63,7 +64,7 @@
 
 .no-shares .hint {
   font-size: 14px;
-  color: #999;
+  color: var(--color-text-muted);
 }
 
 /* Shares table */
@@ -72,7 +73,7 @@
 }
 
 .shares-table {
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--color-border-default);
   border-radius: 8px;
   overflow: hidden;
 }
@@ -81,15 +82,16 @@
   display: grid;
   grid-template-columns: 1fr 140px 140px 100px 100px;
   gap: 0;
-  background: #f5f5f5;
-  border-bottom: 1px solid #e0e0e0;
+  background: var(--color-bg-muted);
+  border-bottom: 1px solid var(--color-border-default);
   font-weight: 500;
   font-size: 13px;
+  color: var(--color-text-primary);
 }
 
 .shares-table-header > div {
   padding: 12px 16px;
-  border-right: 1px solid #e0e0e0;
+  border-right: 1px solid var(--color-border-default);
 }
 
 .shares-table-header > div:last-child {
@@ -105,7 +107,7 @@
   display: grid;
   grid-template-columns: 1fr 140px 140px 100px 100px;
   gap: 0;
-  border-bottom: 1px solid #e8e8e8;
+  border-bottom: 1px solid var(--color-border-subtle);
   transition: background 0.2s;
 }
 
@@ -114,19 +116,19 @@
 }
 
 .share-row:hover {
-  background: #fafafa;
+  background: var(--color-bg-elevated);
 }
 
 .share-row.expired {
   opacity: 0.6;
-  background: #fafafa;
+  background: var(--color-bg-elevated);
 }
 
 .share-row > div {
   padding: 12px 16px;
   display: flex;
   align-items: center;
-  border-right: 1px solid #e8e8e8;
+  border-right: 1px solid var(--color-border-subtle);
   font-size: 13px;
 }
 
@@ -143,7 +145,7 @@
 }
 
 .share-loadout-icon {
-  color: #666;
+  color: var(--color-text-secondary);
   font-size: 14px;
   flex-shrink: 0;
 }
@@ -153,11 +155,12 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   font-weight: 500;
+  color: var(--color-text-primary);
 }
 
 .share-col-created,
 .share-col-expires {
-  color: #666;
+  color: var(--color-text-secondary);
   font-size: 12px;
 }
 
@@ -182,7 +185,7 @@
 }
 
 .attribution-off {
-  color: #999;
+  color: var(--color-text-muted);
   display: flex;
   align-items: center;
   gap: 6px;
@@ -200,17 +203,17 @@
   justify-content: center;
   width: 32px;
   height: 32px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--color-border-strong);
   border-radius: 4px;
-  background: white;
+  background: var(--color-bg-base);
   cursor: pointer;
   transition: all 0.2s;
-  color: #666;
+  color: var(--color-text-secondary);
 }
 
 .share-action-btn:hover {
-  background: #f5f5f5;
-  border-color: #bbb;
+  background: var(--color-bg-muted);
+  border-color: var(--color-border-default);
 }
 
 .copy-btn:hover {
@@ -230,7 +233,11 @@
   justify-content: space-between;
   padding: 12px 16px;
   background: #fff3e0;
-  border-bottom: 1px solid #e8e8e8;
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+[data-theme="dark"] .share-row.confirming {
+  background: #451a03;
 }
 
 .share-confirm-message {
@@ -238,7 +245,7 @@
   align-items: center;
   gap: 12px;
   font-size: 13px;
-  color: #333;
+  color: var(--color-text-primary);
 }
 
 .share-confirm-message i {
@@ -261,14 +268,14 @@
 }
 
 .share-confirm-cancel {
-  background: white;
-  border: 1px solid #ddd;
-  color: #666;
+  background: var(--color-bg-base);
+  border: 1px solid var(--color-border-strong);
+  color: var(--color-text-secondary);
 }
 
 .share-confirm-cancel:hover {
-  background: #f5f5f5;
-  border-color: #bbb;
+  background: var(--color-bg-muted);
+  border-color: var(--color-border-default);
 }
 
 .share-confirm-revoke {

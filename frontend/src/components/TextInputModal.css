@@ -4,7 +4,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--color-modal-overlay);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -12,7 +12,7 @@
 }
 
 .text-input-modal {
-  background: white;
+  background: var(--color-modal-bg);
   border-radius: 8px;
   padding: 24px;
   min-width: 320px;
@@ -20,31 +20,37 @@
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
 }
 
+[data-theme="dark"] .text-input-modal {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
 .text-input-modal h3 {
   margin: 0 0 16px 0;
   font-size: 18px;
-  color: #333;
+  color: var(--color-text-primary);
 }
 
 .text-input-modal label {
   display: block;
   margin-bottom: 8px;
   font-size: 14px;
-  color: #666;
+  color: var(--color-text-secondary);
 }
 
 .text-input-modal input {
   width: 100%;
   padding: 10px 12px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--color-input-border);
   border-radius: 4px;
   font-size: 14px;
   box-sizing: border-box;
+  background: var(--color-input-bg);
+  color: var(--color-text-primary);
 }
 
 .text-input-modal input:focus {
   outline: none;
-  border-color: #2196f3;
+  border-color: var(--color-input-focus-border);
   box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.1);
 }
 
@@ -65,14 +71,14 @@
 }
 
 .text-input-modal-cancel {
-  background: white;
-  border: 1px solid #ddd;
-  color: #666;
+  background: var(--color-bg-base);
+  border: 1px solid var(--color-border-strong);
+  color: var(--color-text-secondary);
 }
 
 .text-input-modal-cancel:hover {
-  background: #f5f5f5;
-  border-color: #bbb;
+  background: var(--color-bg-muted);
+  border-color: var(--color-border-default);
 }
 
 .text-input-modal-submit {

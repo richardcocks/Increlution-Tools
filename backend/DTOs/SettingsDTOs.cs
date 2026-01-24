@@ -35,4 +35,9 @@ public record UserSettings
     /// Chapter 0 is always unlocked by default.
     /// </summary>
     public List<int> UnlockedChapters { get; init; } = new() { 0 };
+
+    /// <summary>
+    /// Theme preference: "system" (default), "dark", or "light"
+    /// </summary>
+    public string ThemePreference { get; init; } = "system";
 }

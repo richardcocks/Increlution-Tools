@@ -1,6 +1,6 @@
 .app {
   flex: 1;
-  background: #fafafa;
+  background: var(--color-bg-elevated);
   display: flex;
   flex-direction: column;
 }
@@ -94,6 +94,54 @@
   border-color: #565f89;
 }
 
+.theme-toggle-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: transparent;
+  border: 1px solid #414868;
+  border-radius: 4px;
+  color: #c0caf5;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.theme-toggle-button:hover {
+  background: #414868;
+  border-color: #565f89;
+  color: #f59e0b;
+}
+
+.theme-icon-system {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1em;
+  height: 1em;
+  overflow: hidden;
+}
+
+.theme-icon-system .fa-sun {
+  position: absolute;
+  clip-path: polygon(0 0, 50% 0, 50% 100%, 0 100%);
+  color: #f59e0b;
+}
+
+.theme-icon-system .fa-moon {
+  position: absolute;
+  clip-path: polygon(50% 0, 100% 0, 100% 100%, 50% 100%);
+  color: #7aa2f7;
+}
+
+.theme-toggle-button:hover .theme-icon-system .fa-sun,
+.theme-toggle-button:hover .theme-icon-system .fa-moon {
+  color: inherit;
+}
+
 .app-body {
   display: flex;
   flex: 1;
@@ -106,7 +154,7 @@
   justify-content: center;
   flex: 1;
   font-size: 18px;
-  color: #666;
+  color: var(--color-text-secondary);
 }
 
 .main-content {

@@ -1,7 +1,9 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSettings } from '../contexts/SettingsContext';
+import { useTheme } from '../contexts/ThemeContext';
 import { useGameData } from '../contexts/GameDataContext';
+import type { ThemePreference } from '../types/settings';
 import { useToast } from '../components/Toast';
 import type { AutomationLevel } from '../types/models';
 import { ActionType } from '../types/models';
@@ -18,6 +20,7 @@ const ACTION_TYPES = [
 export function SettingsPage({ onClose }: { onClose: () => void }) {
   const navigate = useNavigate();
   const { settings, loading: settingsLoading, updateSettings, unlockedChaptersSet, unlockChapter } = useSettings();
+  const { themePreference, setThemePreference } = useTheme();
   const { skills, loading: skillsLoading } = useGameData();
   const { showToast } = useToast();
 
@@ -256,6 +259,23 @@ export function SettingsPage({ onClose }: { onClose: () => void }) {
           ) : (
             <p className="all-unlocked">All chapters unlocked!</p>
           )}
+        </section>
+
+        <section className="settings-section">
+          <h3>Appearance</h3>
+          <div className="theme-select-group">
+            <label htmlFor="theme-select">Theme:</label>
+            <select
+              id="theme-select"
+              value={themePreference}
+              onChange={(e) => setThemePreference(e.target.value as ThemePreference)}
+              className="theme-select"
+            >
+              <option value="system">System (follow device setting)</option>
+              <option value="light">Light</option>
+              <option value="dark">Dark</option>
+            </select>
+          </div>
         </section>
 
         <section className="settings-section">
