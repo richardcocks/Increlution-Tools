@@ -9,6 +9,7 @@ import { useGameData } from '../contexts/GameDataContext';
 import { useSettings } from '../contexts/SettingsContext';
 import { useToast } from './Toast';
 import ChapterGroup from './ChapterGroup';
+import { PublicHeader } from './PublicHeader';
 import './SharedLoadoutView.css';
 
 export function SharedLoadoutView() {
@@ -104,32 +105,41 @@ export function SharedLoadoutView() {
 
   if (loading || gameDataLoading || settingsLoading) {
     return (
-      <div className="shared-loadout-loading">
-        <i className="fas fa-spinner fa-spin" />
-        <p>Loading shared loadout...</p>
-      </div>
+      <>
+        {!user && <PublicHeader />}
+        <div className="shared-loadout-loading">
+          <i className="fas fa-spinner fa-spin" />
+          <p>Loading shared loadout...</p>
+        </div>
+      </>
     );
   }
 
   if (error) {
     return (
-      <div className="shared-loadout-error">
-        <i className="fas fa-exclamation-circle" />
-        <h1>Unable to Load</h1>
-        <p>{error}</p>
-        <Link to="/">Go to Home</Link>
-      </div>
+      <>
+        {!user && <PublicHeader />}
+        <div className="shared-loadout-error">
+          <i className="fas fa-exclamation-circle" />
+          <h1>Unable to Load</h1>
+          <p>{error}</p>
+          <Link to="/">Go to Home</Link>
+        </div>
+      </>
     );
   }
 
   if (!sharedLoadout) {
     return (
-      <div className="shared-loadout-error">
-        <i className="fas fa-question-circle" />
-        <h1>Not Found</h1>
-        <p>This share link doesn't exist or has been removed.</p>
-        <Link to="/">Go to Home</Link>
-      </div>
+      <>
+        {!user && <PublicHeader />}
+        <div className="shared-loadout-error">
+          <i className="fas fa-question-circle" />
+          <h1>Not Found</h1>
+          <p>This share link doesn't exist or has been removed.</p>
+          <Link to="/">Go to Home</Link>
+        </div>
+      </>
     );
   }
 
@@ -138,7 +148,9 @@ export function SharedLoadoutView() {
     .sort((a, b) => a - b);
 
   return (
-    <div className="shared-loadout-view">
+    <>
+      {!user && <PublicHeader />}
+      <div className="shared-loadout-view">
       <div className="shared-loadout-header">
         <div className="shared-loadout-header-content">
           <div className="shared-loadout-title">
@@ -264,5 +276,6 @@ export function SharedLoadoutView() {
         </div>
       </div>
     </div>
+    </>
   );
 }
