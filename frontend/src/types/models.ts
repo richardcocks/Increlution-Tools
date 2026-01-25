@@ -102,3 +102,62 @@ export interface UserShare {
   expiresAt: string | null;
   showAttribution: boolean;
 }
+
+// === Folder Sharing Types ===
+
+export interface FolderShare {
+  id: number;
+  shareToken: string;
+  createdAt: string;
+  expiresAt: string | null;
+  showAttribution: boolean;
+}
+
+// User's folder share (for Manage Shares page)
+export interface UserFolderShare {
+  id: number;
+  shareToken: string;
+  folderId: number;
+  folderName: string;
+  createdAt: string;
+  expiresAt: string | null;
+  showAttribution: boolean;
+}
+
+// Recursive tree structure for shared folders
+export interface SharedFolderNode {
+  id: number;
+  name: string;
+  subFolders: SharedFolderNode[];
+  loadouts: SharedLoadoutSummary[];
+}
+
+export interface SharedLoadoutSummary {
+  id: number;
+  name: string;
+  updatedAt: string;
+}
+
+export interface SharedFolder {
+  folderName: string;
+  folderTree: SharedFolderNode;
+  updatedAt: string;
+  ownerName: string | null;
+}
+
+export interface SharedFolderLoadout {
+  name: string;
+  data: LoadoutData;
+  updatedAt: string;
+}
+
+// Unified saved share (supports both loadout and folder shares)
+export interface SavedShareUnified {
+  id: number;
+  shareToken: string;
+  shareType: 'loadout' | 'folder';
+  itemName: string;
+  ownerName: string | null;
+  savedAt: string;
+  folderTree: SharedFolderNode | null;  // Only populated for folder shares
+}

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { FolderTreeNode } from '../types/models';
+import type { FolderTreeNode, SharedFolderNode } from '../types/models';
 import { useSidebarActions } from '../contexts/SidebarActionsContext';
 import { useSavedShares } from '../contexts/SavedSharesContext';
 import { useToast } from './Toast';
@@ -12,9 +12,12 @@ type DragState =
 interface SidebarProps {
   folderTree: FolderTreeNode | null;
   onCreateLoadout?: () => void;
-  onViewShare?: (token: string) => void;
+  onViewShare?: (token: string, shareType: 'loadout' | 'folder') => void;
   viewingShareToken?: string | null;
+  viewingSharedFolder?: { token: string; loadoutId: number | null } | null;
   onQuickExportShare?: (token: string) => void;
+  onQuickExportSharedFolderLoadout?: (folderToken: string, loadoutId: number) => void;
+  onViewSharedFolderLoadout?: (folderToken: string, loadoutId: number) => void;
 }
 
 interface TreeNodeProps {
@@ -176,6 +179,86 @@ function TreeNode({ node, level, dragState, dropTargetFolderId, onLoadoutDragSta
   );
 }
 
+// Shared folder tree node component for displaying saved folder shares
+interface SharedFolderTreeNodeProps {
+  node: SharedFolderNode;
+  level: number;
+  folderToken: string;
+  selectedLoadoutId: number | null;
+  onLoadoutClick: (loadoutId: number) => void;
+  onQuickExportLoadout?: (folderToken: string, loadoutId: number) => void;
+}
+
+function SharedFolderTreeNode({ node, level, folderToken, selectedLoadoutId, onLoadoutClick, onQuickExportLoadout }: SharedFolderTreeNodeProps) {
+  const [expanded, setExpanded] = useState(true);
+  const hasChildren = node.subFolders.length > 0 || node.loadouts.length > 0;
+
+  return (
+    <div className="shared-folder-tree-node">
+      {level > 0 && (
+        <div
+          className="shared-folder-item"
+          style={{ paddingLeft: `${level * 16}px` }}
+          onClick={() => setExpanded(!expanded)}
+        >
+          {hasChildren && (
+            <button
+              className="expand-button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setExpanded(!expanded);
+              }}
+            >
+              <i className={`fas fa-chevron-${expanded ? 'down' : 'right'}`} />
+            </button>
+          )}
+          {!hasChildren && <span className="expand-placeholder" />}
+          <i className={`fas fa-folder${expanded && hasChildren ? '-open' : ''} folder-icon`} />
+          <span className="folder-name">{node.name}</span>
+        </div>
+      )}
+
+      {expanded && (
+        <div className="shared-folder-contents">
+          {node.subFolders.map((subFolder) => (
+            <SharedFolderTreeNode
+              key={subFolder.id}
+              node={subFolder}
+              level={level + 1}
+              folderToken={folderToken}
+              selectedLoadoutId={selectedLoadoutId}
+              onLoadoutClick={onLoadoutClick}
+              onQuickExportLoadout={onQuickExportLoadout}
+            />
+          ))}
+          {node.loadouts.map((loadout) => (
+            <div
+              key={loadout.id}
+              className={`shared-loadout-item ${selectedLoadoutId === loadout.id ? 'selected' : ''}`}
+              style={{ paddingLeft: `${(level + 1) * 16 + (level === 0 ? 8 : 24)}px` }}
+              onClick={() => onLoadoutClick(loadout.id)}
+              onMouseDown={(e) => {
+                if (e.button === 1) {
+                  e.preventDefault();
+                }
+              }}
+              onMouseUp={(e) => {
+                if (e.button === 1) {
+                  e.preventDefault();
+                  onQuickExportLoadout?.(folderToken, loadout.id);
+                }
+              }}
+            >
+              <i className="fas fa-file-alt loadout-icon" />
+              <span className="loadout-name">{loadout.name}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // Helper to get all descendant folder IDs
 function getDescendantIds(tree: FolderTreeNode, folderId: number): Set<number> {
   const descendants = new Set<number>();
@@ -204,13 +287,14 @@ function getDescendantIds(tree: FolderTreeNode, folderId: number): Set<number> {
   return descendants;
 }
 
-export function Sidebar({ folderTree, onCreateLoadout, onViewShare, viewingShareToken, onQuickExportShare }: SidebarProps) {
+export function Sidebar({ folderTree, onCreateLoadout, onViewShare, viewingShareToken, viewingSharedFolder, onQuickExportShare, onQuickExportSharedFolderLoadout, onViewSharedFolderLoadout }: SidebarProps) {
   const { onMoveLoadout, onMoveFolder } = useSidebarActions();
   const { savedShares, removeSavedShare } = useSavedShares();
   const { showToast } = useToast();
   const [dragState, setDragState] = useState<DragState | null>(null);
   const [dropTargetFolderId, setDropTargetFolderId] = useState<number | null>(null);
   const [othersExpanded, setOthersExpanded] = useState(true);
+  const [expandedFolderShares, setExpandedFolderShares] = useState<Set<number>>(new Set());
 
   const handleLoadoutDragStart = (loadoutId: number, sourceFolderId: number) => {
     setDragState({ type: 'loadout', loadoutId, sourceFolderId });
@@ -246,6 +330,23 @@ export function Sidebar({ folderTree, onCreateLoadout, onViewShare, viewingShare
     } catch {
       showToast('Failed to remove', 'error');
     }
+  };
+
+  const toggleFolderShareExpanded = (shareId: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setExpandedFolderShares(prev => {
+      const next = new Set(prev);
+      if (next.has(shareId)) {
+        next.delete(shareId);
+      } else {
+        next.add(shareId);
+      }
+      return next;
+    });
+  };
+
+  const handleSharedFolderLoadoutClick = (folderToken: string, loadoutId: number) => {
+    onViewSharedFolderLoadout?.(folderToken, loadoutId);
   };
 
   if (!folderTree) {
@@ -304,37 +405,86 @@ export function Sidebar({ folderTree, onCreateLoadout, onViewShare, viewingShare
             {othersExpanded && (
               <div className="others-loadouts-list">
                 {savedShares.map(share => (
-                  <div
-                    key={share.id}
-                    className={`saved-share-item ${viewingShareToken === share.shareToken ? 'selected' : ''}`}
-                    onClick={() => onViewShare?.(share.shareToken)}
-                    onMouseDown={(e) => {
-                      if (e.button === 1) {
-                        e.preventDefault();
-                      }
-                    }}
-                    onMouseUp={(e) => {
-                      if (e.button === 1) {
-                        e.preventDefault();
-                        onQuickExportShare?.(share.shareToken);
-                      }
-                    }}
-                  >
-                    <i className="fas fa-link saved-share-icon" />
-                    <div className="saved-share-info">
-                      <span className="saved-share-name">{share.loadoutName}</span>
-                      {share.ownerName && (
-                        <span className="saved-share-owner">by {share.ownerName}</span>
+                  share.shareType === 'loadout' ? (
+                    // Loadout share - flat item
+                    <div
+                      key={share.id}
+                      className={`saved-share-item ${viewingShareToken === share.shareToken ? 'selected' : ''}`}
+                      onClick={() => onViewShare?.(share.shareToken, 'loadout')}
+                      onMouseDown={(e) => {
+                        if (e.button === 1) {
+                          e.preventDefault();
+                        }
+                      }}
+                      onMouseUp={(e) => {
+                        if (e.button === 1) {
+                          e.preventDefault();
+                          onQuickExportShare?.(share.shareToken);
+                        }
+                      }}
+                    >
+                      <i className="fas fa-link saved-share-icon" />
+                      <div className="saved-share-info">
+                        <span className="saved-share-name">{share.itemName}</span>
+                        {share.ownerName && (
+                          <span className="saved-share-owner">by {share.ownerName}</span>
+                        )}
+                      </div>
+                      <button
+                        className="action-button"
+                        onClick={(e) => handleRemoveSavedShare(share.id, e)}
+                        title="Remove from collection"
+                      >
+                        <i className="fas fa-times" />
+                      </button>
+                    </div>
+                  ) : (
+                    // Folder share - expandable tree
+                    <div key={share.id} className="saved-folder-share">
+                      <div
+                        className={`saved-share-item folder-share ${viewingSharedFolder?.token === share.shareToken && !viewingSharedFolder.loadoutId ? 'selected' : ''}`}
+                        onClick={() => onViewShare?.(share.shareToken, 'folder')}
+                      >
+                        {share.folderTree && (share.folderTree.subFolders.length > 0 || share.folderTree.loadouts.length > 0) && (
+                          <button
+                            className="expand-button"
+                            onClick={(e) => toggleFolderShareExpanded(share.id, e)}
+                          >
+                            <i className={`fas fa-chevron-${expandedFolderShares.has(share.id) ? 'down' : 'right'}`} />
+                          </button>
+                        )}
+                        {(!share.folderTree || (share.folderTree.subFolders.length === 0 && share.folderTree.loadouts.length === 0)) && (
+                          <span className="expand-placeholder" />
+                        )}
+                        <i className="fas fa-folder saved-share-icon" />
+                        <div className="saved-share-info">
+                          <span className="saved-share-name">{share.itemName}</span>
+                          {share.ownerName && (
+                            <span className="saved-share-owner">by {share.ownerName}</span>
+                          )}
+                        </div>
+                        <button
+                          className="action-button"
+                          onClick={(e) => handleRemoveSavedShare(share.id, e)}
+                          title="Remove from collection"
+                        >
+                          <i className="fas fa-times" />
+                        </button>
+                      </div>
+                      {expandedFolderShares.has(share.id) && share.folderTree && (
+                        <div className="saved-folder-tree">
+                          <SharedFolderTreeNode
+                            node={share.folderTree}
+                            level={0}
+                            folderToken={share.shareToken}
+                            selectedLoadoutId={viewingSharedFolder?.token === share.shareToken ? viewingSharedFolder.loadoutId : null}
+                            onLoadoutClick={(loadoutId) => handleSharedFolderLoadoutClick(share.shareToken, loadoutId)}
+                            onQuickExportLoadout={onQuickExportSharedFolderLoadout}
+                          />
+                        </div>
                       )}
                     </div>
-                    <button
-                      className="action-button"
-                      onClick={(e) => handleRemoveSavedShare(share.id, e)}
-                      title="Remove from collection"
-                    >
-                      <i className="fas fa-times" />
-                    </button>
-                  </div>
+                  )
                 ))}
               </div>
             )}

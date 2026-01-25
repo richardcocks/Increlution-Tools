@@ -9,6 +9,7 @@ interface AuthContextValue {
   loading: boolean;
   loginWithDiscord: () => void;
   logout: () => Promise<void>;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -32,8 +33,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
   }, []);
 
+  const refreshUser = useCallback(async () => {
+    const currentUser = await api.getCurrentUser();
+    setUser(currentUser);
+  }, []);
+
   return (
-    <AuthContext.Provider value={{ user, loading, loginWithDiscord, logout }}>
+    <AuthContext.Provider value={{ user, loading, loginWithDiscord, logout, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );

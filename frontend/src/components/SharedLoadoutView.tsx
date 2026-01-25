@@ -15,7 +15,7 @@ import './SharedLoadoutView.css';
 export function SharedLoadoutView() {
   const { token } = useParams<{ token: string }>();
   const { user } = useAuth();
-  const { saveShare, savedShares } = useSavedShares();
+  const { saveLoadoutShare, savedShares } = useSavedShares();
   const { showToast } = useToast();
   const { actions, skills, loading: gameDataLoading } = useGameData();
   const { unlockedChaptersSet, loading: settingsLoading } = useSettings();
@@ -52,7 +52,7 @@ export function SharedLoadoutView() {
     if (!token) return;
     setSaving(true);
     try {
-      await saveShare(token);
+      await saveLoadoutShare(token);
       showToast('Saved to your collection!', 'success');
     } catch (err) {
       showToast(err instanceof Error ? err.message : 'Failed to save', 'error');

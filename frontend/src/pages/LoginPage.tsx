@@ -1,13 +1,17 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { api } from '../services/api';
 import './AuthPages.css';
 
 export function LoginPage() {
-  const { loginWithDiscord, user, loading } = useAuth();
+  const { loginWithDiscord, user, loading, refreshUser } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const error = searchParams.get('error');
+  const [devUsername, setDevUsername] = useState('');
+  const [devLoading, setDevLoading] = useState(false);
+  const [devError, setDevError] = useState<string | null>(null);
 
   // Redirect if already logged in
   useEffect(() => {
@@ -34,6 +38,24 @@ export function LoginPage() {
   };
 
   const errorMessage = getErrorMessage(error);
+
+  const handleDevLogin = async () => {
+    if (!devUsername.trim()) {
+      setDevError('Username is required');
+      return;
+    }
+    setDevLoading(true);
+    setDevError(null);
+    try {
+      await api.devLogin(devUsername.trim());
+      await refreshUser();
+      navigate('/loadouts');
+    } catch (err) {
+      setDevError(err instanceof Error ? err.message : 'Dev login failed');
+    } finally {
+      setDevLoading(false);
+    }
+  };
 
   return (
     <div className="auth-page">
@@ -66,6 +88,32 @@ export function LoginPage() {
           <span className="separator">|</span>
           <Link to="/about">About</Link>
         </div>
+
+        {import.meta.env.DEV && (
+          <div className="dev-login-section">
+            <div className="dev-login-divider">
+              <span>Development Only</span>
+            </div>
+            <div className="dev-login-form">
+              <input
+                type="text"
+                value={devUsername}
+                onChange={(e) => setDevUsername(e.target.value)}
+                placeholder="Test username (e.g., TestUser1)"
+                className="dev-login-input"
+                onKeyDown={(e) => e.key === 'Enter' && handleDevLogin()}
+              />
+              <button
+                className="dev-login-button"
+                onClick={handleDevLogin}
+                disabled={devLoading}
+              >
+                {devLoading ? 'Logging in...' : 'Dev Login'}
+              </button>
+            </div>
+            {devError && <div className="dev-login-error">{devError}</div>}
+          </div>
+        )}
       </div>
     </div>
   );

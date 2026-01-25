@@ -2,13 +2,14 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import type { ReactNode } from 'react';
 import { api } from '../services/api';
-import type { SavedShare } from '../types/models';
+import type { SavedShareUnified } from '../types/models';
 import { useAuth } from './AuthContext';
 
 interface SavedSharesContextValue {
-  savedShares: SavedShare[];
+  savedShares: SavedShareUnified[];
   loading: boolean;
-  saveShare: (token: string) => Promise<SavedShare>;
+  saveLoadoutShare: (token: string) => Promise<void>;
+  saveFolderShare: (token: string) => Promise<void>;
   removeSavedShare: (id: number) => Promise<void>;
   refreshSavedShares: () => Promise<void>;
 }
@@ -17,7 +18,7 @@ const SavedSharesContext = createContext<SavedSharesContextValue | null>(null);
 
 export function SavedSharesProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
-  const [savedShares, setSavedShares] = useState<SavedShare[]>([]);
+  const [savedShares, setSavedShares] = useState<SavedShareUnified[]>([]);
   const [loading, setLoading] = useState(false);
 
   const fetchSavedShares = useCallback(async () => {
@@ -27,7 +28,7 @@ export function SavedSharesProvider({ children }: { children: ReactNode }) {
     }
     setLoading(true);
     try {
-      const shares = await api.getSavedShares();
+      const shares = await api.getSavedSharesUnified();
       setSavedShares(shares);
     } catch (err) {
       console.error('Failed to fetch saved shares:', err);
@@ -41,10 +42,24 @@ export function SavedSharesProvider({ children }: { children: ReactNode }) {
     fetchSavedShares();
   }, [fetchSavedShares]);
 
-  const saveShare = useCallback(async (token: string): Promise<SavedShare> => {
+  const saveLoadoutShare = useCallback(async (token: string): Promise<void> => {
     const saved = await api.saveShare(token);
+    // Convert old SavedShare format to unified format
+    const unified: SavedShareUnified = {
+      id: saved.id,
+      shareToken: saved.shareToken,
+      shareType: 'loadout',
+      itemName: saved.loadoutName,
+      ownerName: saved.ownerName,
+      savedAt: saved.savedAt,
+      folderTree: null
+    };
+    setSavedShares(prev => [...prev, unified]);
+  }, []);
+
+  const saveFolderShare = useCallback(async (token: string): Promise<void> => {
+    const saved = await api.saveFolderShare(token);
     setSavedShares(prev => [...prev, saved]);
-    return saved;
   }, []);
 
   const removeSavedShare = useCallback(async (id: number): Promise<void> => {
@@ -57,7 +72,7 @@ export function SavedSharesProvider({ children }: { children: ReactNode }) {
   }, [fetchSavedShares]);
 
   return (
-    <SavedSharesContext.Provider value={{ savedShares, loading, saveShare, removeSavedShare, refreshSavedShares }}>
+    <SavedSharesContext.Provider value={{ savedShares, loading, saveLoadoutShare, saveFolderShare, removeSavedShare, refreshSavedShares }}>
       {children}
     </SavedSharesContext.Provider>
   );

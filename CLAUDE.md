@@ -66,6 +66,7 @@ Discord OAuth2 with cookie-based sessions. The frontend includes credentials wit
   - `/register` - Redirects to /login
   - `/about`, `/privacy` - Info pages (public)
   - `/share/:token` - View shared loadout (public, limited features for anonymous)
+  - `/share/folder/:token` - View shared folder (public, limited features for anonymous)
   - `/loadouts` - Main editor (protected)
   - `/settings` - User settings (protected)
   - `/favourites` - Saved favourites (protected)
@@ -106,6 +107,7 @@ BrowserRouter
 │   │   │   ├── /login → LoginPage (Discord OAuth)
 │   │   │   ├── /register → Redirects to /login
 │   │   │   ├── /share/:token → SharedLoadoutView (anonymous) or EmbeddedSharedLoadout (logged in)
+│   │   │   ├── /share/folder/:token → SharedFolderView (both anonymous and logged in)
 │   │   │   └── /loadouts, /settings, /favourites, /shares → ProtectedRoute
 │   │   │       └── App
 │   │   │           ├── Header (Discord username, favourites, shares, settings, logout)
@@ -122,7 +124,7 @@ The sidebar shows a tree of folders and loadouts. Action buttons (rename, duplic
 
 - **FolderView**: Shown when a folder is selected. Contains:
   - New Loadout / New Folder buttons
-  - Duplicate / Delete buttons (for non-root folders)
+  - Share / Duplicate / Delete buttons (for non-root folders)
   - Inline folder name editing
   - List of loadouts in the folder
 
@@ -164,18 +166,22 @@ Users can mark actions as favourites from the Favourites page (`/favourites`). F
 - Chapter filtering: exports/imports only include actions from unlocked chapters
 
 ### Sharing System
-Users can share loadouts via tokenized links:
+Users can share loadouts and folders via tokenized links:
 - **Create share**: Set expiration (1h, 24h, 7d, 30d, never) and attribution visibility
-- **Share links**: `/share/:token` - viewable by anyone, read-only
-- **Live references**: Shared loadouts always show current data (not snapshots)
+- **Loadout share links**: `/share/:token` - viewable by anyone, read-only
+- **Folder share links**: `/share/folder/:token` - includes all subfolders and loadouts recursively
+- **Live references**: Shared items always show current data (not snapshots)
 - **Saved shares**: Logged-in viewers can save to "Others' Loadouts" in sidebar
 - **Chapter filtering**: Shares are filtered by the sharer's unlocked chapters at creation time
+- **Root folder restriction**: Cannot share root folder ("My Loadouts")
 
 Key components:
-- `ShareModal` - Create/manage shares for a loadout
-- `SharedLoadoutView` - Anonymous viewing experience
-- `EmbeddedSharedLoadout` - Logged-in viewing within the app
-- `ManageSharesPage` - View/revoke all user's shares
+- `ShareModal` - Create/manage shares for both loadouts and folders (generic)
+- `SharedLoadoutView` - Anonymous loadout viewing experience
+- `SharedFolderView` - Folder viewing with sidebar tree and loadout selection
+- `EmbeddedSharedLoadout` - Logged-in loadout viewing within the app
+- `ManageSharesPage` - View/revoke all user's shares (tabbed: loadouts/folders)
+- `SavedSharesContext` - Manages saved shares (unified for both types)
 
 ### Chapter Unlock System
 Chapters 2-11 are locked by default to prevent spoilers. Users unlock chapters by entering the name of the first exploration in that chapter (verified server-side). Settings stored in `UserSettings`.
@@ -237,16 +243,31 @@ Users can choose between light, dark, or system theme preference. The setting pe
 | PUT | `/api/settings` | Update user settings |
 | POST | `/api/settings/unlock-chapter` | Unlock a chapter |
 
-### Sharing
+### Sharing - Loadouts
 | Method | Endpoint | Auth | Description |
 |--------|----------|------|-------------|
-| POST | `/api/loadouts/{id}/share` | Yes | Create share link |
+| POST | `/api/loadouts/{id}/share` | Yes | Create loadout share link |
 | GET | `/api/loadouts/{id}/shares` | Yes | List shares for loadout |
-| GET | `/api/shares` | Yes | List all user's shares |
-| DELETE | `/api/shares/{shareId}` | Yes | Revoke share link |
+| GET | `/api/shares` | Yes | List all user's loadout shares |
+| DELETE | `/api/shares/{shareId}` | Yes | Revoke loadout share link |
 | GET | `/api/share/{token}` | No | View shared loadout (public) |
-| POST | `/api/share/{token}/save` | Yes | Save to "Others' Loadouts" |
-| GET | `/api/saved-shares` | Yes | List saved shares |
+| POST | `/api/share/{token}/save` | Yes | Save loadout to "Others' Loadouts" |
+
+### Sharing - Folders
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| POST | `/api/folders/{id}/share` | Yes | Create folder share link |
+| GET | `/api/folders/{id}/shares` | Yes | List shares for folder |
+| GET | `/api/folder-shares` | Yes | List all user's folder shares |
+| DELETE | `/api/folder-shares/{shareId}` | Yes | Revoke folder share link |
+| GET | `/api/share/folder/{token}` | No | View shared folder tree (public) |
+| GET | `/api/share/folder/{token}/loadout/{id}` | No | Get loadout data from shared folder |
+| POST | `/api/share/folder/{token}/save` | Yes | Save folder to "Others' Loadouts" |
+
+### Sharing - Saved Shares
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| GET | `/api/saved-shares` | Yes | List all saved shares (unified, both types) |
 | DELETE | `/api/saved-shares/{id}` | Yes | Remove saved share |
 
 ## Database Schema
@@ -258,7 +279,9 @@ Users can choose between light, dark, or system theme preference. The setting pe
 
 **LoadoutShares**: `Id`, `LoadoutId` (FK), `OwnerUserId`, `ShareToken` (unique), `CreatedAt`, `ExpiresAt`, `ShowAttribution`, `UnlockedChapters` (JSON array of chapter numbers at share creation time)
 
-**SavedShares**: `Id`, `UserId`, `LoadoutShareId` (FK), `SavedAt` - tracks which shares a user has saved to "Others' Loadouts"
+**FolderShares**: `Id`, `FolderId` (FK), `OwnerUserId`, `ShareToken` (unique), `CreatedAt`, `ExpiresAt`, `ShowAttribution`, `UnlockedChapters` (JSON array) - parallel structure to LoadoutShares for folder sharing
+
+**SavedShares**: `Id`, `UserId`, `LoadoutShareId` (FK, nullable), `FolderShareId` (FK, nullable), `SavedAt` - tracks which shares a user has saved to "Others' Loadouts". Check constraint ensures exactly one of LoadoutShareId or FolderShareId is set.
 
 **UserSettings**: `Id`, `UserId`, `InvertMouse`, `ApplyDefaultsOnImport`, `DefaultSkillPriorities` (JSON), `UnlockedChapters` (JSON array), `ThemePreference` (system/dark/light)
 

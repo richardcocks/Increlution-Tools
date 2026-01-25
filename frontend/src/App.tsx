@@ -6,15 +6,18 @@ import { Sidebar } from './components/Sidebar'
 import { useToast } from './components/Toast'
 import { DeleteConfirmation } from './components/DeleteConfirmation'
 import { EmbeddedSharedLoadout } from './components/EmbeddedSharedLoadout'
+import { EmbeddedSharedFolderLoadout } from './components/EmbeddedSharedFolderLoadout'
 import { TextInputModal } from './components/TextInputModal'
 import { FolderView } from './components/FolderView'
+import { ShareModal } from './components/ShareModal'
 import { useAuth } from './contexts/AuthContext'
 import { useSettings } from './contexts/SettingsContext'
 import { useTheme } from './contexts/ThemeContext'
 import { useGameData } from './contexts/GameDataContext'
 import { SidebarActionsProvider } from './contexts/SidebarActionsContext'
+import { useSavedShares } from './contexts/SavedSharesContext'
 import { api } from './services/api'
-import type { FolderTreeNode } from './types/models'
+import type { FolderTreeNode, SharedFolderNode } from './types/models'
 import { filterLoadoutByChapters } from './utils/loadoutData'
 import { SettingsPage } from './pages/SettingsPage'
 import { FavouritesPage } from './pages/FavouritesPage'
@@ -32,6 +35,15 @@ type FolderModal =
   | { type: 'rename'; folderId: number; currentName: string }
   | null;
 
+type ShareModalState =
+  | { type: 'folder'; folderId: number; folderName: string }
+  | null;
+
+type ViewingSharedFolder = {
+  token: string;
+  loadoutId: number | null;
+} | null;
+
 function App() {
   const [folderTree, setFolderTree] = useState<FolderTreeNode | null>(null)
   const [selectedLoadoutId, setSelectedLoadoutId] = useState<number | null>(null)
@@ -39,12 +51,15 @@ function App() {
   const [loading, setLoading] = useState(true)
   const [pendingDelete, setPendingDelete] = useState<PendingDelete>(null)
   const [viewingShareToken, setViewingShareToken] = useState<string | null>(null)
+  const [viewingSharedFolder, setViewingSharedFolder] = useState<ViewingSharedFolder>(null)
   const [folderModal, setFolderModal] = useState<FolderModal>(null)
+  const [shareModalState, setShareModalState] = useState<ShareModalState>(null)
   const { showToast } = useToast()
   const { user, logout } = useAuth()
   const { unlockedChaptersSet } = useSettings()
   const { themePreference, effectiveTheme, cycleTheme } = useTheme()
   const { actions } = useGameData()
+  const { savedShares } = useSavedShares()
   const navigate = useNavigate()
   const location = useLocation()
   const params = useParams<{ token?: string }>()
@@ -346,6 +361,7 @@ function App() {
   const handleCreateLoadout = async (folderId: number) => {
     setPendingDelete(null)
     setViewingShareToken(null)  // Clear shared view when creating new loadout
+    setViewingSharedFolder(null)  // Clear shared folder view
     // Update URL to /loadouts if we're not already there
     // Use queueMicrotask to ensure state updates are committed before navigation
     if (location.pathname !== '/loadouts') {
@@ -403,6 +419,7 @@ function App() {
     setSelectedLoadoutId(null)
     setPendingDelete(null)
     setViewingShareToken(null)  // Clear shared view when selecting folder
+    setViewingSharedFolder(null)  // Clear shared folder view
     // Update URL to /loadouts if we're not already there
     // Use queueMicrotask to ensure state updates are committed before navigation
     if (location.pathname !== '/loadouts') {
@@ -415,6 +432,7 @@ function App() {
     setSelectedFolderId(folderId)
     setPendingDelete(null)
     setViewingShareToken(null)  // Clear shared view when selecting own loadout
+    setViewingSharedFolder(null)  // Clear shared folder view
     // Update URL to /loadouts if we're not already there
     // Use queueMicrotask to ensure state updates are committed before navigation
     if (location.pathname !== '/loadouts') {
@@ -422,12 +440,27 @@ function App() {
     }
   }
 
-  const handleViewShare = (token: string) => {
-    setViewingShareToken(token)
+  const handleViewShare = (token: string, shareType: 'loadout' | 'folder' = 'loadout') => {
     setSelectedLoadoutId(null)
     setPendingDelete(null)
-    // Update URL to show the share token
-    navigate(`/share/${token}`)
+
+    if (shareType === 'folder') {
+      // For folder shares, stay in the app and track the folder
+      setViewingShareToken(null)
+      setViewingSharedFolder({ token, loadoutId: null })
+    } else {
+      // For loadout shares, navigate to the share page
+      setViewingSharedFolder(null)
+      setViewingShareToken(token)
+      navigate(`/share/${token}`)
+    }
+  }
+
+  const handleViewSharedFolderLoadout = (folderToken: string, loadoutId: number) => {
+    setSelectedLoadoutId(null)
+    setPendingDelete(null)
+    setViewingShareToken(null)
+    setViewingSharedFolder({ token: folderToken, loadoutId })
   }
 
   const handleCloseShare = () => {
@@ -552,6 +585,19 @@ function App() {
     }
   }, [showToast])
 
+  // Quick export shared folder loadout to clipboard (middle-click on sidebar)
+  const handleQuickExportSharedFolderLoadout = useCallback(async (folderToken: string, loadoutId: number) => {
+    try {
+      const loadout = await api.getSharedFolderLoadout(folderToken, loadoutId)
+      const jsonString = JSON.stringify(loadout.data)
+      await navigator.clipboard.writeText(jsonString)
+      showToast('Copied to clipboard!', 'success')
+    } catch (err) {
+      console.error('Error exporting to clipboard:', err)
+      showToast('Failed to copy to clipboard', 'error')
+    }
+  }, [showToast])
+
   // Compute breadcrumb for current selected folder
   const folderBreadcrumb = selectedFolderId && folderTree
     ? getFolderPath(folderTree, selectedFolderId)
@@ -569,6 +615,80 @@ function App() {
           onClose={handleCloseShare}
         />
       );
+    }
+
+    if (viewingSharedFolder) {
+      if (viewingSharedFolder.loadoutId) {
+        return (
+          <EmbeddedSharedFolderLoadout
+            folderToken={viewingSharedFolder.token}
+            loadoutId={viewingSharedFolder.loadoutId}
+            onClose={() => setViewingSharedFolder({ token: viewingSharedFolder.token, loadoutId: null })}
+          />
+        );
+      } else {
+        // Folder selected but no loadout - show the folder contents
+        const sharedFolderData = savedShares.find(s => s.shareToken === viewingSharedFolder.token && s.shareType === 'folder');
+
+        // Helper to collect all loadouts from folder tree
+        const collectLoadouts = (node: SharedFolderNode | undefined, path: string[] = []): Array<{ id: number; name: string; path: string[] }> => {
+          if (!node) return [];
+          const results: Array<{ id: number; name: string; path: string[] }> = [];
+          const currentPath = [...path, node.name];
+
+          for (const loadout of node.loadouts) {
+            results.push({ id: loadout.id, name: loadout.name, path: currentPath });
+          }
+          for (const subFolder of node.subFolders) {
+            results.push(...collectLoadouts(subFolder, currentPath));
+          }
+          return results;
+        };
+
+        const allLoadouts = sharedFolderData?.folderTree ? collectLoadouts(sharedFolderData.folderTree) : [];
+
+        return (
+          <div className="shared-folder-content-view">
+            <div className="shared-folder-content-header">
+              <i className="fas fa-folder-open" />
+              <div className="shared-folder-content-title">
+                <h1>{sharedFolderData?.itemName ?? 'Shared Folder'}</h1>
+                {sharedFolderData?.ownerName && (
+                  <span className="shared-folder-owner">Shared by {sharedFolderData.ownerName}</span>
+                )}
+              </div>
+            </div>
+
+            {allLoadouts.length === 0 ? (
+              <div className="shared-folder-empty">
+                <p>This folder is empty.</p>
+              </div>
+            ) : (
+              <div className="shared-folder-loadout-list">
+                <h2>Loadouts ({allLoadouts.length})</h2>
+                <div className="shared-folder-loadouts">
+                  {allLoadouts.map(loadout => (
+                    <div
+                      key={loadout.id}
+                      className="shared-folder-loadout-item"
+                      onClick={() => handleViewSharedFolderLoadout(viewingSharedFolder.token, loadout.id)}
+                    >
+                      <i className="fas fa-file-alt" />
+                      <div className="shared-folder-loadout-info">
+                        <span className="shared-folder-loadout-name">{loadout.name}</span>
+                        {loadout.path.length > 1 && (
+                          <span className="shared-folder-loadout-path">{loadout.path.slice(1).join(' / ')}</span>
+                        )}
+                      </div>
+                      <i className="fas fa-chevron-right" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      }
     }
 
     if (pendingDelete && folderTree) {
@@ -610,6 +730,7 @@ function App() {
             onSelectLoadout={(loadoutId) => handleLoadoutSelect(loadoutId, selectedFolderId)}
             onDuplicateFolder={() => handleDuplicateFolder(selectedFolderId)}
             onDeleteFolder={() => handleDeleteFolder(selectedFolderId)}
+            onShareFolder={() => setShareModalState({ type: 'folder', folderId: selectedFolderId, folderName: currentFolder.name })}
           />
         );
       }
@@ -699,7 +820,10 @@ function App() {
               onCreateLoadout={() => handleCreateLoadout(selectedFolderId ?? folderTree?.id ?? 0)}
               onViewShare={handleViewShare}
               viewingShareToken={viewingShareToken}
+              viewingSharedFolder={viewingSharedFolder}
               onQuickExportShare={handleQuickExportShare}
+              onQuickExportSharedFolderLoadout={handleQuickExportSharedFolderLoadout}
+              onViewSharedFolderLoadout={handleViewSharedFolderLoadout}
             />
             <div className="main-content">
               {renderMainContent()}
@@ -726,6 +850,14 @@ function App() {
           submitText="Rename"
           onSubmit={handleRenameFolderSubmit}
           onCancel={() => setFolderModal(null)}
+        />
+      )}
+      {shareModalState && (
+        <ShareModal
+          itemType="folder"
+          itemId={shareModalState.folderId}
+          itemName={shareModalState.folderName}
+          onClose={() => setShareModalState(null)}
         />
       )}
     </div>

@@ -17,6 +17,7 @@ import { LandingPage } from './pages/LandingPage.tsx'
 import AboutPage from './pages/AboutPage.tsx'
 import PrivacyPage from './pages/PrivacyPage.tsx'
 import { AuthAwareShareRoute } from './components/AuthAwareShareRoute.tsx'
+import { AuthAwareFolderShareRoute } from './components/AuthAwareFolderShareRoute.tsx'
 import { DeleteAccountPage } from './pages/DeleteAccountPage.tsx'
 
 createRoot(document.getElementById('root')!).render(
@@ -38,6 +39,11 @@ createRoot(document.getElementById('root')!).render(
                     <Route path="/share/:token" element={
                       <GameDataProvider>
                         <AuthAwareShareRoute />
+                      </GameDataProvider>
+                    } />
+                    <Route path="/share/folder/:token" element={
+                      <GameDataProvider>
+                        <AuthAwareFolderShareRoute />
                       </GameDataProvider>
                     } />
                     <Route path="/loadouts" element={

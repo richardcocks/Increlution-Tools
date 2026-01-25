@@ -1,12 +1,15 @@
 import { useState, useEffect, useCallback } from 'react';
 import { api } from '../services/api';
-import type { LoadoutShare } from '../types/models';
+import type { LoadoutShare, FolderShare } from '../types/models';
 import { useToast } from './Toast';
 import './ShareModal.css';
 
+type ShareType = 'loadout' | 'folder';
+
 interface ShareModalProps {
-  loadoutId: number;
-  loadoutName: string;
+  itemType: ShareType;
+  itemId: number;
+  itemName: string;
   onClose: () => void;
 }
 
@@ -20,10 +23,10 @@ const EXPIRATION_OPTIONS = [
   { label: 'Never', value: null },
 ];
 
-export function ShareModal({ loadoutId, loadoutName, onClose }: ShareModalProps) {
+export function ShareModal({ itemType, itemId, itemName, onClose }: ShareModalProps) {
   const { showToast } = useToast();
   const [activeTab, setActiveTab] = useState<TabType>('create');
-  const [shares, setShares] = useState<LoadoutShare[]>([]);
+  const [shares, setShares] = useState<(LoadoutShare | FolderShare)[]>([]);
   const [loading, setLoading] = useState(false);
 
   // Create form state
@@ -36,7 +39,9 @@ export function ShareModal({ loadoutId, loadoutName, onClose }: ShareModalProps)
   const fetchShares = useCallback(async () => {
     setLoading(true);
     try {
-      const result = await api.getLoadoutShares(loadoutId);
+      const result = itemType === 'loadout'
+        ? await api.getLoadoutShares(itemId)
+        : await api.getFolderShares(itemId);
       setShares(result);
     } catch (err) {
       console.error('Failed to fetch shares:', err);
@@ -44,7 +49,7 @@ export function ShareModal({ loadoutId, loadoutName, onClose }: ShareModalProps)
     } finally {
       setLoading(false);
     }
-  }, [loadoutId, showToast]);
+  }, [itemId, itemType, showToast]);
 
   useEffect(() => {
     if (activeTab === 'manage') {
@@ -55,11 +60,14 @@ export function ShareModal({ loadoutId, loadoutName, onClose }: ShareModalProps)
   const handleCreate = async () => {
     setLoading(true);
     try {
-      const share = await api.createShare(loadoutId, {
-        expiresInHours,
-        showAttribution,
-      });
-      const link = `${window.location.origin}/share/${share.shareToken}`;
+      const share = itemType === 'loadout'
+        ? await api.createShare(itemId, { expiresInHours, showAttribution })
+        : await api.createFolderShare(itemId, { expiresInHours, showAttribution });
+
+      const linkPath = itemType === 'loadout'
+        ? `/share/${share.shareToken}`
+        : `/share/folder/${share.shareToken}`;
+      const link = `${window.location.origin}${linkPath}`;
       setGeneratedLink(link);
       showToast('Share link created', 'success');
     } catch (err) {
@@ -84,7 +92,11 @@ export function ShareModal({ loadoutId, loadoutName, onClose }: ShareModalProps)
 
   const handleRevoke = async (shareId: number) => {
     try {
-      await api.revokeShare(shareId);
+      if (itemType === 'loadout') {
+        await api.revokeShare(shareId);
+      } else {
+        await api.revokeFolderShare(shareId);
+      }
       setShares(prev => prev.filter(s => s.id !== shareId));
       showToast('Share link revoked', 'success');
     } catch (err) {
@@ -93,8 +105,11 @@ export function ShareModal({ loadoutId, loadoutName, onClose }: ShareModalProps)
     }
   };
 
-  const handleCopyExisting = async (share: LoadoutShare) => {
-    const link = `${window.location.origin}/share/${share.shareToken}`;
+  const handleCopyExisting = async (share: LoadoutShare | FolderShare) => {
+    const linkPath = itemType === 'loadout'
+      ? `/share/${share.shareToken}`
+      : `/share/folder/${share.shareToken}`;
+    const link = `${window.location.origin}${linkPath}`;
     try {
       await navigator.clipboard.writeText(link);
       setCopiedShareId(share.id);
@@ -109,16 +124,22 @@ export function ShareModal({ loadoutId, loadoutName, onClose }: ShareModalProps)
     return new Date(dateStr).toLocaleString();
   };
 
-  const isExpired = (share: LoadoutShare) => {
+  const isExpired = (share: LoadoutShare | FolderShare) => {
     if (!share.expiresAt) return false;
     return new Date(share.expiresAt) < new Date();
   };
+
+  const typeLabel = itemType === 'loadout' ? 'loadout' : 'folder';
+  const typeIcon = itemType === 'loadout' ? 'fa-file-alt' : 'fa-folder';
 
   return (
     <div className="share-modal-overlay" onClick={onClose}>
       <div className="share-modal" onClick={e => e.stopPropagation()}>
         <div className="share-modal-header">
-          <h2>Share "{loadoutName}"</h2>
+          <h2>
+            <i className={`fas ${typeIcon}`} style={{ marginRight: '8px' }} />
+            Share "{itemName}"
+          </h2>
           <button className="share-modal-close" onClick={onClose}>
             <i className="fas fa-times" />
           </button>
@@ -142,6 +163,13 @@ export function ShareModal({ loadoutId, loadoutName, onClose }: ShareModalProps)
         <div className="share-modal-content">
           {activeTab === 'create' ? (
             <>
+              {itemType === 'folder' && (
+                <div className="share-info-banner">
+                  <i className="fas fa-info-circle" />
+                  <span>Sharing this folder will include all subfolders and loadouts within it.</span>
+                </div>
+              )}
+
               <div className="share-form-group">
                 <label>Expires After</label>
                 <select
@@ -215,7 +243,7 @@ export function ShareModal({ loadoutId, loadoutName, onClose }: ShareModalProps)
               ) : shares.length === 0 ? (
                 <div className="shares-empty">
                   <i className="fas fa-link" />
-                  <p>No active share links</p>
+                  <p>No active share links for this {typeLabel}</p>
                 </div>
               ) : (
                 shares.map(share => (

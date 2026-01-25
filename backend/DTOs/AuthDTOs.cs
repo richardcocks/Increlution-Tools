@@ -23,3 +23,6 @@ public record DiscordUser(
     [property: JsonPropertyName("avatar")] string? Avatar,
     [property: JsonPropertyName("discriminator")] string Discriminator
 );
+
+// Development-only test user login request
+public record DevLoginRequest(string? Username);

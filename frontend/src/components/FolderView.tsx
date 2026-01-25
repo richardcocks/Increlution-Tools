@@ -12,6 +12,7 @@ interface FolderViewProps {
   onSelectLoadout: (loadoutId: number) => void;
   onDuplicateFolder: () => void;
   onDeleteFolder: () => void;
+  onShareFolder: () => void;
 }
 
 export function FolderView({
@@ -23,7 +24,8 @@ export function FolderView({
   onCreateLoadout,
   onSelectLoadout,
   onDuplicateFolder,
-  onDeleteFolder
+  onDeleteFolder,
+  onShareFolder
 }: FolderViewProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedName, setEditedName] = useState('');
@@ -108,6 +110,10 @@ export function FolderView({
         </button>
         {!isRootFolder && (
           <>
+            <button className="folder-view-action-btn secondary" onClick={onShareFolder}>
+              <i className="fas fa-share-alt" />
+              Share
+            </button>
             <button className="folder-view-action-btn secondary" onClick={onDuplicateFolder}>
               <i className="fas fa-copy" />
               Duplicate
