@@ -356,8 +356,14 @@ export const api = {
       credentials: 'include'
     });
     if (!response.ok) {
-      const data = await response.json();
-      throw new Error(data.error || `Failed to get shared loadout: ${response.statusText}`);
+      let errorMessage = `Failed to get shared loadout: ${response.statusText}`;
+      try {
+        const data = await response.json();
+        if (data.error) errorMessage = data.error;
+      } catch {
+        // Response wasn't JSON, use default message
+      }
+      throw new Error(errorMessage);
     }
     return response.json();
   },
@@ -450,8 +456,14 @@ export const api = {
       credentials: 'include'
     });
     if (!response.ok) {
-      const data = await response.json();
-      throw new Error(data.error || `Failed to get shared folder: ${response.statusText}`);
+      let errorMessage = `Failed to get shared folder: ${response.statusText}`;
+      try {
+        const data = await response.json();
+        if (data.error) errorMessage = data.error;
+      } catch {
+        // Response wasn't JSON, use default message
+      }
+      throw new Error(errorMessage);
     }
     return response.json();
   },
@@ -461,8 +473,14 @@ export const api = {
       credentials: 'include'
     });
     if (!response.ok) {
-      const data = await response.json();
-      throw new Error(data.error || `Failed to get loadout from shared folder: ${response.statusText}`);
+      let errorMessage = `Failed to get loadout from shared folder: ${response.statusText}`;
+      try {
+        const data = await response.json();
+        if (data.error) errorMessage = data.error;
+      } catch {
+        // Response wasn't JSON, use default message
+      }
+      throw new Error(errorMessage);
     }
     return response.json();
   },

@@ -463,7 +463,8 @@ app.MapGet("/api/auth/discord/callback", async (
 .WithName("DiscordCallback");
 
 // POST /api/auth/dev/login - Development-only test user login
-if (app.Environment.IsDevelopment())
+// Requires both IsDevelopment() AND EnableDevLogin setting to be true
+if (app.Environment.IsDevelopment() && app.Configuration.GetValue<bool>("EnableDevLogin"))
 {
     app.MapPost("/api/auth/dev/login", async (
         DevLoginRequest request,
@@ -903,16 +904,7 @@ app.MapDelete("/api/folders/{id}", async (int id, bool force, ClaimsPrincipal us
         var allShares = await db.LoadoutShares.Where(s => s.OwnerUserId == userId).ToListAsync();
 
         // Find all folder IDs to delete (including nested)
-        var folderIdsToDelete = new HashSet<int>();
-        void CollectFolderIds(int folderId)
-        {
-            folderIdsToDelete.Add(folderId);
-            foreach (var sub in allFolders.Where(f => f.ParentId == folderId))
-            {
-                CollectFolderIds(sub.Id);
-            }
-        }
-        CollectFolderIds(id);
+        var folderIdsToDelete = CollectFolderIds(id, allFolders);
 
         // Find loadouts in these folders
         var loadoutsInFolders = allLoadouts.Where(l => folderIdsToDelete.Contains(l.FolderId)).ToList();
@@ -2048,6 +2040,25 @@ app.MapDelete("/api/folder-shares/{shareId}", async (int shareId, ClaimsPrincipa
 .RequireAuthorization()
 .WithName("RevokeFolderShare");
 
+// Helper function to collect all folder IDs including descendants
+HashSet<int> CollectFolderIds(int rootFolderId, IEnumerable<Folder> allFolders)
+{
+    var folderIds = new HashSet<int>();
+    var folderList = allFolders.ToList();
+
+    void Collect(int folderId)
+    {
+        folderIds.Add(folderId);
+        foreach (var sub in folderList.Where(f => f.ParentId == folderId))
+        {
+            Collect(sub.Id);
+        }
+    }
+
+    Collect(rootFolderId);
+    return folderIds;
+}
+
 // Helper function to build folder tree for shared folder
 SharedFolderNode BuildSharedFolderTree(
     Folder folder,
@@ -2109,16 +2120,7 @@ app.MapGet("/api/share/folder/{token}", async (
     var allLoadouts = await db.Loadouts.Where(l => l.UserId == share.OwnerUserId).ToListAsync();
 
     // Collect all folder IDs including the shared folder and its descendants
-    var folderIds = new HashSet<int>();
-    void CollectFolderIds(int folderId)
-    {
-        folderIds.Add(folderId);
-        foreach (var sub in allFolders.Where(f => f.ParentId == folderId))
-        {
-            CollectFolderIds(sub.Id);
-        }
-    }
-    CollectFolderIds(share.FolderId);
+    var folderIds = CollectFolderIds(share.FolderId, allFolders);
 
     // Filter to only folders in the shared tree
     var foldersInTree = allFolders.Where(f => folderIds.Contains(f.Id)).ToList();
@@ -2165,16 +2167,7 @@ app.MapGet("/api/share/folder/{token}/loadout/{loadoutId}", async (
 
     // Verify loadout is in the shared folder tree
     var allFolders = await db.Folders.Where(f => f.UserId == share.OwnerUserId).ToListAsync();
-    var folderIds = new HashSet<int>();
-    void CollectFolderIds(int folderId)
-    {
-        folderIds.Add(folderId);
-        foreach (var sub in allFolders.Where(f => f.ParentId == folderId))
-        {
-            CollectFolderIds(sub.Id);
-        }
-    }
-    CollectFolderIds(share.FolderId);
+    var folderIds = CollectFolderIds(share.FolderId, allFolders);
 
     var loadout = await db.Loadouts.FirstOrDefaultAsync(l => l.Id == loadoutId && folderIds.Contains(l.FolderId));
     if (loadout == null)
@@ -2254,16 +2247,7 @@ app.MapPost("/api/share/folder/{token}/save", async (
     // Build folder tree for response
     var allFolders = await db.Folders.Where(f => f.UserId == share.OwnerUserId).ToListAsync();
     var allLoadouts = await db.Loadouts.Where(l => l.UserId == share.OwnerUserId).ToListAsync();
-    var folderIds = new HashSet<int>();
-    void CollectFolderIds(int folderId)
-    {
-        folderIds.Add(folderId);
-        foreach (var sub in allFolders.Where(f => f.ParentId == folderId))
-        {
-            CollectFolderIds(sub.Id);
-        }
-    }
-    CollectFolderIds(share.FolderId);
+    var folderIds = CollectFolderIds(share.FolderId, allFolders);
     var foldersInTree = allFolders.Where(f => folderIds.Contains(f.Id)).ToList();
     var loadoutsInTree = allLoadouts.Where(l => folderIds.Contains(l.FolderId)).ToList();
     var unlockedChapters = new HashSet<int>(share.GetUnlockedChapters());
@@ -2370,16 +2354,7 @@ app.MapGet("/api/saved-shares/unified", async (
             var ownerLoadouts = loadoutsByOwner.GetValueOrDefault(saved.FolderShare.OwnerUserId) ?? new List<Loadout>();
 
             // Build folder tree from pre-fetched data
-            var folderIds = new HashSet<int>();
-            void CollectFolderIds(int folderId)
-            {
-                folderIds.Add(folderId);
-                foreach (var sub in ownerFolders.Where(f => f.ParentId == folderId))
-                {
-                    CollectFolderIds(sub.Id);
-                }
-            }
-            CollectFolderIds(saved.FolderShare.FolderId);
+            var folderIds = CollectFolderIds(saved.FolderShare.FolderId, ownerFolders);
             var foldersInTree = ownerFolders.Where(f => folderIds.Contains(f.Id)).ToList();
             var loadoutsInTree = ownerLoadouts.Where(l => folderIds.Contains(l.FolderId)).ToList();
             var unlockedChapters = new HashSet<int>(saved.FolderShare.GetUnlockedChapters());
