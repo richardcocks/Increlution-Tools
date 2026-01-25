@@ -2209,6 +2209,45 @@ app.MapGet("/api/saved-shares/unified", async (
         .ThenInclude(fs => fs != null ? fs.Folder : null)
         .ToListAsync();
 
+    // Pre-fetch all data to avoid N+1 queries
+    // 1. Collect all distinct owner user IDs that need attribution
+    var ownerUserIds = savedShares
+        .Where(s => (s.LoadoutShare?.ShowAttribution ?? s.FolderShare?.ShowAttribution ?? false))
+        .Select(s => s.LoadoutShare?.OwnerUserId ?? s.FolderShare?.OwnerUserId)
+        .Where(id => id.HasValue)
+        .Select(id => id!.Value)
+        .Distinct()
+        .ToList();
+
+    // 2. Batch fetch all owner usernames
+    var ownerNames = await identityDb.Users
+        .Where(u => ownerUserIds.Contains(u.Id))
+        .ToDictionaryAsync(u => u.Id, u => u.DiscordUsername);
+
+    // 3. Collect all distinct owner user IDs for folder shares (need their folders/loadouts)
+    var folderShareOwnerIds = savedShares
+        .Where(s => s.FolderShareId != null && s.FolderShare != null)
+        .Select(s => s.FolderShare!.OwnerUserId)
+        .Distinct()
+        .ToList();
+
+    // 4. Batch fetch all folders and loadouts for folder share owners
+    var allFoldersByOwner = await db.Folders
+        .Where(f => f.UserId.HasValue && folderShareOwnerIds.Contains(f.UserId.Value))
+        .ToListAsync();
+    var foldersByOwner = allFoldersByOwner
+        .Where(f => f.UserId.HasValue)
+        .GroupBy(f => f.UserId!.Value)
+        .ToDictionary(g => g.Key, g => g.ToList());
+
+    var allLoadoutsByOwner = await db.Loadouts
+        .Where(l => l.UserId.HasValue && folderShareOwnerIds.Contains(l.UserId.Value))
+        .ToListAsync();
+    var loadoutsByOwner = allLoadoutsByOwner
+        .Where(l => l.UserId.HasValue)
+        .GroupBy(l => l.UserId!.Value)
+        .ToDictionary(g => g.Key, g => g.ToList());
+
     var results = new List<SavedShareUnifiedResponse>();
     var allActions = gameData.GetAllActions();
 
@@ -2218,10 +2257,9 @@ app.MapGet("/api/saved-shares/unified", async (
         var showAttribution = saved.LoadoutShare?.ShowAttribution ?? saved.FolderShare?.ShowAttribution ?? true;
         var ownerUserId = saved.LoadoutShare?.OwnerUserId ?? saved.FolderShare?.OwnerUserId;
 
-        if (showAttribution && ownerUserId.HasValue)
+        if (showAttribution && ownerUserId.HasValue && ownerNames.TryGetValue(ownerUserId.Value, out var name))
         {
-            var owner = await identityDb.Users.FindAsync(ownerUserId.Value);
-            ownerName = owner?.DiscordUsername;
+            ownerName = name;
         }
 
         if (saved.LoadoutShareId != null && saved.LoadoutShare != null)
@@ -2238,21 +2276,23 @@ app.MapGet("/api/saved-shares/unified", async (
         }
         else if (saved.FolderShareId != null && saved.FolderShare != null)
         {
-            // Build folder tree
-            var allFolders = await db.Folders.Where(f => f.UserId == saved.FolderShare.OwnerUserId).ToListAsync();
-            var allLoadouts = await db.Loadouts.Where(l => l.UserId == saved.FolderShare.OwnerUserId).ToListAsync();
+            // Use pre-fetched data instead of querying in loop
+            var ownerFolders = foldersByOwner.GetValueOrDefault(saved.FolderShare.OwnerUserId) ?? new List<Folder>();
+            var ownerLoadouts = loadoutsByOwner.GetValueOrDefault(saved.FolderShare.OwnerUserId) ?? new List<Loadout>();
+
+            // Build folder tree from pre-fetched data
             var folderIds = new HashSet<int>();
             void CollectFolderIds(int folderId)
             {
                 folderIds.Add(folderId);
-                foreach (var sub in allFolders.Where(f => f.ParentId == folderId))
+                foreach (var sub in ownerFolders.Where(f => f.ParentId == folderId))
                 {
                     CollectFolderIds(sub.Id);
                 }
             }
             CollectFolderIds(saved.FolderShare.FolderId);
-            var foldersInTree = allFolders.Where(f => folderIds.Contains(f.Id)).ToList();
-            var loadoutsInTree = allLoadouts.Where(l => folderIds.Contains(l.FolderId)).ToList();
+            var foldersInTree = ownerFolders.Where(f => folderIds.Contains(f.Id)).ToList();
+            var loadoutsInTree = ownerLoadouts.Where(l => folderIds.Contains(l.FolderId)).ToList();
             var unlockedChapters = new HashSet<int>(saved.FolderShare.GetUnlockedChapters());
 
             results.Add(new SavedShareUnifiedResponse(
