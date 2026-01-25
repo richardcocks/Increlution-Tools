@@ -46,6 +46,44 @@ createRoot(document.getElementById('root')!).render(
                         <AuthAwareFolderShareRoute />
                       </GameDataProvider>
                     } />
+                    {/* User's own folders and loadouts */}
+                    <Route path="/loadouts/folder/:folderId" element={
+                      <ProtectedRoute>
+                        <GameDataProvider>
+                          <App />
+                        </GameDataProvider>
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/loadouts/loadout/:loadoutId" element={
+                      <ProtectedRoute>
+                        <GameDataProvider>
+                          <App />
+                        </GameDataProvider>
+                      </ProtectedRoute>
+                    } />
+                    {/* Saved shared content (embedded view for logged-in users) */}
+                    <Route path="/loadouts/shared/:token" element={
+                      <ProtectedRoute>
+                        <GameDataProvider>
+                          <App />
+                        </GameDataProvider>
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/loadouts/shared/folder/:folderToken/:loadoutId" element={
+                      <ProtectedRoute>
+                        <GameDataProvider>
+                          <App />
+                        </GameDataProvider>
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/loadouts/shared/folder/:folderToken" element={
+                      <ProtectedRoute>
+                        <GameDataProvider>
+                          <App />
+                        </GameDataProvider>
+                      </ProtectedRoute>
+                    } />
+                    {/* Root loadouts view */}
                     <Route path="/loadouts" element={
                       <ProtectedRoute>
                         <GameDataProvider>
