@@ -257,9 +257,9 @@ if (app.Environment.IsDevelopment())
     app.UseHttpsRedirection();
 }
 app.UseCors("AllowFrontend");
-app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseRateLimiter();  // Must be after auth so we can check if user is authenticated
 app.UseOutputCache();
 
 // Serve static files (frontend) in production
@@ -461,6 +461,95 @@ app.MapGet("/api/auth/discord/callback", async (
 })
 .RequireRateLimiting("auth")
 .WithName("DiscordCallback");
+
+// POST /api/auth/dev/login - Development-only test user login
+if (app.Environment.IsDevelopment())
+{
+    app.MapPost("/api/auth/dev/login", async (
+        DevLoginRequest request,
+        IdentityAppDbContext identityDb,
+        AppDbContext db,
+        GameDataService gameData,
+        HttpContext httpContext) =>
+    {
+        var username = request.Username?.Trim();
+        if (string.IsNullOrEmpty(username))
+        {
+            return Results.BadRequest("Username is required");
+        }
+
+        // Create a fake Discord ID from the username (deterministic so same user returns)
+        var fakeDiscordId = $"dev_{username.ToLowerInvariant()}";
+
+        // Find or create user
+        var user = await identityDb.Users
+            .FirstOrDefaultAsync(u => u.DiscordId == fakeDiscordId);
+
+        if (user == null)
+        {
+            // New user - create account
+            user = new ApplicationUser
+            {
+                UserName = fakeDiscordId,
+                DiscordId = fakeDiscordId,
+                DiscordUsername = $"{username} (Dev)",
+                NormalizedUserName = fakeDiscordId.ToUpperInvariant(),
+                SecurityStamp = Guid.NewGuid().ToString()
+            };
+
+            // Initialize default settings
+            var skills = gameData.GetAllSkills();
+            var actionTypes = new[] { 0, 1, 2 };
+            var defaultPriorities = new Dictionary<string, int>();
+            foreach (var skillId in skills.Keys)
+            {
+                foreach (var actionType in actionTypes)
+                {
+                    defaultPriorities[$"{skillId}-{actionType}"] = 2;
+                }
+            }
+            var defaultSettings = new UserSettings
+            {
+                DefaultSkillPriorities = defaultPriorities,
+                SkillPrioritiesInitialized = true
+            };
+            user.Settings = System.Text.Json.JsonSerializer.Serialize(defaultSettings);
+
+            identityDb.Users.Add(user);
+            await identityDb.SaveChangesAsync();
+
+            // Create root folder for the new user
+            var rootFolder = new Folder
+            {
+                Name = "My Loadouts",
+                ParentId = null,
+                UserId = user.Id,
+                CreatedAt = DateTime.UtcNow
+            };
+            db.Folders.Add(rootFolder);
+            await db.SaveChangesAsync();
+        }
+
+        // Create claims and sign in
+        var claims = new List<Claim>
+        {
+            new(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new("DiscordId", user.DiscordId),
+            new("DiscordUsername", user.DiscordUsername ?? "")
+        };
+
+        var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+        var principal = new ClaimsPrincipal(identity);
+
+        await httpContext.SignInAsync(
+            CookieAuthenticationDefaults.AuthenticationScheme,
+            principal,
+            new AuthenticationProperties { IsPersistent = true });
+
+        return Results.Ok(new UserInfo(user.Id, user.DiscordUsername ?? username));
+    })
+    .WithName("DevLogin");
+}
 
 // POST /api/auth/logout - Sign out
 app.MapPost("/api/auth/logout", async (HttpContext httpContext) =>

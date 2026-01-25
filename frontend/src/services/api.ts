@@ -43,6 +43,21 @@ export const api = {
     }
   },
 
+  // Development-only: login as test user
+  async devLogin(username: string): Promise<UserInfo> {
+    const response = await fetch(`${API_BASE}/auth/dev/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ username })
+    });
+    if (!response.ok) {
+      const text = await response.text();
+      throw new Error(text || 'Dev login failed');
+    }
+    return response.json();
+  },
+
   // Game data endpoints
   async getActions(): Promise<IncrelutionAction[]> {
     const response = await fetch(`${API_BASE}/actions`, {

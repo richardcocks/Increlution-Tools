@@ -14,7 +14,9 @@ interface SidebarProps {
   onCreateLoadout?: () => void;
   onViewShare?: (token: string, shareType: 'loadout' | 'folder') => void;
   viewingShareToken?: string | null;
+  viewingSharedFolder?: { token: string; loadoutId: number | null } | null;
   onQuickExportShare?: (token: string) => void;
+  onQuickExportSharedFolderLoadout?: (folderToken: string, loadoutId: number) => void;
   onViewSharedFolderLoadout?: (folderToken: string, loadoutId: number) => void;
 }
 
@@ -184,9 +186,10 @@ interface SharedFolderTreeNodeProps {
   folderToken: string;
   selectedLoadoutId: number | null;
   onLoadoutClick: (loadoutId: number) => void;
+  onQuickExportLoadout?: (folderToken: string, loadoutId: number) => void;
 }
 
-function SharedFolderTreeNode({ node, level, folderToken, selectedLoadoutId, onLoadoutClick }: SharedFolderTreeNodeProps) {
+function SharedFolderTreeNode({ node, level, folderToken, selectedLoadoutId, onLoadoutClick, onQuickExportLoadout }: SharedFolderTreeNodeProps) {
   const [expanded, setExpanded] = useState(true);
   const hasChildren = node.subFolders.length > 0 || node.loadouts.length > 0;
 
@@ -196,6 +199,7 @@ function SharedFolderTreeNode({ node, level, folderToken, selectedLoadoutId, onL
         <div
           className="shared-folder-item"
           style={{ paddingLeft: `${level * 16}px` }}
+          onClick={() => setExpanded(!expanded)}
         >
           {hasChildren && (
             <button
@@ -209,7 +213,7 @@ function SharedFolderTreeNode({ node, level, folderToken, selectedLoadoutId, onL
             </button>
           )}
           {!hasChildren && <span className="expand-placeholder" />}
-          <i className="fas fa-folder folder-icon" />
+          <i className={`fas fa-folder${expanded && hasChildren ? '-open' : ''} folder-icon`} />
           <span className="folder-name">{node.name}</span>
         </div>
       )}
@@ -224,6 +228,7 @@ function SharedFolderTreeNode({ node, level, folderToken, selectedLoadoutId, onL
               folderToken={folderToken}
               selectedLoadoutId={selectedLoadoutId}
               onLoadoutClick={onLoadoutClick}
+              onQuickExportLoadout={onQuickExportLoadout}
             />
           ))}
           {node.loadouts.map((loadout) => (
@@ -232,6 +237,17 @@ function SharedFolderTreeNode({ node, level, folderToken, selectedLoadoutId, onL
               className={`shared-loadout-item ${selectedLoadoutId === loadout.id ? 'selected' : ''}`}
               style={{ paddingLeft: `${(level + 1) * 16 + (level === 0 ? 8 : 24)}px` }}
               onClick={() => onLoadoutClick(loadout.id)}
+              onMouseDown={(e) => {
+                if (e.button === 1) {
+                  e.preventDefault();
+                }
+              }}
+              onMouseUp={(e) => {
+                if (e.button === 1) {
+                  e.preventDefault();
+                  onQuickExportLoadout?.(folderToken, loadout.id);
+                }
+              }}
             >
               <i className="fas fa-file-alt loadout-icon" />
               <span className="loadout-name">{loadout.name}</span>
@@ -271,7 +287,7 @@ function getDescendantIds(tree: FolderTreeNode, folderId: number): Set<number> {
   return descendants;
 }
 
-export function Sidebar({ folderTree, onCreateLoadout, onViewShare, viewingShareToken, onQuickExportShare, onViewSharedFolderLoadout }: SidebarProps) {
+export function Sidebar({ folderTree, onCreateLoadout, onViewShare, viewingShareToken, viewingSharedFolder, onQuickExportShare, onQuickExportSharedFolderLoadout, onViewSharedFolderLoadout }: SidebarProps) {
   const { onMoveLoadout, onMoveFolder } = useSidebarActions();
   const { savedShares, removeSavedShare } = useSavedShares();
   const { showToast } = useToast();
@@ -279,7 +295,6 @@ export function Sidebar({ folderTree, onCreateLoadout, onViewShare, viewingShare
   const [dropTargetFolderId, setDropTargetFolderId] = useState<number | null>(null);
   const [othersExpanded, setOthersExpanded] = useState(true);
   const [expandedFolderShares, setExpandedFolderShares] = useState<Set<number>>(new Set());
-  const [selectedSharedLoadoutId, setSelectedSharedLoadoutId] = useState<number | null>(null);
 
   const handleLoadoutDragStart = (loadoutId: number, sourceFolderId: number) => {
     setDragState({ type: 'loadout', loadoutId, sourceFolderId });
@@ -331,7 +346,6 @@ export function Sidebar({ folderTree, onCreateLoadout, onViewShare, viewingShare
   };
 
   const handleSharedFolderLoadoutClick = (folderToken: string, loadoutId: number) => {
-    setSelectedSharedLoadoutId(loadoutId);
     onViewSharedFolderLoadout?.(folderToken, loadoutId);
   };
 
@@ -428,7 +442,7 @@ export function Sidebar({ folderTree, onCreateLoadout, onViewShare, viewingShare
                     // Folder share - expandable tree
                     <div key={share.id} className="saved-folder-share">
                       <div
-                        className={`saved-share-item folder-share ${viewingShareToken === share.shareToken ? 'selected' : ''}`}
+                        className={`saved-share-item folder-share ${viewingSharedFolder?.token === share.shareToken && !viewingSharedFolder.loadoutId ? 'selected' : ''}`}
                         onClick={() => onViewShare?.(share.shareToken, 'folder')}
                       >
                         {share.folderTree && (share.folderTree.subFolders.length > 0 || share.folderTree.loadouts.length > 0) && (
@@ -463,8 +477,9 @@ export function Sidebar({ folderTree, onCreateLoadout, onViewShare, viewingShare
                             node={share.folderTree}
                             level={0}
                             folderToken={share.shareToken}
-                            selectedLoadoutId={selectedSharedLoadoutId}
+                            selectedLoadoutId={viewingSharedFolder?.token === share.shareToken ? viewingSharedFolder.loadoutId : null}
                             onLoadoutClick={(loadoutId) => handleSharedFolderLoadoutClick(share.shareToken, loadoutId)}
+                            onQuickExportLoadout={onQuickExportSharedFolderLoadout}
                           />
                         </div>
                       )}

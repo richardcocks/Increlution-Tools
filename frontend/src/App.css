@@ -161,3 +161,105 @@
   flex: 1;
   overflow-y: auto;
 }
+
+/* Shared folder content view */
+.shared-folder-content-view {
+  padding: 1.5rem;
+  max-width: 800px;
+}
+
+.shared-folder-content-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid var(--color-border);
+}
+
+.shared-folder-content-header > i {
+  font-size: 2rem;
+  color: #f59e0b;
+}
+
+.shared-folder-content-title h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: var(--color-text-primary);
+}
+
+.shared-folder-owner {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+.shared-folder-empty {
+  text-align: center;
+  padding: 2rem;
+  color: var(--color-text-secondary);
+}
+
+.shared-folder-loadout-list h2 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  margin: 0 0 0.75rem 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.shared-folder-loadouts {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.shared-folder-loadout-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.shared-folder-loadout-item:hover {
+  background: var(--color-bg-hover);
+  border-color: var(--color-border-hover);
+}
+
+.shared-folder-loadout-item > i:first-child {
+  color: var(--color-text-secondary);
+  font-size: 1rem;
+}
+
+.shared-folder-loadout-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.shared-folder-loadout-name {
+  display: block;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.shared-folder-loadout-path {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.shared-folder-loadout-item > i:last-child {
+  color: var(--color-text-secondary);
+  font-size: 0.75rem;
+}
