@@ -31,11 +31,11 @@ export function HelpPage({ onClose }: { onClose: () => void }) {
             </div>
             <div className="shortcut-row">
               <span className="shortcut-key">Ctrl + Click (row)</span>
-              <span className="shortcut-desc">Toggle lock (locked actions use game defaults)</span>
+              <span className="shortcut-desc">Toggle exclude (excluded actions are not changed when importing into the game)</span>
             </div>
             <div className="shortcut-row">
               <span className="shortcut-key">Ctrl + Click (tab)</span>
-              <span className="shortcut-desc">Bulk lock/unlock all actions in that chapter</span>
+              <span className="shortcut-desc">Bulk exclude/include all actions in that chapter</span>
             </div>
             <div className="shortcut-row">
               <span className="shortcut-key">Ctrl + V</span>

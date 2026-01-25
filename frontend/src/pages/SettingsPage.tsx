@@ -368,7 +368,7 @@ export function SettingsPage({ onClose }: { onClose: () => void }) {
               onChange={e => handleOverwriteWhenNullChange(e.target.checked)}
             />
             <span className="checkbox-label">
-              Overwrite values with locked/null when pasting from Increlution
+              Overwrite values with excluded actions when pasting from Increlution
             </span>
           </label>
           <label className="checkbox-option">
