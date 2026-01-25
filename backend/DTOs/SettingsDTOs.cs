@@ -44,6 +44,12 @@ public record UserSettings
     public bool ApplyDefaultsOnImport { get; init; } = false;
 
     /// <summary>
+    /// When true, null values in imported data overwrite existing values.
+    /// When false (default), null values in imports are ignored and existing values are preserved.
+    /// </summary>
+    public bool OverwriteWhenNull { get; init; } = false;
+
+    /// <summary>
     /// List of action IDs that the user has marked as favourites
     /// </summary>
     public List<int> FavouriteActions { get; init; } = new();

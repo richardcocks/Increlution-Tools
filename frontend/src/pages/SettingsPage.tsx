@@ -115,6 +115,14 @@ export function SettingsPage({ onClose }: { onClose: () => void }) {
     }
   };
 
+  const handleOverwriteWhenNullChange = async (value: boolean) => {
+    try {
+      await updateSettings({ overwriteWhenNull: value });
+    } catch {
+      showToast('Failed to save settings', 'error');
+    }
+  };
+
   const handlePriorityChange = async (skillId: number, actionType: number, level: number | null) => {
     const key = makeSkillActionKey(skillId, actionType);
     const newPriorities = { ...settings.defaultSkillPriorities };
@@ -353,6 +361,16 @@ export function SettingsPage({ onClose }: { onClose: () => void }) {
 
         <section className="settings-section">
           <h3>Paste from Game Behavior</h3>
+          <label className="checkbox-option">
+            <input
+              type="checkbox"
+              checked={settings.overwriteWhenNull}
+              onChange={e => handleOverwriteWhenNullChange(e.target.checked)}
+            />
+            <span className="checkbox-label">
+              Overwrite values with locked/null when pasting from Increlution
+            </span>
+          </label>
           <label className="checkbox-option">
             <input
               type="checkbox"
