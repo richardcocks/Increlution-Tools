@@ -321,3 +321,42 @@
 .share-item-stat.warning {
   color: #d97706;
 }
+
+/* Info banner for folder sharing */
+.share-info-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 16px;
+  background: #fef3c7;
+  border: 1px solid #fbbf24;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-size: 14px;
+  color: #92400e;
+}
+
+.share-info-banner i {
+  font-size: 16px;
+  margin-top: 2px;
+  color: #d97706;
+}
+
+[data-theme="dark"] .share-info-banner {
+  background: #422006;
+  border-color: #a16207;
+  color: #fef3c7;
+}
+
+[data-theme="dark"] .share-info-banner i {
+  color: #fbbf24;
+}
+
+[data-theme="dark"] .share-link-container {
+  background: #0c4a6e;
+  border-color: #0369a1;
+}
+
+[data-theme="dark"] .share-link-header {
+  color: #7dd3fc;
+}

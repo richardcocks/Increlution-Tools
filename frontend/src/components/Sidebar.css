@@ -367,3 +367,81 @@
 .saved-share-item .action-button {
   opacity: 0;
 }
+
+/* Folder share item styling */
+.saved-folder-share {
+  /* Container for folder share and its tree */
+}
+
+.saved-share-item.folder-share {
+  padding-left: 8px;
+}
+
+.saved-share-item.folder-share .expand-button {
+  margin-right: 4px;
+}
+
+.saved-folder-tree {
+  padding-left: 24px;
+}
+
+.shared-folder-tree-node {
+  /* Container for shared folder tree node */
+}
+
+.shared-folder-item {
+  display: flex;
+  align-items: center;
+  padding: 4px 8px;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.shared-folder-item .folder-icon {
+  color: var(--color-text-secondary);
+  font-size: 12px;
+}
+
+.shared-folder-item .folder-name {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--color-text-secondary);
+}
+
+.shared-loadout-item {
+  display: flex;
+  align-items: center;
+  padding: 4px 8px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-size: 12px;
+}
+
+.shared-loadout-item:hover {
+  background: var(--color-sidebar-hover);
+}
+
+.shared-loadout-item.selected {
+  background: #e3f2fd;
+  font-weight: 500;
+}
+
+.shared-loadout-item .loadout-icon {
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+
+.shared-loadout-item .loadout-name {
+  font-size: 12px;
+}
+
+/* Dark mode adjustments */
+[data-theme="dark"] .folder-item.drop-target-active {
+  background: #1e3a5f;
+  border-color: #3b82f6;
+}
+
+[data-theme="dark"] .saved-share-item.selected,
+[data-theme="dark"] .shared-loadout-item.selected {
+  background: #1e3a5f;
+}

@@ -13,7 +13,7 @@ A visual editor for managing automation loadouts in the [Increlution](https://st
 - **Import/Export**:
   - Copy/paste loadouts directly (Ctrl+V to import)
   - Upload/download JSON files
-- **Sharing**: Share loadouts via links with optional expiration and attribution
+- **Sharing**: Share loadouts or entire folders via links with optional expiration and attribution
 - **Chapter Progress**: Unlock chapters by proving you've reached them (prevents spoilers)
 - **Favourites**: Save and quickly access favourite loadout configurations
 - **Default Priorities**: Configure default skill priorities for new loadouts
@@ -104,15 +104,18 @@ Open http://localhost:5173 in your browser.
 - Deleting a non-empty folder requires typing the folder name to confirm
 - Protected (readonly) loadouts are moved to the parent folder instead of deleted
 
-### Sharing Loadouts
-1. Open a loadout and click the "Share" button
+### Sharing Loadouts and Folders
+1. Click the "Share" button on any loadout or folder (except the root folder)
 2. Configure options:
    - **Expiration**: 1 hour, 24 hours, 7 days, 30 days, or never
    - **Show Attribution**: Whether your username appears on the shared view
 3. Copy the generated link and share it
-4. Recipients can view the loadout read-only
-5. Logged-in recipients can save it to their "Others' Loadouts" for quick access
-6. Manage all your shares from the shares icon in the header
+4. Recipients can view the shared content read-only:
+   - **Loadout shares**: Display the loadout directly
+   - **Folder shares**: Display a folder tree with all subfolders and loadouts
+5. Logged-in recipients can save shares to their "Others' Loadouts" for quick access
+6. Shared items show live data (changes you make are reflected in the share)
+7. Manage all your shares from the shares icon in the header
 
 ### Chapter Progress
 To prevent spoilers, chapters 2-11 are locked by default. Unlock them in Settings by entering the name of the first exploration in each chapter. This affects what you can see and export.
@@ -123,7 +126,7 @@ To prevent spoilers, chapters 2-11 are locked by default. Unlock them in Setting
 IncrelutionAutomationEditor/
 ├── backend/                 # ASP.NET Core API
 │   ├── Data/               # Entity Framework contexts
-│   ├── Models/             # Entity models (Folder, Loadout, LoadoutShare, etc.)
+│   ├── Models/             # Entity models (Folder, Loadout, LoadoutShare, FolderShare, etc.)
 │   ├── Migrations/         # EF Core migrations
 │   ├── Services/           # Business logic (GameDataService)
 │   └── GameData/           # Static JSON game data files

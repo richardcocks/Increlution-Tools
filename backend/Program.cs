@@ -498,9 +498,13 @@ app.MapDelete("/api/auth/account", async (
     var savedShares = await db.SavedShares.Where(s => s.UserId == userId).ToListAsync();
     db.SavedShares.RemoveRange(savedShares);
 
-    // 2. Delete shares created by user (and cascade deletes others' saved references)
+    // 2. Delete loadout shares created by user (and cascade deletes others' saved references)
     var shares = await db.LoadoutShares.Where(s => s.OwnerUserId == userId).ToListAsync();
     db.LoadoutShares.RemoveRange(shares);
+
+    // 2b. Delete folder shares created by user
+    var folderShares = await db.FolderShares.Where(s => s.OwnerUserId == userId).ToListAsync();
+    db.FolderShares.RemoveRange(folderShares);
 
     // 3. Delete all loadouts
     var loadouts = await db.Loadouts.Where(l => l.UserId == userId).ToListAsync();
@@ -1806,6 +1810,467 @@ app.MapDelete("/api/saved-shares/{id}", async (int id, ClaimsPrincipal user, App
 })
 .RequireAuthorization()
 .WithName("RemoveSavedShare");
+
+// === Folder Sharing Endpoints ===
+
+// POST /api/folders/{id}/share - Create folder share link
+app.MapPost("/api/folders/{id}/share", async (
+    int id,
+    CreateShareRequest request,
+    ClaimsPrincipal user,
+    AppDbContext db,
+    IdentityAppDbContext identityDb,
+    AppLimits limits) =>
+{
+    var userId = GetUserId(user);
+    var folder = await db.Folders.FirstOrDefaultAsync(f => f.Id == id && f.UserId == userId);
+    if (folder == null)
+        return Results.NotFound("Folder not found");
+
+    // Cannot share root folder
+    if (folder.ParentId == null)
+        return Results.BadRequest("Cannot share root folder");
+
+    // Check share count limit per folder
+    var shareCount = await db.FolderShares.CountAsync(s => s.FolderId == id);
+    if (shareCount >= limits.MaxSharesPerLoadout)
+        return Results.BadRequest($"Maximum shares per folder ({limits.MaxSharesPerLoadout}) reached");
+
+    // Validate expiration hours
+    if (request.ExpiresInHours.HasValue &&
+        (request.ExpiresInHours.Value < 1 || request.ExpiresInHours.Value > limits.MaxShareExpirationHours))
+        return Results.BadRequest($"Expiration must be between 1 and {limits.MaxShareExpirationHours} hours");
+
+    // Get user's unlocked chapters
+    var unlockedChapters = new List<int> { 0 };
+    var appUser = await identityDb.Users.FindAsync(userId);
+    if (appUser?.Settings != null)
+    {
+        try
+        {
+            var settings = System.Text.Json.JsonSerializer.Deserialize<UserSettings>(appUser.Settings);
+            if (settings?.UnlockedChapters?.Count > 0)
+            {
+                unlockedChapters = settings.UnlockedChapters;
+            }
+        }
+        catch
+        {
+            // Use default
+        }
+    }
+
+    // Generate unique token (retry on collision)
+    string token;
+    do
+    {
+        token = GenerateShareToken();
+    } while (await db.FolderShares.AnyAsync(s => s.ShareToken == token) ||
+             await db.LoadoutShares.AnyAsync(s => s.ShareToken == token));
+
+    var share = new FolderShare
+    {
+        FolderId = id,
+        OwnerUserId = userId,
+        ShareToken = token,
+        CreatedAt = DateTime.UtcNow,
+        ExpiresAt = request.ExpiresInHours.HasValue
+            ? DateTime.UtcNow.AddHours(request.ExpiresInHours.Value)
+            : null,
+        ShowAttribution = request.ShowAttribution
+    };
+    share.SetUnlockedChapters(unlockedChapters);
+
+    db.FolderShares.Add(share);
+    await db.SaveChangesAsync();
+
+    return Results.Ok(new FolderShareResponse(
+        share.Id,
+        share.ShareToken,
+        share.CreatedAt,
+        share.ExpiresAt,
+        share.ShowAttribution
+    ));
+})
+.RequireAuthorization()
+.WithName("CreateFolderShare");
+
+// GET /api/folders/{id}/shares - List active shares for folder
+app.MapGet("/api/folders/{id}/shares", async (int id, ClaimsPrincipal user, AppDbContext db) =>
+{
+    var userId = GetUserId(user);
+    var folder = await db.Folders.FirstOrDefaultAsync(f => f.Id == id && f.UserId == userId);
+    if (folder == null)
+        return Results.NotFound("Folder not found");
+
+    var shares = await db.FolderShares
+        .Where(s => s.FolderId == id && s.OwnerUserId == userId)
+        .Select(s => new FolderShareResponse(
+            s.Id,
+            s.ShareToken,
+            s.CreatedAt,
+            s.ExpiresAt,
+            s.ShowAttribution
+        ))
+        .ToListAsync();
+
+    return Results.Ok(shares);
+})
+.RequireAuthorization()
+.WithName("GetFolderShares");
+
+// GET /api/folder-shares - List all folder shares for current user
+app.MapGet("/api/folder-shares", async (ClaimsPrincipal user, AppDbContext db) =>
+{
+    var userId = GetUserId(user);
+
+    var shares = await db.FolderShares
+        .Where(s => s.OwnerUserId == userId)
+        .Include(s => s.Folder)
+        .Select(s => new UserFolderShareResponse(
+            s.Id,
+            s.ShareToken,
+            s.FolderId,
+            s.Folder.Name,
+            s.CreatedAt,
+            s.ExpiresAt,
+            s.ShowAttribution
+        ))
+        .ToListAsync();
+
+    return Results.Ok(shares);
+})
+.RequireAuthorization()
+.WithName("GetAllUserFolderShares");
+
+// DELETE /api/folder-shares/{shareId} - Revoke folder share link
+app.MapDelete("/api/folder-shares/{shareId}", async (int shareId, ClaimsPrincipal user, AppDbContext db) =>
+{
+    var userId = GetUserId(user);
+    var share = await db.FolderShares.FirstOrDefaultAsync(s => s.Id == shareId && s.OwnerUserId == userId);
+    if (share == null)
+        return Results.NotFound("Share not found");
+
+    db.FolderShares.Remove(share);
+    await db.SaveChangesAsync();
+
+    return Results.Ok();
+})
+.RequireAuthorization()
+.WithName("RevokeFolderShare");
+
+// Helper function to build folder tree for shared folder
+SharedFolderNode BuildSharedFolderTree(
+    Folder folder,
+    List<Folder> allFolders,
+    List<Loadout> allLoadouts,
+    HashSet<int> unlockedChapters,
+    IEnumerable<IncrelutionAction> allActions)
+{
+    // Build chapter lookup for filtering loadout data
+    var chapterLookup = new Dictionary<int, Dictionary<int, int>>();
+    foreach (var action in allActions)
+    {
+        if (!chapterLookup.ContainsKey(action.Type))
+            chapterLookup[action.Type] = new Dictionary<int, int>();
+        chapterLookup[action.Type][action.OriginalId] = action.Chapter;
+    }
+
+    var subFolders = allFolders
+        .Where(f => f.ParentId == folder.Id)
+        .Select(f => BuildSharedFolderTree(f, allFolders, allLoadouts, unlockedChapters, allActions))
+        .ToList();
+
+    var loadouts = allLoadouts
+        .Where(l => l.FolderId == folder.Id)
+        .Select(l => new SharedLoadoutSummary(l.Id, l.Name, l.UpdatedAt))
+        .ToList();
+
+    return new SharedFolderNode(folder.Id, folder.Name, subFolders, loadouts);
+}
+
+// GET /api/share/folder/{token} - View shared folder (public, cached)
+app.MapGet("/api/share/folder/{token}", async (
+    string token,
+    AppDbContext db,
+    IdentityAppDbContext identityDb,
+    GameDataService gameData) =>
+{
+    var share = await db.FolderShares
+        .Include(s => s.Folder)
+        .FirstOrDefaultAsync(s => s.ShareToken == token);
+
+    if (share == null)
+        return Results.NotFound(new SharedFolderErrorResponse("Share not found"));
+
+    // Check expiration
+    if (share.ExpiresAt.HasValue && share.ExpiresAt.Value < DateTime.UtcNow)
+        return Results.BadRequest(new SharedFolderErrorResponse("This share link has expired"));
+
+    // Get owner name if attribution is enabled
+    string? ownerName = null;
+    if (share.ShowAttribution)
+    {
+        var owner = await identityDb.Users.FindAsync(share.OwnerUserId);
+        ownerName = owner?.DiscordUsername;
+    }
+
+    // Load all folders and loadouts recursively under this folder
+    var allFolders = await db.Folders.Where(f => f.UserId == share.OwnerUserId).ToListAsync();
+    var allLoadouts = await db.Loadouts.Where(l => l.UserId == share.OwnerUserId).ToListAsync();
+
+    // Collect all folder IDs including the shared folder and its descendants
+    var folderIds = new HashSet<int>();
+    void CollectFolderIds(int folderId)
+    {
+        folderIds.Add(folderId);
+        foreach (var sub in allFolders.Where(f => f.ParentId == folderId))
+        {
+            CollectFolderIds(sub.Id);
+        }
+    }
+    CollectFolderIds(share.FolderId);
+
+    // Filter to only folders in the shared tree
+    var foldersInTree = allFolders.Where(f => folderIds.Contains(f.Id)).ToList();
+    var loadoutsInTree = allLoadouts.Where(l => folderIds.Contains(l.FolderId)).ToList();
+
+    // Build the tree
+    var unlockedChapters = new HashSet<int>(share.GetUnlockedChapters());
+    var allActions = gameData.GetAllActions();
+    var folderTree = BuildSharedFolderTree(share.Folder, foldersInTree, loadoutsInTree, unlockedChapters, allActions);
+
+    // Find the most recent update time among all loadouts
+    var latestUpdate = loadoutsInTree.Any()
+        ? loadoutsInTree.Max(l => l.UpdatedAt)
+        : share.CreatedAt;
+
+    return Results.Ok(new SharedFolderResponse(
+        share.Folder.Name,
+        folderTree,
+        latestUpdate,
+        ownerName
+    ));
+})
+.RequireRateLimiting("public-or-api")
+.CacheOutput("SharedLoadout")
+.WithName("GetSharedFolder");
+
+// GET /api/share/folder/{token}/loadout/{loadoutId} - Get specific loadout data from shared folder
+app.MapGet("/api/share/folder/{token}/loadout/{loadoutId}", async (
+    string token,
+    int loadoutId,
+    AppDbContext db,
+    GameDataService gameData) =>
+{
+    var share = await db.FolderShares
+        .Include(s => s.Folder)
+        .FirstOrDefaultAsync(s => s.ShareToken == token);
+
+    if (share == null)
+        return Results.NotFound(new SharedFolderErrorResponse("Share not found"));
+
+    // Check expiration
+    if (share.ExpiresAt.HasValue && share.ExpiresAt.Value < DateTime.UtcNow)
+        return Results.BadRequest(new SharedFolderErrorResponse("This share link has expired"));
+
+    // Verify loadout is in the shared folder tree
+    var allFolders = await db.Folders.Where(f => f.UserId == share.OwnerUserId).ToListAsync();
+    var folderIds = new HashSet<int>();
+    void CollectFolderIds(int folderId)
+    {
+        folderIds.Add(folderId);
+        foreach (var sub in allFolders.Where(f => f.ParentId == folderId))
+        {
+            CollectFolderIds(sub.Id);
+        }
+    }
+    CollectFolderIds(share.FolderId);
+
+    var loadout = await db.Loadouts.FirstOrDefaultAsync(l => l.Id == loadoutId && folderIds.Contains(l.FolderId));
+    if (loadout == null)
+        return Results.NotFound(new SharedFolderErrorResponse("Loadout not found in shared folder"));
+
+    // Filter loadout data by sharer's unlocked chapters
+    var unlockedChapters = new HashSet<int>(share.GetUnlockedChapters());
+    var allActions = gameData.GetAllActions();
+    var loadoutData = loadout.GetData();
+    var filteredData = FilterLoadoutByChapters(loadoutData, allActions, unlockedChapters);
+
+    return Results.Ok(new SharedFolderLoadoutResponse(
+        loadout.Name,
+        filteredData,
+        loadout.UpdatedAt
+    ));
+})
+.RequireRateLimiting("public-or-api")
+.CacheOutput("SharedLoadout")
+.WithName("GetSharedFolderLoadout");
+
+// POST /api/share/folder/{token}/save - Save folder to "Others' Loadouts"
+app.MapPost("/api/share/folder/{token}/save", async (
+    string token,
+    ClaimsPrincipal user,
+    AppDbContext db,
+    IdentityAppDbContext identityDb,
+    AppLimits limits) =>
+{
+    var userId = GetUserId(user);
+
+    // Check saved share limit
+    var savedCount = await db.SavedShares.CountAsync(s => s.UserId == userId);
+    if (savedCount >= limits.MaxSavedSharesPerUser)
+        return Results.BadRequest($"Maximum saved shares ({limits.MaxSavedSharesPerUser}) reached");
+
+    var share = await db.FolderShares
+        .Include(s => s.Folder)
+        .FirstOrDefaultAsync(s => s.ShareToken == token);
+
+    if (share == null)
+        return Results.NotFound("Share not found");
+
+    // Check expiration
+    if (share.ExpiresAt.HasValue && share.ExpiresAt.Value < DateTime.UtcNow)
+        return Results.BadRequest("This share link has expired");
+
+    // Check if already saved
+    var existing = await db.SavedShares
+        .FirstOrDefaultAsync(s => s.UserId == userId && s.FolderShareId == share.Id);
+
+    if (existing != null)
+        return Results.BadRequest("Already saved to your collection");
+
+    // Can't save your own folder
+    if (share.OwnerUserId == userId)
+        return Results.BadRequest("Cannot save your own folder");
+
+    var savedShare = new SavedShare
+    {
+        UserId = userId,
+        FolderShareId = share.Id,
+        SavedAt = DateTime.UtcNow
+    };
+
+    db.SavedShares.Add(savedShare);
+    await db.SaveChangesAsync();
+
+    // Get owner name if attribution is enabled
+    string? ownerName = null;
+    if (share.ShowAttribution)
+    {
+        var owner = await identityDb.Users.FindAsync(share.OwnerUserId);
+        ownerName = owner?.DiscordUsername;
+    }
+
+    // Build folder tree for response
+    var allFolders = await db.Folders.Where(f => f.UserId == share.OwnerUserId).ToListAsync();
+    var allLoadouts = await db.Loadouts.Where(l => l.UserId == share.OwnerUserId).ToListAsync();
+    var folderIds = new HashSet<int>();
+    void CollectFolderIds(int folderId)
+    {
+        folderIds.Add(folderId);
+        foreach (var sub in allFolders.Where(f => f.ParentId == folderId))
+        {
+            CollectFolderIds(sub.Id);
+        }
+    }
+    CollectFolderIds(share.FolderId);
+    var foldersInTree = allFolders.Where(f => folderIds.Contains(f.Id)).ToList();
+    var loadoutsInTree = allLoadouts.Where(l => folderIds.Contains(l.FolderId)).ToList();
+    var unlockedChapters = new HashSet<int>(share.GetUnlockedChapters());
+
+    return Results.Ok(new SavedShareUnifiedResponse(
+        savedShare.Id,
+        share.ShareToken,
+        "folder",
+        share.Folder.Name,
+        ownerName,
+        savedShare.SavedAt,
+        BuildSharedFolderTree(share.Folder, foldersInTree, loadoutsInTree, unlockedChapters, Array.Empty<IncrelutionAction>())
+    ));
+})
+.RequireAuthorization()
+.WithName("SaveFolderShare");
+
+// GET /api/saved-shares/unified - List user's saved shares (both loadouts and folders)
+app.MapGet("/api/saved-shares/unified", async (
+    ClaimsPrincipal user,
+    AppDbContext db,
+    IdentityAppDbContext identityDb,
+    GameDataService gameData) =>
+{
+    var userId = GetUserId(user);
+
+    var savedShares = await db.SavedShares
+        .Where(s => s.UserId == userId)
+        .Include(s => s.LoadoutShare)
+        .ThenInclude(ls => ls != null ? ls.Loadout : null)
+        .Include(s => s.FolderShare)
+        .ThenInclude(fs => fs != null ? fs.Folder : null)
+        .ToListAsync();
+
+    var results = new List<SavedShareUnifiedResponse>();
+    var allActions = gameData.GetAllActions();
+
+    foreach (var saved in savedShares)
+    {
+        string? ownerName = null;
+        var showAttribution = saved.LoadoutShare?.ShowAttribution ?? saved.FolderShare?.ShowAttribution ?? true;
+        var ownerUserId = saved.LoadoutShare?.OwnerUserId ?? saved.FolderShare?.OwnerUserId;
+
+        if (showAttribution && ownerUserId.HasValue)
+        {
+            var owner = await identityDb.Users.FindAsync(ownerUserId.Value);
+            ownerName = owner?.DiscordUsername;
+        }
+
+        if (saved.LoadoutShareId != null && saved.LoadoutShare != null)
+        {
+            results.Add(new SavedShareUnifiedResponse(
+                saved.Id,
+                saved.LoadoutShare.ShareToken,
+                "loadout",
+                saved.LoadoutShare.Loadout.Name,
+                ownerName,
+                saved.SavedAt,
+                null
+            ));
+        }
+        else if (saved.FolderShareId != null && saved.FolderShare != null)
+        {
+            // Build folder tree
+            var allFolders = await db.Folders.Where(f => f.UserId == saved.FolderShare.OwnerUserId).ToListAsync();
+            var allLoadouts = await db.Loadouts.Where(l => l.UserId == saved.FolderShare.OwnerUserId).ToListAsync();
+            var folderIds = new HashSet<int>();
+            void CollectFolderIds(int folderId)
+            {
+                folderIds.Add(folderId);
+                foreach (var sub in allFolders.Where(f => f.ParentId == folderId))
+                {
+                    CollectFolderIds(sub.Id);
+                }
+            }
+            CollectFolderIds(saved.FolderShare.FolderId);
+            var foldersInTree = allFolders.Where(f => folderIds.Contains(f.Id)).ToList();
+            var loadoutsInTree = allLoadouts.Where(l => folderIds.Contains(l.FolderId)).ToList();
+            var unlockedChapters = new HashSet<int>(saved.FolderShare.GetUnlockedChapters());
+
+            results.Add(new SavedShareUnifiedResponse(
+                saved.Id,
+                saved.FolderShare.ShareToken,
+                "folder",
+                saved.FolderShare.Folder.Name,
+                ownerName,
+                saved.SavedAt,
+                BuildSharedFolderTree(saved.FolderShare.Folder, foldersInTree, loadoutsInTree, unlockedChapters, allActions)
+            ));
+        }
+    }
+
+    return Results.Ok(results);
+})
+.RequireAuthorization()
+.WithName("GetSavedSharesUnified");
 
 // SPA fallback for client-side routing (production only)
 if (!app.Environment.IsDevelopment())

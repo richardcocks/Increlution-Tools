@@ -8,6 +8,7 @@ import { DeleteConfirmation } from './components/DeleteConfirmation'
 import { EmbeddedSharedLoadout } from './components/EmbeddedSharedLoadout'
 import { TextInputModal } from './components/TextInputModal'
 import { FolderView } from './components/FolderView'
+import { ShareModal } from './components/ShareModal'
 import { useAuth } from './contexts/AuthContext'
 import { useSettings } from './contexts/SettingsContext'
 import { useTheme } from './contexts/ThemeContext'
@@ -32,6 +33,10 @@ type FolderModal =
   | { type: 'rename'; folderId: number; currentName: string }
   | null;
 
+type ShareModalState =
+  | { type: 'folder'; folderId: number; folderName: string }
+  | null;
+
 function App() {
   const [folderTree, setFolderTree] = useState<FolderTreeNode | null>(null)
   const [selectedLoadoutId, setSelectedLoadoutId] = useState<number | null>(null)
@@ -40,6 +45,7 @@ function App() {
   const [pendingDelete, setPendingDelete] = useState<PendingDelete>(null)
   const [viewingShareToken, setViewingShareToken] = useState<string | null>(null)
   const [folderModal, setFolderModal] = useState<FolderModal>(null)
+  const [shareModalState, setShareModalState] = useState<ShareModalState>(null)
   const { showToast } = useToast()
   const { user, logout } = useAuth()
   const { unlockedChaptersSet } = useSettings()
@@ -610,6 +616,7 @@ function App() {
             onSelectLoadout={(loadoutId) => handleLoadoutSelect(loadoutId, selectedFolderId)}
             onDuplicateFolder={() => handleDuplicateFolder(selectedFolderId)}
             onDeleteFolder={() => handleDeleteFolder(selectedFolderId)}
+            onShareFolder={() => setShareModalState({ type: 'folder', folderId: selectedFolderId, folderName: currentFolder.name })}
           />
         );
       }
@@ -726,6 +733,14 @@ function App() {
           submitText="Rename"
           onSubmit={handleRenameFolderSubmit}
           onCancel={() => setFolderModal(null)}
+        />
+      )}
+      {shareModalState && (
+        <ShareModal
+          itemType="folder"
+          itemId={shareModalState.folderId}
+          itemName={shareModalState.folderName}
+          onClose={() => setShareModalState(null)}
         />
       )}
     </div>

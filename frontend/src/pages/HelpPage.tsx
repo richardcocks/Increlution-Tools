@@ -90,10 +90,12 @@ export function HelpPage({ onClose }: { onClose: () => void }) {
         <section className="help-section">
           <h3>Sharing</h3>
           <ul className="help-list">
-            <li>Click "Share" on any loadout to create a shareable link</li>
+            <li>Click "Share" on any loadout or folder to create a shareable link</li>
+            <li>Folder shares include all subfolders and loadouts recursively</li>
             <li>Choose expiration and whether to show your name</li>
-            <li>Others can view your loadout read-only via the link</li>
-            <li>Logged-in viewers can save it to "Others' Loadouts"</li>
+            <li>Others can view your shared content read-only via the link</li>
+            <li>Logged-in viewers can save shares to "Others' Loadouts"</li>
+            <li>Shared items show live data (your changes are reflected)</li>
           </ul>
         </section>
 

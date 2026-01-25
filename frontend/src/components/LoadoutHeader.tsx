@@ -183,8 +183,9 @@ const LoadoutHeader = forwardRef<LoadoutHeaderHandle, LoadoutHeaderProps>(({ loa
 
       {showShareModal && loadout && (
         <ShareModal
-          loadoutId={loadout.id}
-          loadoutName={loadout.name}
+          itemType="loadout"
+          itemId={loadout.id}
+          itemName={loadout.name}
           onClose={() => setShowShareModal(false)}
         />
       )}

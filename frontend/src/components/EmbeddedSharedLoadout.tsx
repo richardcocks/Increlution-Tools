@@ -15,7 +15,7 @@ interface EmbeddedSharedLoadoutProps {
 }
 
 export function EmbeddedSharedLoadout({ token, onClose }: EmbeddedSharedLoadoutProps) {
-  const { saveShare, savedShares } = useSavedShares();
+  const { saveLoadoutShare, savedShares } = useSavedShares();
   const { showToast } = useToast();
   const { actions, skills, loading: gameDataLoading } = useGameData();
   const { unlockedChaptersSet } = useSettings();
@@ -49,7 +49,7 @@ export function EmbeddedSharedLoadout({ token, onClose }: EmbeddedSharedLoadoutP
   const handleSave = async () => {
     setSaving(true);
     try {
-      await saveShare(token);
+      await saveLoadoutShare(token);
       showToast('Saved to your collection!', 'success');
     } catch (err) {
       showToast(err instanceof Error ? err.message : 'Failed to save', 'error');
