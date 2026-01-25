@@ -50,6 +50,45 @@ const LoadoutEditor = forwardRef<LoadoutEditorHandle, LoadoutEditorProps>(({ loa
     startEditingName: () => headerRef.current?.startEditing()
   }));
 
+  // Merge imported data with existing loadout data
+  // When overwriteWhenNull is false, null values in the import are ignored and existing values preserved
+  const mergeWithExisting = useCallback((importedData: LoadoutData, existingData: LoadoutData | undefined): LoadoutData => {
+    if (!existingData || settings.overwriteWhenNull) {
+      // No existing data or user wants nulls to overwrite - use imported data as-is
+      return importedData;
+    }
+
+    // Start with a deep copy of existing data
+    const result: LoadoutData = {};
+    for (const typeKey of Object.keys(existingData)) {
+      const actionType = Number(typeKey);
+      result[actionType] = { ...existingData[actionType] };
+    }
+
+    // Merge imported data, but skip null values
+    for (const typeKey of Object.keys(importedData)) {
+      const actionType = Number(typeKey);
+      const importedTypeData = importedData[actionType];
+
+      if (!result[actionType]) {
+        result[actionType] = {};
+      }
+
+      for (const actionKey of Object.keys(importedTypeData)) {
+        const originalId = Number(actionKey);
+        const importedValue = importedTypeData[originalId];
+
+        // Only overwrite if imported value is not null
+        if (importedValue !== null) {
+          result[actionType][originalId] = importedValue;
+        }
+        // If importedValue is null and overwriteWhenNull is false, we skip it (keep existing value)
+      }
+    }
+
+    return result;
+  }, [settings.overwriteWhenNull]);
+
   // Apply default skill priorities to imported data
   const applyDefaultsToImport = useCallback((data: LoadoutData): LoadoutData => {
     if (!settings.applyDefaultsOnImport || Object.keys(settings.defaultSkillPriorities).length === 0) {
@@ -111,7 +150,8 @@ const LoadoutEditor = forwardRef<LoadoutEditorHandle, LoadoutEditorProps>(({ loa
 
     try {
       const data = parseLoadoutJson(text);
-      const dataWithDefaults = applyDefaultsToImport(data);
+      const mergedData = mergeWithExisting(data, loadout.data);
+      const dataWithDefaults = applyDefaultsToImport(mergedData);
       await api.importLoadout(loadoutId, dataWithDefaults);
 
       // Refresh loadout data
@@ -127,7 +167,7 @@ const LoadoutEditor = forwardRef<LoadoutEditorHandle, LoadoutEditorProps>(({ loa
         showToast('Failed to import loadout', 'error');
       }
     }
-  }, [loadout, loadoutId, showToast, applyDefaultsToImport]);
+  }, [loadout, loadoutId, showToast, mergeWithExisting, applyDefaultsToImport]);
 
   useEffect(() => {
     const handlePaste = (e: ClipboardEvent) => {
@@ -434,7 +474,8 @@ const LoadoutEditor = forwardRef<LoadoutEditorHandle, LoadoutEditorProps>(({ loa
     if (!loadout || !loadoutId) return;
 
     try {
-      const dataWithDefaults = applyDefaultsToImport(data);
+      const mergedData = mergeWithExisting(data, loadout.data);
+      const dataWithDefaults = applyDefaultsToImport(mergedData);
       await api.importLoadout(loadoutId, dataWithDefaults);
 
       // Refresh loadout data

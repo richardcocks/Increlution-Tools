@@ -8,6 +8,7 @@ export interface UserSettings {
   defaultSkillPriorities: Record<SkillActionKey, number>;
   skillPrioritiesInitialized: boolean;
   applyDefaultsOnImport: boolean;
+  overwriteWhenNull: boolean;
   favouriteActions: number[];
   unlockedChapters: number[];
   themePreference: ThemePreference;
@@ -18,6 +19,7 @@ export const defaultSettings: UserSettings = {
   defaultSkillPriorities: {},
   skillPrioritiesInitialized: false,
   applyDefaultsOnImport: false,
+  overwriteWhenNull: false,
   favouriteActions: [],
   unlockedChapters: [0],
   themePreference: 'system'

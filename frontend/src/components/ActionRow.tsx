@@ -43,7 +43,7 @@ const ActionRow = memo(function ActionRow({ action, skill, automationLevel, onAu
         <span className="action-name">{action.name}</span>
       </div>
       {isNull ? (
-        <i className="fas fa-lock action-lock-icon" title="Excluded from export (Ctrl+click to unlock)" />
+        <i className="fas fa-ban action-excluded-icon" title="Excluded from loadout (Ctrl+click to include)" />
       ) : (
         <AutomationWheel
           level={automationLevel}
