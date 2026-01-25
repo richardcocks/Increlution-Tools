@@ -62,7 +62,12 @@ function App() {
   const { savedShares } = useSavedShares()
   const navigate = useNavigate()
   const location = useLocation()
-  const params = useParams<{ token?: string }>()
+  const params = useParams<{
+    token?: string
+    folderId?: string
+    loadoutId?: string
+    folderToken?: string
+  }>()
   const loadoutEditorRef = useRef<LoadoutEditorHandle>(null)
 
   // Derive page state from URL
@@ -70,14 +75,6 @@ function App() {
   const showFavourites = location.pathname === '/favourites'
   const showShares = location.pathname === '/shares'
   const showHelp = location.pathname === '/help'
-
-  // Handle /share/:token route for logged-in users
-  useEffect(() => {
-    if (params.token) {
-      setViewingShareToken(params.token)
-      setPendingDelete(null)
-    }
-  }, [params.token])
 
   const fetchFolderTree = async () => {
     try {
@@ -92,16 +89,98 @@ function App() {
     }
   }
 
+  // Initial fetch of folder tree
   useEffect(() => {
-    const initFolderTree = async () => {
-      const tree = await fetchFolderTree()
-      // Select root folder by default on initial load
-      if (tree) {
-        setSelectedFolderId(tree.id)
-      }
-    }
-    initFolderTree()
+    fetchFolderTree()
   }, [])
+
+  // Sync URL params to state (handles initial load, back/forward, and direct URL access)
+  // Note: We intentionally omit state variables from deps to prevent infinite loops.
+  // The effect should only run when URL params change, not when state changes.
+  // State comparisons inside the effect prevent redundant updates.
+  useEffect(() => {
+    if (!folderTree) return
+    if (showSettings || showFavourites || showShares || showHelp) return
+
+    const urlFolderId = params.folderId ? parseInt(params.folderId, 10) : null
+    const urlLoadoutId = params.loadoutId ? parseInt(params.loadoutId, 10) : null
+
+    // Handle NaN for numeric params
+    if ((params.folderId && isNaN(urlFolderId!)) || (params.loadoutId && isNaN(urlLoadoutId!))) {
+      navigate('/loadouts', { replace: true })
+      return
+    }
+
+    // Handle shared loadout: /loadouts/shared/:token
+    if (params.token) {
+      if (viewingShareToken !== params.token) {
+        setViewingShareToken(params.token)
+        setViewingSharedFolder(null)
+        setSelectedLoadoutId(null)
+        setSelectedFolderId(null)
+        setPendingDelete(null)
+      }
+      return
+    }
+
+    // Handle shared folder: /loadouts/shared/folder/:folderToken or /loadouts/shared/folder/:folderToken/:loadoutId
+    if (params.folderToken) {
+      const sharedLoadoutId = urlLoadoutId
+      const currentState = viewingSharedFolder
+
+      if (!currentState || currentState.token !== params.folderToken || currentState.loadoutId !== sharedLoadoutId) {
+        setViewingSharedFolder({ token: params.folderToken, loadoutId: sharedLoadoutId })
+        setViewingShareToken(null)
+        setSelectedLoadoutId(null)
+        setSelectedFolderId(null)
+        setPendingDelete(null)
+      }
+      return
+    }
+
+    // Clear shared state when viewing own content
+    if (viewingShareToken || viewingSharedFolder) {
+      setViewingShareToken(null)
+      setViewingSharedFolder(null)
+    }
+
+    // Handle own loadout: /loadouts/loadout/:loadoutId
+    if (urlLoadoutId) {
+      const { folder, loadout } = findLoadoutInTree(folderTree, urlLoadoutId)
+      if (loadout && folder) {
+        if (selectedLoadoutId !== urlLoadoutId) {
+          setSelectedLoadoutId(urlLoadoutId)
+          setSelectedFolderId(folder.id)
+        }
+      } else {
+        showToast('Loadout not found', 'error')
+        navigate('/loadouts', { replace: true })
+      }
+      return
+    }
+
+    // Handle own folder: /loadouts/folder/:folderId
+    if (urlFolderId) {
+      const folder = findFolderById(folderTree, urlFolderId)
+      if (folder) {
+        if (selectedFolderId !== urlFolderId || selectedLoadoutId !== null) {
+          setSelectedFolderId(urlFolderId)
+          setSelectedLoadoutId(null)
+        }
+      } else {
+        showToast('Folder not found', 'error')
+        navigate('/loadouts', { replace: true })
+      }
+      return
+    }
+
+    // No params in URL (/loadouts) - select root folder
+    if (selectedFolderId !== folderTree.id || selectedLoadoutId !== null) {
+      setSelectedFolderId(folderTree.id)
+      setSelectedLoadoutId(null)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params.token, params.folderToken, params.folderId, params.loadoutId, folderTree, showSettings, showFavourites, showShares, showHelp])
 
   const handleLogout = async () => {
     try {
@@ -161,10 +240,19 @@ function App() {
 
   const confirmDeleteFolder = async (folderId: number, force = false) => {
     try {
+      // Find the parent folder before deleting
+      const folderToDelete = folderTree ? findFolderById(folderTree, folderId) : null
+      const parentId = folderToDelete?.parentId
+
       const result = await api.deleteFolder(folderId, force)
+
+      // Navigate to parent folder after deletion
       if (selectedFolderId === folderId) {
-        // Navigate to parent folder or root
-        setSelectedFolderId(folderTree?.id ?? null)
+        if (parentId && folderTree && parentId !== folderTree.id) {
+          navigate(`/loadouts/folder/${parentId}`)
+        } else {
+          navigate('/loadouts')
+        }
       }
       await fetchFolderTree()
 
@@ -358,25 +446,33 @@ function App() {
     return null;
   }
 
+  // Helper to find a loadout and its parent folder by loadout ID
+  const findLoadoutInTree = (
+    tree: FolderTreeNode,
+    loadoutId: number
+  ): { folder: FolderTreeNode | null; loadout: { id: number; name: string } | null } => {
+    const loadout = tree.loadouts.find(l => l.id === loadoutId)
+    if (loadout) return { folder: tree, loadout }
+    for (const sub of tree.subFolders) {
+      const result = findLoadoutInTree(sub, loadoutId)
+      if (result.loadout) return result
+    }
+    return { folder: null, loadout: null }
+  }
+
   const handleCreateLoadout = async (folderId: number) => {
     setPendingDelete(null)
-    setViewingShareToken(null)  // Clear shared view when creating new loadout
-    setViewingSharedFolder(null)  // Clear shared folder view
-    // Update URL to /loadouts if we're not already there
-    // Use queueMicrotask to ensure state updates are committed before navigation
-    if (location.pathname !== '/loadouts') {
-      queueMicrotask(() => navigate('/loadouts'))
-    }
     try {
       const loadout = await api.createLoadout('Loadout', folderId)
-      // Optimistically add to tree and select
+      // Optimistically add to tree
       setFolderTree(prev => prev ? addLoadoutToTree(prev, folderId, {
         id: loadout.id,
         name: loadout.name,
         updatedAt: loadout.updatedAt,
         isProtected: loadout.isProtected
       }) : prev)
-      setSelectedLoadoutId(loadout.id)
+      // Navigate to the new loadout
+      navigate(`/loadouts/loadout/${loadout.id}`)
       // Refresh tree in background to sync with server
       fetchFolderTree()
     } catch (err) {
@@ -392,8 +488,13 @@ function App() {
   const confirmDeleteLoadout = async (loadoutId: number) => {
     try {
       await api.deleteLoadout(loadoutId)
+      // Navigate to parent folder after deletion
       if (selectedLoadoutId === loadoutId) {
-        setSelectedLoadoutId(null)
+        if (selectedFolderId && folderTree && selectedFolderId !== folderTree.id) {
+          navigate(`/loadouts/folder/${selectedFolderId}`)
+        } else {
+          navigate('/loadouts')
+        }
       }
       await fetchFolderTree()
     } catch (err) {
@@ -415,57 +516,39 @@ function App() {
   }
 
   const handleFolderSelect = (folderId: number) => {
-    setSelectedFolderId(folderId)
-    setSelectedLoadoutId(null)
     setPendingDelete(null)
-    setViewingShareToken(null)  // Clear shared view when selecting folder
-    setViewingSharedFolder(null)  // Clear shared folder view
-    // Update URL to /loadouts if we're not already there
-    // Use queueMicrotask to ensure state updates are committed before navigation
-    if (location.pathname !== '/loadouts') {
-      queueMicrotask(() => navigate('/loadouts'))
+    // Navigate to URL - state will sync from URL sync effect
+    if (folderTree && folderId === folderTree.id) {
+      navigate('/loadouts')
+    } else {
+      navigate(`/loadouts/folder/${folderId}`)
     }
   }
 
-  const handleLoadoutSelect = (loadoutId: number, folderId: number) => {
-    setSelectedLoadoutId(loadoutId)
-    setSelectedFolderId(folderId)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handleLoadoutSelect = (loadoutId: number, _folderId: number) => {
     setPendingDelete(null)
-    setViewingShareToken(null)  // Clear shared view when selecting own loadout
-    setViewingSharedFolder(null)  // Clear shared folder view
-    // Update URL to /loadouts if we're not already there
-    // Use queueMicrotask to ensure state updates are committed before navigation
-    if (location.pathname !== '/loadouts') {
-      queueMicrotask(() => navigate('/loadouts'))
-    }
+    // Navigate to URL - state will sync from URL sync effect
+    navigate(`/loadouts/loadout/${loadoutId}`)
   }
 
   const handleViewShare = (token: string, shareType: 'loadout' | 'folder' = 'loadout') => {
-    setSelectedLoadoutId(null)
     setPendingDelete(null)
-
+    // Navigate to URL - state will sync from URL sync effect
     if (shareType === 'folder') {
-      // For folder shares, stay in the app and track the folder
-      setViewingShareToken(null)
-      setViewingSharedFolder({ token, loadoutId: null })
+      navigate(`/loadouts/shared/folder/${token}`)
     } else {
-      // For loadout shares, navigate to the share page
-      setViewingSharedFolder(null)
-      setViewingShareToken(token)
-      navigate(`/share/${token}`)
+      navigate(`/loadouts/shared/${token}`)
     }
   }
 
   const handleViewSharedFolderLoadout = (folderToken: string, loadoutId: number) => {
-    setSelectedLoadoutId(null)
     setPendingDelete(null)
-    setViewingShareToken(null)
-    setViewingSharedFolder({ token: folderToken, loadoutId })
+    // Navigate to URL - state will sync from URL sync effect
+    navigate(`/loadouts/shared/folder/${folderToken}/${loadoutId}`)
   }
 
   const handleCloseShare = () => {
-    setViewingShareToken(null)
-    // Navigate back to loadouts
     navigate('/loadouts')
   }
 
@@ -539,6 +622,8 @@ function App() {
         updatedAt: result.updatedAt,
         isProtected: result.isProtected
       }) : prev)
+      // Navigate to the new duplicate
+      navigate(`/loadouts/loadout/${result.id}`)
       showToast('Loadout duplicated', 'success')
     } catch (err) {
       console.error('Error duplicating loadout:', err)
@@ -551,6 +636,8 @@ function App() {
       const result = await api.duplicateFolder(folderId)
       // Refresh tree to get the new folder structure
       await fetchFolderTree()
+      // Navigate to the new duplicate
+      navigate(`/loadouts/folder/${result.id}`)
       showToast(`Duplicated ${result.totalFoldersCopied} folder${result.totalFoldersCopied !== 1 ? 's' : ''} and ${result.totalLoadoutsCopied} loadout${result.totalLoadoutsCopied !== 1 ? 's' : ''}`, 'success')
     } catch (err) {
       console.error('Error duplicating folder:', err)
@@ -623,7 +710,7 @@ function App() {
           <EmbeddedSharedFolderLoadout
             folderToken={viewingSharedFolder.token}
             loadoutId={viewingSharedFolder.loadoutId}
-            onClose={() => setViewingSharedFolder({ token: viewingSharedFolder.token, loadoutId: null })}
+            onClose={() => navigate(`/loadouts/shared/folder/${viewingSharedFolder.token}`)}
           />
         );
       } else {
