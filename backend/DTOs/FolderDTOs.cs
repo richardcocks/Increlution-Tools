@@ -64,3 +64,11 @@ public record DeleteFolderResponse(
     int LoadoutsDeleted,
     int ProtectedLoadoutsMoved
 );
+
+public record ReorderRequest(
+    [property: Required(ErrorMessage = "Item type is required")]
+    string ItemType,  // "folder" or "loadout"
+
+    [property: Required(ErrorMessage = "Ordered IDs are required")]
+    List<int> OrderedIds
+);

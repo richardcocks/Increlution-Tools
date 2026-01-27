@@ -134,6 +134,18 @@ export const api = {
     return response.json();
   },
 
+  async reorderItems(folderId: number, itemType: 'folder' | 'loadout', orderedIds: number[]): Promise<void> {
+    const response = await fetch(`${API_BASE}/folders/${folderId}/reorder`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ itemType, orderedIds })
+    });
+    if (!response.ok) {
+      throw new Error(`Failed to reorder items: ${response.statusText}`);
+    }
+  },
+
   async moveFolder(id: number, parentId: number): Promise<void> {
     const response = await fetch(`${API_BASE}/folders/${id}/parent`, {
       method: 'PUT',
