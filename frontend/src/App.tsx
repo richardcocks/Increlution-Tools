@@ -713,10 +713,9 @@ function App() {
       } catch (err) {
         console.error('Error moving to position:', err);
         showToast('Failed to move item', 'error');
-        setFolderTree(previousTree);
-        if (selectedLoadoutId === itemId && itemType === 'loadout') {
-          setSelectedFolderId(sourceFolderId);
-        }
+        // Refetch server state to ensure consistency, since the move
+        // may have succeeded while the reorder failed
+        await fetchFolderTree();
       }
     }
   }, [folderTree, selectedLoadoutId, showToast]);
