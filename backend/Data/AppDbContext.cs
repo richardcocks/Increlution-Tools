@@ -1,5 +1,6 @@
 using IncrelutionAutomationEditor.Api.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace IncrelutionAutomationEditor.Api.Data;
 
@@ -14,6 +15,16 @@ public class AppDbContext : DbContext
     public DbSet<LoadoutShare> LoadoutShares => Set<LoadoutShare>();
     public DbSet<FolderShare> FolderShares => Set<FolderShare>();
     public DbSet<SavedShare> SavedShares => Set<SavedShare>();
+
+    protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+    {
+        // SQLite doesn't preserve DateTimeKind, so all DateTime values lose their UTC kind
+        // when read back. This ensures they are always treated as UTC.
+        configurationBuilder.Properties<DateTime>()
+            .HaveConversion<UtcDateTimeConverter>();
+        configurationBuilder.Properties<DateTime?>()
+            .HaveConversion<UtcNullableDateTimeConverter>();
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -89,3 +100,11 @@ public class AppDbContext : DbContext
                 "([LoadoutShareId] IS NOT NULL AND [FolderShareId] IS NULL) OR ([LoadoutShareId] IS NULL AND [FolderShareId] IS NOT NULL)"));
     }
 }
+
+internal class UtcDateTimeConverter() : ValueConverter<DateTime, DateTime>(
+    v => v,
+    v => DateTime.SpecifyKind(v, DateTimeKind.Utc));
+
+internal class UtcNullableDateTimeConverter() : ValueConverter<DateTime?, DateTime?>(
+    v => v,
+    v => v.HasValue ? DateTime.SpecifyKind(v.Value, DateTimeKind.Utc) : v);
