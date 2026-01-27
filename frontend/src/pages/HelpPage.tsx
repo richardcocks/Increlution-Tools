@@ -45,6 +45,14 @@ export function HelpPage({ onClose }: { onClose: () => void }) {
               <span className="shortcut-key">Middle-click (sidebar)</span>
               <span className="shortcut-desc">Quick copy loadout data (to paste into Increlution)</span>
             </div>
+            <div className="shortcut-row">
+              <span className="shortcut-key">Ctrl + Z</span>
+              <span className="shortcut-desc">Undo last change to loadout data</span>
+            </div>
+            <div className="shortcut-row">
+              <span className="shortcut-key">Ctrl + Y / Ctrl + Shift + Z</span>
+              <span className="shortcut-desc">Redo last undone change</span>
+            </div>
           </div>
         </section>
 

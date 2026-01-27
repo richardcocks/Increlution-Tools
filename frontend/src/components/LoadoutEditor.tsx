@@ -45,6 +45,11 @@ const LoadoutEditor = forwardRef<LoadoutEditorHandle, LoadoutEditorProps>(({ loa
   // Track pending API calls per action to prevent race conditions
   // Key: "type:originalId", Value: AbortController
   const pendingUpdatesRef = useRef<Map<string, AbortController>>(new Map());
+  // Undo/redo history stacks for loadout data
+  const undoStackRef = useRef<LoadoutData[]>([]);
+  const redoStackRef = useRef<LoadoutData[]>([]);
+  const isUndoRedoRef = useRef(false);
+  const MAX_UNDO_HISTORY = 50;
 
   useImperativeHandle(ref, () => ({
     startEditingName: () => headerRef.current?.startEditing()
@@ -141,12 +146,57 @@ const LoadoutEditor = forwardRef<LoadoutEditorHandle, LoadoutEditorProps>(({ loa
       }
     };
 
+    // Clear undo/redo history when switching loadouts
+    undoStackRef.current = [];
+    redoStackRef.current = [];
+
     fetchLoadout();
   }, [loadoutId]);
+
+  // Push current loadout data onto the undo stack
+  const pushUndo = useCallback((currentData: LoadoutData) => {
+    if (isUndoRedoRef.current) return;
+    undoStackRef.current = [...undoStackRef.current.slice(-MAX_UNDO_HISTORY + 1), currentData];
+    redoStackRef.current = [];
+  }, []);
+
+  const applyUndoRedo = useCallback(async (
+    fromStack: LoadoutData[],
+    toStack: LoadoutData[],
+    label: string
+  ) => {
+    if (!loadout || !loadoutId || fromStack.length === 0) return;
+
+    const targetData = fromStack.pop()!;
+    toStack.push(loadout.data);
+
+    isUndoRedoRef.current = true;
+    setLoadout(prev => prev ? { ...prev, data: targetData, updatedAt: new Date().toISOString() } : prev);
+    isUndoRedoRef.current = false;
+
+    try {
+      await api.importLoadout(loadoutId, targetData);
+      showToast(label, 'success');
+    } catch {
+      showToast(`Failed to ${label.toLowerCase()}`, 'error');
+      const loadoutData = await api.getLoadout(loadoutId);
+      setLoadout(loadoutData);
+    }
+  }, [loadout, loadoutId, showToast]);
+
+  const undo = useCallback(() => {
+    applyUndoRedo(undoStackRef.current, redoStackRef.current, 'Undo');
+  }, [applyUndoRedo]);
+
+  const redo = useCallback(() => {
+    applyUndoRedo(redoStackRef.current, undoStackRef.current, 'Redo');
+  }, [applyUndoRedo]);
 
   // Handle global paste for import
   const handlePasteImport = useCallback(async (text: string) => {
     if (!loadout || !loadoutId) return;
+
+    pushUndo(loadout.data);
 
     try {
       const data = parseLoadoutJson(text);
@@ -266,6 +316,8 @@ const LoadoutEditor = forwardRef<LoadoutEditorHandle, LoadoutEditorProps>(({ loa
   const updateAutomationLevel = useCallback(async (action: IncrelutionAction, level: AutomationLevel) => {
     if (!loadout || !loadoutId) return;
 
+    pushUndo(loadout.data);
+
     const actionKey = `${action.type}:${action.originalId}`;
 
     // Abort any pending request for this action to prevent race conditions
@@ -360,6 +412,8 @@ const LoadoutEditor = forwardRef<LoadoutEditorHandle, LoadoutEditorProps>(({ loa
   // Bulk lock/unlock all actions in a scope
   const bulkToggleLock = useCallback(async (scope: number | 'all' | 'fav') => {
     if (!loadout || !loadoutId) return;
+
+    pushUndo(loadout.data);
 
     const scopeActions = getActionsForScope(scope);
     if (scopeActions.length === 0) return;
@@ -473,6 +527,8 @@ const LoadoutEditor = forwardRef<LoadoutEditorHandle, LoadoutEditorProps>(({ loa
   const handleImport = async (data: LoadoutData) => {
     if (!loadout || !loadoutId) return;
 
+    pushUndo(loadout.data);
+
     try {
       const mergedData = mergeWithExisting(data, loadout.data);
       const dataWithDefaults = applyDefaultsToImport(mergedData);
@@ -524,6 +580,28 @@ const LoadoutEditor = forwardRef<LoadoutEditorHandle, LoadoutEditorProps>(({ loa
     document.addEventListener('keydown', handleCopy);
     return () => document.removeEventListener('keydown', handleCopy);
   }, [loadoutId, handleExportClipboard]);
+
+  // Ctrl+Z for undo, Ctrl+Y / Ctrl+Shift+Z for redo
+  useEffect(() => {
+    const handleUndoRedo = (e: KeyboardEvent) => {
+      if (!loadoutId) return;
+      if (!(e.ctrlKey || e.metaKey)) return;
+
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return;
+
+      if (e.key === 'z' && !e.shiftKey) {
+        e.preventDefault();
+        undo();
+      } else if (e.key === 'y' || (e.key === 'z' && e.shiftKey)) {
+        e.preventDefault();
+        redo();
+      }
+    };
+
+    document.addEventListener('keydown', handleUndoRedo);
+    return () => document.removeEventListener('keydown', handleUndoRedo);
+  }, [loadoutId, undo, redo]);
 
   if (!loadoutId) {
     return (

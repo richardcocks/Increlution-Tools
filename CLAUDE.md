@@ -150,6 +150,14 @@ Visual gauge replacing dropdown for setting automation levels:
 
 State uses React `useState` with optimistic updates - UI updates immediately, API calls in background, reverts on error.
 
+### Undo/Redo
+- **Ctrl+Z**: Undo last loadout data change
+- **Ctrl+Y / Ctrl+Shift+Z**: Redo
+- Implemented via snapshot stacks (`undoStackRef`, `redoStackRef`) in `LoadoutEditor.tsx`
+- Tracks all data mutations: single action changes, bulk lock/unlock, imports
+- Applies optimistically then syncs to server via `api.importLoadout()`
+- History capped at 50 entries, cleared when switching loadouts
+
 ### Favourites System
 Users can mark actions as favourites from the Favourites page (`/favourites`). Favourite actions appear in the Fav tab in the LoadoutEditor for quick access.
 

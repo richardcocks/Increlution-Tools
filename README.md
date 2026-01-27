@@ -10,6 +10,7 @@ A visual editor for managing automation loadouts in the [Increlution](https://st
 - **Chapter Tabs**: Quickly navigate between chapters
 - **Folder Organization**: Organize loadouts in folders with drag-and-drop
 - **Duplicate**: Clone loadouts or entire folder structures with one click
+- **Undo/Redo**: Ctrl+Z to undo, Ctrl+Y or Ctrl+Shift+Z to redo loadout changes
 - **Import/Export**:
   - Copy/paste loadouts directly (Ctrl+V to import)
   - Upload/download JSON files
@@ -84,6 +85,8 @@ Open http://localhost:5173 in your browser.
    - **Ctrl+click (wheel)**: Set to maximum/minimum
    - **Ctrl+click (row)**: Lock/unlock (locked actions are excluded from export)
    - **Ctrl+click (chapter tab)**: Bulk lock/unlock all actions in that chapter
+   - **Ctrl+Z**: Undo last change
+   - **Ctrl+Y** or **Ctrl+Shift+Z**: Redo
 
 ### Import from Game
 1. In Increlution, press F1 (or Esc -> Automations) to open the Automations screen
