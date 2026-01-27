@@ -489,7 +489,7 @@ const LoadoutEditor = forwardRef<LoadoutEditorHandle, LoadoutEditorProps>(({ loa
     }
   };
 
-  const handleExportClipboard = async () => {
+  const handleExportClipboard = useCallback(async () => {
     if (!loadoutId) return;
 
     try {
@@ -504,7 +504,26 @@ const LoadoutEditor = forwardRef<LoadoutEditorHandle, LoadoutEditorProps>(({ loa
       console.error('Error exporting to clipboard:', err);
       showToast('Failed to copy to clipboard', 'error');
     }
-  };
+  }, [loadoutId, actions, unlockedChaptersSet, showToast]);
+
+  useEffect(() => {
+    const handleCopy = (e: KeyboardEvent) => {
+      if (!loadoutId) return;
+      if (!(e.ctrlKey || e.metaKey) || e.key !== 'c') return;
+
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return;
+
+      const selection = window.getSelection();
+      if (selection && selection.toString().length > 0) return;
+
+      e.preventDefault();
+      handleExportClipboard();
+    };
+
+    document.addEventListener('keydown', handleCopy);
+    return () => document.removeEventListener('keydown', handleCopy);
+  }, [loadoutId, handleExportClipboard]);
 
   if (!loadoutId) {
     return (
