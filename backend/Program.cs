@@ -1346,6 +1346,9 @@ app.MapPost("/api/loadouts/{id}/import", async (
         }
     }
 
+    if (request.Data == null)
+        return Results.BadRequest("Data is required");
+
     loadout.SetData(request.Data);
     loadout.UpdatedAt = DateTime.UtcNow;
     await db.SaveChangesAsync();
@@ -1956,12 +1959,15 @@ app.MapGet("/api/saved-shares", async (
     var savedShares = await db.SavedShares
         .Where(s => s.UserId == userId)
         .Include(s => s.LoadoutShare)
-        .ThenInclude(ls => ls.Loadout)
+        .ThenInclude(ls => ls!.Loadout)
         .ToListAsync();
 
     var results = new List<SavedShareResponse>();
     foreach (var saved in savedShares)
     {
+        if (saved.LoadoutShare is null)
+            continue;
+
         string? ownerName = null;
         if (saved.LoadoutShare.ShowAttribution)
         {
