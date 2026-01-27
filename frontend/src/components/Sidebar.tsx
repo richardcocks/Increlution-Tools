@@ -77,30 +77,39 @@ function TreeNode({ node, level, dragState, dropTargetFolderId, reorderTarget, o
     if (isRootFolder) return false;
     if (dragState.folderId === node.id) return false;
     if (dragState.descendantIds.has(node.id)) return false;
-    // Must share the same parent to reorder as siblings
     if (node.parentId == null) return false;
-    // For same-parent: always allowed
-    if (dragState.sourceParentId === node.parentId) return true;
-    // For cross-parent: also allowed (will move + reorder)
     return true;
   })();
+
+  const REORDER_EDGE_RATIO = 0.25;
 
   const handleFolderDragOver = (e: React.DragEvent) => {
     if (!dragState) return;
 
-    // Reorder: position between sibling folders
-    if (canFolderReorder) {
-      e.preventDefault();
-      e.dataTransfer.dropEffect = 'move';
+    if (dragState.type === 'folder' && canFolderReorder) {
       const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-      const midY = rect.top + rect.height / 2;
-      const position = e.clientY < midY ? 'above' : 'below';
-      onReorderTargetChange({ folderId: node.parentId!, itemType: 'folder', targetId: node.id, position });
-      onDropTargetChange(null);
-      return;
+      const offsetY = e.clientY - rect.top;
+      const edgeSize = rect.height * REORDER_EDGE_RATIO;
+
+      if (offsetY < edgeSize) {
+        // Top edge: reorder above
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        onReorderTargetChange({ folderId: node.parentId!, itemType: 'folder', targetId: node.id, position: 'above' });
+        onDropTargetChange(null);
+        return;
+      } else if (offsetY > rect.height - edgeSize) {
+        // Bottom edge: reorder below
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        onReorderTargetChange({ folderId: node.parentId!, itemType: 'folder', targetId: node.id, position: 'below' });
+        onDropTargetChange(null);
+        return;
+      }
+      // Fall through to center: move into folder
     }
 
-    // Move into folder
+    // Center zone or non-reorderable: move into folder
     if (canDropInto) {
       e.preventDefault();
       e.dataTransfer.dropEffect = 'move';
@@ -113,6 +122,7 @@ function TreeNode({ node, level, dragState, dropTargetFolderId, reorderTarget, o
     const relatedTarget = e.relatedTarget as HTMLElement;
     if (!e.currentTarget.contains(relatedTarget)) {
       onDropTargetChange(null);
+      onReorderTargetChange(null);
     }
   };
 
@@ -126,10 +136,21 @@ function TreeNode({ node, level, dragState, dropTargetFolderId, reorderTarget, o
       onDrop(node.id);
     }
     onDropTargetChange(null);
+    onReorderTargetChange(null);
   };
 
   const handleLoadoutDragOver = (e: React.DragEvent, loadoutId: number) => {
-    if (!dragState || dragState.type !== 'loadout') return;
+    if (!dragState) return;
+    // When dragging a folder over a loadout, treat as dropping into this folder
+    if (dragState.type === 'folder') {
+      if (canDropInto) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        onDropTargetChange(node.id);
+      }
+      onReorderTargetChange(null);
+      return;
+    }
     if (dragState.loadoutId === loadoutId) return;
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
@@ -144,6 +165,9 @@ function TreeNode({ node, level, dragState, dropTargetFolderId, reorderTarget, o
     e.preventDefault();
     if (reorderTarget) {
       onReorderDrop();
+    } else if (dragState?.type === 'folder' && canDropInto) {
+      onDrop(node.id);
+      onDropTargetChange(null);
     }
   };
 
