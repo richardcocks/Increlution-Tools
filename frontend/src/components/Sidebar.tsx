@@ -59,39 +59,49 @@ function TreeNode({ node, level, dragState, dropTargetFolderId, reorderTarget, o
   const isDropTarget = dropTargetFolderId === node.id;
   const isDraggingThisFolder = dragState?.type === 'folder' && dragState.folderId === node.id;
 
-  // Determine if we can drop here (move to different folder)
-  const canDrop = (() => {
+  // Can this folder accept a "move into" drop? (dropping ON the folder row)
+  const canDropInto = (() => {
     if (!dragState) return false;
     if (dragState.type === 'loadout') {
       return dragState.sourceFolderId !== node.id;
     } else {
       if (dragState.folderId === node.id) return false;
       if (dragState.descendantIds.has(node.id)) return false;
-      // Don't allow folder-move-drop if dragging within same parent (that's reorder)
-      if (dragState.sourceParentId === node.id) return false;
       return true;
     }
   })();
 
-  // Check if a folder drag is reordering within the same parent
-  const isFolderReorderTarget = dragState?.type === 'folder' && dragState.sourceParentId === node.parentId && dragState.folderId !== node.id && !isRootFolder;
+  // Can this folder row be a reorder target? (dragging a folder between siblings)
+  const canFolderReorder = (() => {
+    if (!dragState || dragState.type !== 'folder') return false;
+    if (isRootFolder) return false;
+    if (dragState.folderId === node.id) return false;
+    if (dragState.descendantIds.has(node.id)) return false;
+    // Must share the same parent to reorder as siblings
+    if (node.parentId == null) return false;
+    // For same-parent: always allowed
+    if (dragState.sourceParentId === node.parentId) return true;
+    // For cross-parent: also allowed (will move + reorder)
+    return true;
+  })();
 
   const handleFolderDragOver = (e: React.DragEvent) => {
     if (!dragState) return;
 
-    // Reorder: folder being dragged within the same parent
-    if (isFolderReorderTarget) {
+    // Reorder: position between sibling folders
+    if (canFolderReorder) {
       e.preventDefault();
       e.dataTransfer.dropEffect = 'move';
       const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
       const midY = rect.top + rect.height / 2;
       const position = e.clientY < midY ? 'above' : 'below';
       onReorderTargetChange({ folderId: node.parentId!, itemType: 'folder', targetId: node.id, position });
+      onDropTargetChange(null);
       return;
     }
 
-    // Move to different folder
-    if (canDrop) {
+    // Move into folder
+    if (canDropInto) {
       e.preventDefault();
       e.dataTransfer.dropEffect = 'move';
       onDropTargetChange(node.id);
@@ -108,27 +118,26 @@ function TreeNode({ node, level, dragState, dropTargetFolderId, reorderTarget, o
 
   const handleFolderDrop = (e: React.DragEvent) => {
     e.preventDefault();
-    if (isFolderReorderTarget && reorderTarget) {
+    if (reorderTarget && reorderTarget.targetId === node.id) {
       onReorderDrop();
       return;
     }
-    if (canDrop) {
+    if (canDropInto) {
       onDrop(node.id);
     }
     onDropTargetChange(null);
   };
 
   const handleLoadoutDragOver = (e: React.DragEvent, loadoutId: number) => {
-    if (!dragState) return;
-    // Reorder: loadout being dragged within the same folder
-    if (dragState.type === 'loadout' && dragState.sourceFolderId === node.id && dragState.loadoutId !== loadoutId) {
-      e.preventDefault();
-      e.dataTransfer.dropEffect = 'move';
-      const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-      const midY = rect.top + rect.height / 2;
-      const position = e.clientY < midY ? 'above' : 'below';
-      onReorderTargetChange({ folderId: node.id, itemType: 'loadout', targetId: loadoutId, position });
-    }
+    if (!dragState || dragState.type !== 'loadout') return;
+    if (dragState.loadoutId === loadoutId) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    const midY = rect.top + rect.height / 2;
+    const position = e.clientY < midY ? 'above' : 'below';
+    onReorderTargetChange({ folderId: node.id, itemType: 'loadout', targetId: loadoutId, position });
+    onDropTargetChange(null);
   };
 
   const handleLoadoutDrop = (e: React.DragEvent) => {
@@ -141,7 +150,7 @@ function TreeNode({ node, level, dragState, dropTargetFolderId, reorderTarget, o
   return (
     <div className="tree-node">
       <div
-        className={`folder-item ${isSelected ? 'selected' : ''} ${isDropTarget && canDrop ? 'drop-target-active' : ''} ${isDraggingThisFolder ? 'dragging' : ''} ${reorderTarget?.itemType === 'folder' && reorderTarget.targetId === node.id && reorderTarget.position === 'above' ? 'reorder-above' : ''} ${reorderTarget?.itemType === 'folder' && reorderTarget.targetId === node.id && reorderTarget.position === 'below' ? 'reorder-below' : ''}`}
+        className={`folder-item ${isSelected ? 'selected' : ''} ${isDropTarget && canDropInto ? 'drop-target-active' : ''} ${isDraggingThisFolder ? 'dragging' : ''} ${reorderTarget?.itemType === 'folder' && reorderTarget.targetId === node.id && reorderTarget.position === 'above' ? 'reorder-above' : ''} ${reorderTarget?.itemType === 'folder' && reorderTarget.targetId === node.id && reorderTarget.position === 'below' ? 'reorder-below' : ''}`}
         style={{ paddingLeft: `${level * 16}px` }}
         onClick={() => onFolderSelect(node.id)}
         draggable={!isRootFolder}
@@ -343,7 +352,7 @@ function getDescendantIds(tree: FolderTreeNode, folderId: number): Set<number> {
 }
 
 export function Sidebar({ folderTree, onCreateLoadout, onViewShare, viewingShareToken, viewingSharedFolder, onQuickExportShare, onQuickExportSharedFolderLoadout, onViewSharedFolderLoadout }: SidebarProps) {
-  const { onMoveLoadout, onMoveFolder, onReorder } = useSidebarActions();
+  const { onMoveLoadout, onMoveFolder, onMoveToPosition } = useSidebarActions();
   const { savedShares, removeSavedShare } = useSavedShares();
   const { showToast } = useToast();
   const [dragState, setDragState] = useState<DragState | null>(null);
@@ -398,11 +407,13 @@ export function Sidebar({ folderTree, onCreateLoadout, onViewShare, viewingShare
     if (reorderTarget.itemType === 'folder' && dragState.type === 'folder') {
       const ids = parentFolder.subFolders.map(f => f.id);
       const draggedId = dragState.folderId;
+      // filter removes draggedId if it's already in this folder (same-folder reorder)
+      // if cross-folder, filter is a no-op since draggedId isn't in the list
       const filtered = ids.filter(id => id !== draggedId);
       const targetIndex = filtered.indexOf(reorderTarget.targetId);
       const insertIndex = reorderTarget.position === 'above' ? targetIndex : targetIndex + 1;
       filtered.splice(insertIndex, 0, draggedId);
-      onReorder(reorderTarget.folderId, 'folder', filtered);
+      onMoveToPosition('folder', draggedId, dragState.sourceParentId, reorderTarget.folderId, filtered);
     } else if (reorderTarget.itemType === 'loadout' && dragState.type === 'loadout') {
       const ids = parentFolder.loadouts.map(l => l.id);
       const draggedId = dragState.loadoutId;
@@ -410,7 +421,7 @@ export function Sidebar({ folderTree, onCreateLoadout, onViewShare, viewingShare
       const targetIndex = filtered.indexOf(reorderTarget.targetId);
       const insertIndex = reorderTarget.position === 'above' ? targetIndex : targetIndex + 1;
       filtered.splice(insertIndex, 0, draggedId);
-      onReorder(reorderTarget.folderId, 'loadout', filtered);
+      onMoveToPosition('loadout', draggedId, dragState.sourceFolderId, reorderTarget.folderId, filtered);
     }
 
     setDragState(null);

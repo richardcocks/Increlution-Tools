@@ -661,22 +661,65 @@ function App() {
     }
   }
 
-  const handleReorder = useCallback(async (folderId: number, itemType: 'folder' | 'loadout', orderedIds: number[]) => {
-    // Optimistic update
+  const handleMoveToPosition = useCallback(async (
+    itemType: 'folder' | 'loadout',
+    itemId: number,
+    sourceFolderId: number,
+    targetFolderId: number,
+    orderedIds: number[]
+  ) => {
     const previousTree = folderTree;
-    setFolderTree(prev => {
-      if (!prev) return prev;
-      return reorderInTree(prev, folderId, itemType, orderedIds);
-    });
+    const isSameFolder = sourceFolderId === targetFolderId;
 
-    try {
-      await api.reorderItems(folderId, itemType, orderedIds);
-    } catch (err) {
-      console.error('Error reordering:', err);
-      showToast('Failed to reorder items', 'error');
-      setFolderTree(previousTree);
+    if (isSameFolder) {
+      // Same folder: just reorder
+      setFolderTree(prev => {
+        if (!prev) return prev;
+        return reorderInTree(prev, targetFolderId, itemType, orderedIds);
+      });
+
+      try {
+        await api.reorderItems(targetFolderId, itemType, orderedIds);
+      } catch (err) {
+        console.error('Error reordering:', err);
+        showToast('Failed to reorder items', 'error');
+        setFolderTree(previousTree);
+      }
+    } else {
+      // Different folder: move then reorder
+      // Optimistic update: move item, then apply ordering
+      setFolderTree(prev => {
+        if (!prev) return prev;
+        let updated: FolderTreeNode;
+        if (itemType === 'loadout') {
+          updated = moveLoadoutInTree(prev, itemId, sourceFolderId, targetFolderId);
+        } else {
+          updated = moveFolderInTree(prev, itemId, sourceFolderId, targetFolderId);
+        }
+        return reorderInTree(updated, targetFolderId, itemType, orderedIds);
+      });
+
+      if (selectedLoadoutId === itemId && itemType === 'loadout') {
+        setSelectedFolderId(targetFolderId);
+      }
+
+      try {
+        if (itemType === 'loadout') {
+          await api.moveLoadout(itemId, targetFolderId);
+        } else {
+          await api.moveFolder(itemId, targetFolderId);
+        }
+        await api.reorderItems(targetFolderId, itemType, orderedIds);
+      } catch (err) {
+        console.error('Error moving to position:', err);
+        showToast('Failed to move item', 'error');
+        setFolderTree(previousTree);
+        if (selectedLoadoutId === itemId && itemType === 'loadout') {
+          setSelectedFolderId(sourceFolderId);
+        }
+      }
     }
-  }, [folderTree, showToast]);
+  }, [folderTree, selectedLoadoutId, showToast]);
 
   // Quick export loadout to clipboard (middle-click on sidebar)
   const handleQuickExport = useCallback(async (loadoutId: number) => {
@@ -933,7 +976,7 @@ function App() {
           onMoveLoadout={handleMoveLoadout}
           onMoveFolder={handleMoveFolder}
           onQuickExport={handleQuickExport}
-          onReorder={handleReorder}
+          onMoveToPosition={handleMoveToPosition}
         >
           <div className="app-body">
             <Sidebar
