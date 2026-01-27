@@ -392,6 +392,22 @@ function App() {
     return addFolderToParent(treeWithoutFolder);
   }
 
+  const reorderInTree = (tree: FolderTreeNode, folderId: number, itemType: 'folder' | 'loadout', orderedIds: number[]): FolderTreeNode => {
+    if (tree.id === folderId) {
+      if (itemType === 'folder') {
+        const reordered = orderedIds.map(id => tree.subFolders.find(f => f.id === id)!).filter(Boolean);
+        return { ...tree, subFolders: reordered };
+      } else {
+        const reordered = orderedIds.map(id => tree.loadouts.find(l => l.id === id)!).filter(Boolean);
+        return { ...tree, loadouts: reordered };
+      }
+    }
+    return {
+      ...tree,
+      subFolders: tree.subFolders.map(sub => reorderInTree(sub, folderId, itemType, orderedIds))
+    };
+  }
+
   // Helper to check if targetId is a descendant of folderId
   const isDescendant = (tree: FolderTreeNode, folderId: number, targetId: number): boolean => {
     const findFolder = (node: FolderTreeNode): FolderTreeNode | null => {
@@ -644,6 +660,23 @@ function App() {
       showToast(err instanceof Error ? err.message : 'Failed to duplicate folder', 'error')
     }
   }
+
+  const handleReorder = useCallback(async (folderId: number, itemType: 'folder' | 'loadout', orderedIds: number[]) => {
+    // Optimistic update
+    const previousTree = folderTree;
+    setFolderTree(prev => {
+      if (!prev) return prev;
+      return reorderInTree(prev, folderId, itemType, orderedIds);
+    });
+
+    try {
+      await api.reorderItems(folderId, itemType, orderedIds);
+    } catch (err) {
+      console.error('Error reordering:', err);
+      showToast('Failed to reorder items', 'error');
+      setFolderTree(previousTree);
+    }
+  }, [folderTree, showToast]);
 
   // Quick export loadout to clipboard (middle-click on sidebar)
   const handleQuickExport = useCallback(async (loadoutId: number) => {
@@ -900,6 +933,7 @@ function App() {
           onMoveLoadout={handleMoveLoadout}
           onMoveFolder={handleMoveFolder}
           onQuickExport={handleQuickExport}
+          onReorder={handleReorder}
         >
           <div className="app-body">
             <Sidebar

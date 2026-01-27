@@ -768,9 +768,11 @@ app.MapGet("/api/folders/tree", async (ClaimsPrincipal user, AppDbContext db) =>
             folder.Name,
             folder.ParentId,
             folders.Where(f => f.ParentId == folder.Id)
+                .OrderBy(f => f.SortOrder)
                 .Select(f => BuildTree(f.Id))
                 .ToList(),
             loadouts.Where(l => l.FolderId == folder.Id)
+                .OrderBy(l => l.SortOrder)
                 .Select(l => new LoadoutSummary(l.Id, l.Name, l.UpdatedAt, l.IsProtected))
                 .ToList()
         );
@@ -835,12 +837,18 @@ app.MapPost("/api/folders", async (CreateFolderRequest request, ClaimsPrincipal 
     if (currentDepth >= limits.MaxFolderDepth)
         return Results.BadRequest($"Maximum folder depth ({limits.MaxFolderDepth}) reached");
 
+    // Calculate next sort order for subfolders in the parent
+    var maxFolderSortOrder = await db.Folders
+        .Where(f => f.ParentId == request.ParentId && f.UserId == userId)
+        .MaxAsync(f => (int?)f.SortOrder) ?? -1;
+
     var folder = new Folder
     {
         Name = request.Name.Trim(),
         ParentId = request.ParentId,
         UserId = userId,
-        CreatedAt = DateTime.UtcNow
+        CreatedAt = DateTime.UtcNow,
+        SortOrder = maxFolderSortOrder + 1
     };
     db.Folders.Add(folder);
     await db.SaveChangesAsync();
@@ -911,10 +919,16 @@ app.MapDelete("/api/folders/{id}", async (int id, bool force, ClaimsPrincipal us
         var protectedLoadouts = loadoutsInFolders.Where(l => l.IsProtected).ToList();
         var unprotectedLoadouts = loadoutsInFolders.Where(l => !l.IsProtected).ToList();
 
-        // Re-parent protected loadouts to the parent folder
+        // Re-parent protected loadouts to the parent folder (append to end)
+        var maxParentLoadoutSortOrder = allLoadouts
+            .Where(l => l.FolderId == folder.ParentId!.Value)
+            .Select(l => (int?)l.SortOrder)
+            .Max() ?? -1;
         foreach (var protectedLoadout in protectedLoadouts)
         {
+            maxParentLoadoutSortOrder++;
             protectedLoadout.FolderId = folder.ParentId!.Value;
+            protectedLoadout.SortOrder = maxParentLoadoutSortOrder;
             protectedLoadout.UpdatedAt = DateTime.UtcNow;
         }
         protectedLoadoutsMoved = protectedLoadouts.Count;
@@ -1018,12 +1032,76 @@ app.MapPut("/api/folders/{id}/parent", async (int id, MoveFolderRequest request,
     if (newTotalDepth > limits.MaxFolderDepth)
         return Results.BadRequest($"Move would exceed maximum folder depth ({limits.MaxFolderDepth})");
 
+    // Append to end of target folder
+    var maxSortOrder = allFolders
+        .Where(f => f.ParentId == request.ParentId)
+        .Select(f => (int?)f.SortOrder)
+        .Max() ?? -1;
+
     folder.ParentId = request.ParentId;
+    folder.SortOrder = maxSortOrder + 1;
     await db.SaveChangesAsync();
     return Results.Ok();
 })
 .RequireAuthorization()
 .WithName("MoveFolder");
+
+// PUT /api/folders/{id}/reorder - Reorder items within a folder
+app.MapPut("/api/folders/{id}/reorder", async (int id, ReorderRequest request, ClaimsPrincipal user, AppDbContext db) =>
+{
+    var userId = GetUserId(user);
+    var folder = await db.Folders.FirstOrDefaultAsync(f => f.Id == id && f.UserId == userId);
+    if (folder == null)
+        return Results.NotFound("Folder not found");
+
+    if (request.ItemType != "folder" && request.ItemType != "loadout")
+        return Results.BadRequest("Item type must be 'folder' or 'loadout'");
+
+    if (request.OrderedIds == null || request.OrderedIds.Count == 0)
+        return Results.BadRequest("Ordered IDs are required");
+
+    if (request.ItemType == "folder")
+    {
+        var subFolders = await db.Folders
+            .Where(f => f.ParentId == id && f.UserId == userId)
+            .ToListAsync();
+
+        var subFolderIds = subFolders.Select(f => f.Id).ToHashSet();
+        var requestedIds = request.OrderedIds.ToHashSet();
+
+        if (!requestedIds.SetEquals(subFolderIds))
+            return Results.BadRequest("Ordered IDs must match all subfolders in this folder");
+
+        for (var i = 0; i < request.OrderedIds.Count; i++)
+        {
+            var sub = subFolders.First(f => f.Id == request.OrderedIds[i]);
+            sub.SortOrder = i;
+        }
+    }
+    else
+    {
+        var loadouts = await db.Loadouts
+            .Where(l => l.FolderId == id && l.UserId == userId)
+            .ToListAsync();
+
+        var loadoutIds = loadouts.Select(l => l.Id).ToHashSet();
+        var requestedIds = request.OrderedIds.ToHashSet();
+
+        if (!requestedIds.SetEquals(loadoutIds))
+            return Results.BadRequest("Ordered IDs must match all loadouts in this folder");
+
+        for (var i = 0; i < request.OrderedIds.Count; i++)
+        {
+            var loadout = loadouts.First(l => l.Id == request.OrderedIds[i]);
+            loadout.SortOrder = i;
+        }
+    }
+
+    await db.SaveChangesAsync();
+    return Results.Ok();
+})
+.RequireAuthorization()
+.WithName("ReorderFolderItems");
 
 // POST /api/loadouts - Create new loadout
 app.MapPost("/api/loadouts", async (
@@ -1084,6 +1162,11 @@ app.MapPost("/api/loadouts", async (
         }
     }
 
+    // Calculate next sort order for loadouts in the folder
+    var maxLoadoutSortOrder = await db.Loadouts
+        .Where(l => l.FolderId == request.FolderId && l.UserId == userId)
+        .MaxAsync(l => (int?)l.SortOrder) ?? -1;
+
     var loadout = new Loadout
     {
         Name = request.Name.Trim(),
@@ -1091,7 +1174,8 @@ app.MapPost("/api/loadouts", async (
         UserId = userId,
         CreatedAt = DateTime.UtcNow,
         UpdatedAt = DateTime.UtcNow,
-        Data = System.Text.Json.JsonSerializer.Serialize(data)
+        Data = System.Text.Json.JsonSerializer.Serialize(data),
+        SortOrder = maxLoadoutSortOrder + 1
     };
     db.Loadouts.Add(loadout);
     await db.SaveChangesAsync();
@@ -1302,7 +1386,13 @@ app.MapPut("/api/loadouts/{id}/folder", async (int id, MoveLoadoutRequest reques
     if (loadout.FolderId == request.FolderId)
         return Results.Ok();
 
+    // Append to end of target folder
+    var maxSortOrder = await db.Loadouts
+        .Where(l => l.FolderId == request.FolderId && l.UserId == userId)
+        .MaxAsync(l => (int?)l.SortOrder) ?? -1;
+
     loadout.FolderId = request.FolderId;
+    loadout.SortOrder = maxSortOrder + 1;
     loadout.UpdatedAt = DateTime.UtcNow;
     await db.SaveChangesAsync();
     return Results.Ok();
@@ -1323,6 +1413,13 @@ app.MapPost("/api/loadouts/{id}/duplicate", async (int id, ClaimsPrincipal user,
     if (loadoutCount >= limits.MaxLoadoutsPerUser)
         return Results.BadRequest($"Maximum loadout limit ({limits.MaxLoadoutsPerUser}) reached");
 
+    // Shift subsequent loadouts to make room after the original
+    var siblingsAfter = await db.Loadouts
+        .Where(l => l.FolderId == loadout.FolderId && l.UserId == userId && l.SortOrder > loadout.SortOrder)
+        .ToListAsync();
+    foreach (var s in siblingsAfter)
+        s.SortOrder++;
+
     var newLoadout = new Loadout
     {
         Name = GenerateCopyName(loadout.Name),
@@ -1331,7 +1428,8 @@ app.MapPost("/api/loadouts/{id}/duplicate", async (int id, ClaimsPrincipal user,
         CreatedAt = DateTime.UtcNow,
         UpdatedAt = DateTime.UtcNow,
         Data = loadout.Data, // Copy the JSON data as-is
-        IsProtected = false  // New duplicates are unprotected
+        IsProtected = false,  // New duplicates are unprotected
+        SortOrder = loadout.SortOrder + 1
     };
     db.Loadouts.Add(newLoadout);
     await db.SaveChangesAsync();
@@ -1420,11 +1518,18 @@ app.MapPost("/api/folders/{id}/duplicate", async (int id, ClaimsPrincipal user, 
     if (newTotalDepth > limits.MaxFolderDepth)
         return Results.BadRequest($"Duplicating would exceed maximum folder depth ({limits.MaxFolderDepth})");
 
+    // Shift subsequent sibling folders to make room after the original
+    var siblingsAfter = allFolders
+        .Where(f => f.ParentId == folder.ParentId && f.SortOrder > folder.SortOrder)
+        .ToList();
+    foreach (var s in siblingsAfter)
+        s.SortOrder++;
+
     // Recursively duplicate the folder structure
     var totalFoldersCopied = 0;
     var totalLoadoutsCopied = 0;
 
-    async Task<Folder> DuplicateFolderRecursive(int sourceFolderId, int? targetParentId, bool isTopLevel)
+    async Task<Folder> DuplicateFolderRecursive(int sourceFolderId, int? targetParentId, bool isTopLevel, int sortOrder)
     {
         var sourceFolder = allFolders.First(f => f.Id == sourceFolderId);
 
@@ -1433,14 +1538,15 @@ app.MapPost("/api/folders/{id}/duplicate", async (int id, ClaimsPrincipal user, 
             Name = isTopLevel ? GenerateCopyName(sourceFolder.Name) : sourceFolder.Name,
             ParentId = targetParentId,
             UserId = userId,
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = DateTime.UtcNow,
+            SortOrder = sortOrder
         };
         db.Folders.Add(newFolder);
         await db.SaveChangesAsync();
         totalFoldersCopied++;
 
-        // Duplicate loadouts in this folder
-        var folderLoadouts = allLoadouts.Where(l => l.FolderId == sourceFolderId).ToList();
+        // Duplicate loadouts in this folder (preserving sort order)
+        var folderLoadouts = allLoadouts.Where(l => l.FolderId == sourceFolderId).OrderBy(l => l.SortOrder).ToList();
         foreach (var loadout in folderLoadouts)
         {
             var newLoadout = new Loadout
@@ -1451,24 +1557,25 @@ app.MapPost("/api/folders/{id}/duplicate", async (int id, ClaimsPrincipal user, 
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
                 Data = loadout.Data,
-                IsProtected = false
+                IsProtected = false,
+                SortOrder = loadout.SortOrder
             };
             db.Loadouts.Add(newLoadout);
             totalLoadoutsCopied++;
         }
         await db.SaveChangesAsync();
 
-        // Duplicate subfolders
-        var subFolders = allFolders.Where(f => f.ParentId == sourceFolderId).ToList();
+        // Duplicate subfolders (preserving sort order)
+        var subFolders = allFolders.Where(f => f.ParentId == sourceFolderId).OrderBy(f => f.SortOrder).ToList();
         foreach (var subFolder in subFolders)
         {
-            await DuplicateFolderRecursive(subFolder.Id, newFolder.Id, false);
+            await DuplicateFolderRecursive(subFolder.Id, newFolder.Id, false, subFolder.SortOrder);
         }
 
         return newFolder;
     }
 
-    var newRootFolder = await DuplicateFolderRecursive(id, folder.ParentId, true);
+    var newRootFolder = await DuplicateFolderRecursive(id, folder.ParentId, true, folder.SortOrder + 1);
 
     return Results.Ok(new DuplicateFolderResponse(
         newRootFolder.Id,

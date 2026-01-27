@@ -11,6 +11,7 @@ public class Loadout
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
     public bool IsProtected { get; set; } = false;
+    public int SortOrder { get; set; }
 
     // JSON column storing the automation settings
     // Dictionary<ActionType, Dictionary<ActionId, AutomationLevel>>
