@@ -8,6 +8,7 @@ import { ShareModal } from './ShareModal';
 interface LoadoutHeaderProps {
   loadout: Loadout | null;
   folderBreadcrumb?: string[];
+  isFolderReadOnly?: boolean;
   onNameChange: (name: string) => void;
   onImport: (data: LoadoutData) => void;
   onExportClipboard: () => void;
@@ -20,7 +21,7 @@ export interface LoadoutHeaderHandle {
   startEditing: () => void;
 }
 
-const LoadoutHeader = forwardRef<LoadoutHeaderHandle, LoadoutHeaderProps>(({ loadout, folderBreadcrumb, onNameChange, onImport, onExportClipboard, onToggleProtection, onDuplicate, onDelete }, ref) => {
+const LoadoutHeader = forwardRef<LoadoutHeaderHandle, LoadoutHeaderProps>(({ loadout, folderBreadcrumb, isFolderReadOnly = false, onNameChange, onImport, onExportClipboard, onToggleProtection, onDuplicate, onDelete }, ref) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedName, setEditedName] = useState('');
   const [isPasteMode, setIsPasteMode] = useState(false);
@@ -60,8 +61,10 @@ const LoadoutHeader = forwardRef<LoadoutHeaderHandle, LoadoutHeaderProps>(({ loa
     setIsPasteMode(false);
   };
 
+  const isEffectivelyProtected = (loadout?.isProtected ?? false) || isFolderReadOnly;
+
   const handleStartEdit = () => {
-    if (loadout && !loadout.isProtected) {
+    if (loadout && !isEffectivelyProtected) {
       setEditedName(loadout.name);
       setIsEditing(true);
     }
@@ -107,16 +110,16 @@ const LoadoutHeader = forwardRef<LoadoutHeaderHandle, LoadoutHeaderProps>(({ loa
           ) : (
             <h1
               onClick={handleStartEdit}
-              className={`loadout-name ${loadout.isProtected ? 'protected' : ''}`}
+              className={`loadout-name ${isEffectivelyProtected ? 'protected' : ''}`}
             >
-              {loadout.isProtected && <i className="fas fa-lock protected-icon"></i>}
+              {isEffectivelyProtected && <i className="fas fa-lock protected-icon"></i>}
               {folderBreadcrumb && folderBreadcrumb.length > 0 && (
                 <span className="loadout-name-breadcrumb">
                   {folderBreadcrumb.join(' / ')} /&nbsp;
                 </span>
               )}
               {loadout.name}
-              {!loadout.isProtected && <i className="fas fa-edit edit-icon"></i>}
+              {!isEffectivelyProtected && <i className="fas fa-edit edit-icon"></i>}
             </h1>
           )}
         </div>
@@ -149,7 +152,7 @@ const LoadoutHeader = forwardRef<LoadoutHeaderHandle, LoadoutHeaderProps>(({ loa
             onClick={handlePasteImport}
             className="loadout-button"
             title="Paste loadout data exported from Increlution (Ctrl+V)"
-            disabled={loadout.isProtected}
+            disabled={isEffectivelyProtected}
           >
             <i className="fas fa-clipboard"></i> Paste from Game
           </button>
@@ -175,7 +178,7 @@ const LoadoutHeader = forwardRef<LoadoutHeaderHandle, LoadoutHeaderProps>(({ loa
           onClick={onDelete}
           className="loadout-button loadout-button-danger"
           title="Delete this loadout"
-          disabled={loadout.isProtected}
+          disabled={isEffectivelyProtected}
         >
           <i className="fas fa-trash"></i> Delete
         </button>

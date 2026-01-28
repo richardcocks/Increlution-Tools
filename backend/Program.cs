@@ -272,6 +272,20 @@ if (!app.Environment.IsDevelopment())
 // Helper to get current user ID
 int GetUserId(ClaimsPrincipal user) => int.Parse(user.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
+// Helper to check if a folder or any of its ancestors is read-only
+bool IsFolderOrAncestorReadOnly(List<Folder> allFolders, int folderId)
+{
+    int? currentId = folderId;
+    while (currentId != null)
+    {
+        var folder = allFolders.FirstOrDefault(f => f.Id == currentId);
+        if (folder == null) break;
+        if (folder.IsReadOnly) return true;
+        currentId = folder.ParentId;
+    }
+    return false;
+}
+
 // === Auth Endpoints (Discord OAuth2) ===
 
 // GET /api/auth/discord - Initiate Discord OAuth2 flow
@@ -767,6 +781,7 @@ app.MapGet("/api/folders/tree", async (ClaimsPrincipal user, AppDbContext db) =>
             folder.Id,
             folder.Name,
             folder.ParentId,
+            folder.IsReadOnly,
             folders.Where(f => f.ParentId == folder.Id)
                 .OrderBy(f => f.SortOrder)
                 .Select(f => BuildTree(f.Id))
@@ -820,8 +835,12 @@ app.MapPost("/api/folders", async (CreateFolderRequest request, ClaimsPrincipal 
     if (parentFolder == null)
         return Results.NotFound("Parent folder not found");
 
-    // Check folder depth limit
+    // Check folder read-only
     var allFolders = await db.Folders.Where(f => f.UserId == userId).ToListAsync();
+    if (IsFolderOrAncestorReadOnly(allFolders, request.ParentId))
+        return Results.BadRequest("Folder is read-only");
+
+    // Check folder depth limit
     int GetDepth(int? parentId)
     {
         int depth = 0;
@@ -870,6 +889,11 @@ app.MapPut("/api/folders/{id}", async (int id, RenameFolderRequest request, Clai
     if (folder.ParentId == null)
         return Results.BadRequest("Cannot rename root folder");
 
+    // Check folder read-only
+    var allFoldersForRename = await db.Folders.Where(f => f.UserId == userId).ToListAsync();
+    if (IsFolderOrAncestorReadOnly(allFoldersForRename, id))
+        return Results.BadRequest("Folder is read-only");
+
     folder.Name = request.Name.Trim();
     await db.SaveChangesAsync();
 
@@ -893,6 +917,11 @@ app.MapDelete("/api/folders/{id}", async (int id, bool force, ClaimsPrincipal us
     // Prevent deleting root folder
     if (folder.ParentId == null)
         return Results.BadRequest("Cannot delete root folder");
+
+    // Check folder read-only (check parent, since the folder itself being read-only shouldn't prevent deletion by parent)
+    var allFoldersForDeleteFolder = await db.Folders.Where(f => f.UserId == userId).ToListAsync();
+    if (IsFolderOrAncestorReadOnly(allFoldersForDeleteFolder, id))
+        return Results.BadRequest("Folder is read-only");
 
     var hasContents = folder.SubFolders.Any() || folder.Loadouts.Any();
 
@@ -971,6 +1000,11 @@ app.MapPut("/api/folders/{id}/parent", async (int id, MoveFolderRequest request,
     // Cannot move root folder
     if (folder.ParentId == null)
         return Results.BadRequest("Cannot move root folder");
+
+    // Check source parent folder read-only
+    var allFoldersPreCheck = await db.Folders.Where(f => f.UserId == userId).ToListAsync();
+    if (folder.ParentId.HasValue && IsFolderOrAncestorReadOnly(allFoldersPreCheck, folder.ParentId.Value))
+        return Results.BadRequest("Folder is read-only");
 
     var targetFolder = await db.Folders.FirstOrDefaultAsync(f => f.Id == request.ParentId && f.UserId == userId);
     if (targetFolder == null)
@@ -1054,6 +1088,11 @@ app.MapPut("/api/folders/{id}/reorder", async (int id, ReorderRequest request, C
     if (folder == null)
         return Results.NotFound("Folder not found");
 
+    // Check folder read-only
+    var allFoldersForReorder = await db.Folders.Where(f => f.UserId == userId).ToListAsync();
+    if (IsFolderOrAncestorReadOnly(allFoldersForReorder, id))
+        return Results.BadRequest("Folder is read-only");
+
     if (request.ItemType != "folder" && request.ItemType != "loadout")
         return Results.BadRequest("Item type must be 'folder' or 'loadout'");
 
@@ -1103,6 +1142,22 @@ app.MapPut("/api/folders/{id}/reorder", async (int id, ReorderRequest request, C
 .RequireAuthorization()
 .WithName("ReorderFolderItems");
 
+// PUT /api/folders/{id}/readonly - Toggle folder read-only flag
+app.MapPut("/api/folders/{id}/readonly", async (int id, SetFolderReadOnlyRequest request, ClaimsPrincipal user, AppDbContext db) =>
+{
+    var userId = GetUserId(user);
+    var folder = await db.Folders.FirstOrDefaultAsync(f => f.Id == id && f.UserId == userId);
+    if (folder == null)
+        return Results.NotFound("Folder not found");
+
+    folder.IsReadOnly = request.IsReadOnly;
+    await db.SaveChangesAsync();
+
+    return Results.Ok(new { folder.IsReadOnly });
+})
+.RequireAuthorization()
+.WithName("SetFolderReadOnly");
+
 // POST /api/loadouts - Create new loadout
 app.MapPost("/api/loadouts", async (
     CreateLoadoutRequest request,
@@ -1123,6 +1178,11 @@ app.MapPost("/api/loadouts", async (
     var folder = await db.Folders.FirstOrDefaultAsync(f => f.Id == request.FolderId && f.UserId == userId);
     if (folder == null)
         return Results.NotFound("Folder not found");
+
+    // Check folder read-only
+    var allFoldersForCreate = await db.Folders.Where(f => f.UserId == userId).ToListAsync();
+    if (IsFolderOrAncestorReadOnly(allFoldersForCreate, request.FolderId))
+        return Results.BadRequest("Folder is read-only");
 
     // Get user's default skill priorities and unlocked chapters
     var data = new Dictionary<string, Dictionary<string, int>>();
@@ -1196,6 +1256,11 @@ app.MapDelete("/api/loadouts/{id}", async (int id, ClaimsPrincipal user, AppDbCo
     if (loadout.IsProtected)
         return Results.BadRequest("Cannot delete a protected loadout");
 
+    // Check folder read-only
+    var allFoldersForDelete = await db.Folders.Where(f => f.UserId == userId).ToListAsync();
+    if (IsFolderOrAncestorReadOnly(allFoldersForDelete, loadout.FolderId))
+        return Results.BadRequest("Folder is read-only");
+
     db.Loadouts.Remove(loadout);
     await db.SaveChangesAsync();
 
@@ -1231,6 +1296,11 @@ app.MapPut("/api/loadout/action", async (
 
     if (loadout.IsProtected)
         return Results.BadRequest("Cannot modify a protected loadout");
+
+    // Check folder read-only
+    var allFoldersForAction = await db.Folders.Where(f => f.UserId == userId).ToListAsync();
+    if (IsFolderOrAncestorReadOnly(allFoldersForAction, loadout.FolderId))
+        return Results.BadRequest("Folder is read-only");
 
     var data = loadout.GetData();
 
@@ -1277,6 +1347,11 @@ app.MapPut("/api/loadouts/{id}/name", async (
 
     if (loadout.IsProtected)
         return Results.BadRequest("Cannot modify a protected loadout");
+
+    // Check folder read-only
+    var allFoldersForName = await db.Folders.Where(f => f.UserId == userId).ToListAsync();
+    if (IsFolderOrAncestorReadOnly(allFoldersForName, loadout.FolderId))
+        return Results.BadRequest("Folder is read-only");
 
     loadout.Name = request.Name.Trim();
     loadout.UpdatedAt = DateTime.UtcNow;
@@ -1326,6 +1401,11 @@ app.MapPost("/api/loadouts/{id}/import", async (
 
     if (loadout.IsProtected)
         return Results.BadRequest("Cannot modify a protected loadout");
+
+    // Check folder read-only
+    var allFoldersForImport = await db.Folders.Where(f => f.UserId == userId).ToListAsync();
+    if (IsFolderOrAncestorReadOnly(allFoldersForImport, loadout.FolderId))
+        return Results.BadRequest("Folder is read-only");
 
     // Validate imported data
     if (request.Data != null)
@@ -1381,6 +1461,11 @@ app.MapPut("/api/loadouts/{id}/folder", async (int id, MoveLoadoutRequest reques
     var loadout = await db.Loadouts.FirstOrDefaultAsync(l => l.Id == id && l.UserId == userId);
     if (loadout == null)
         return Results.NotFound("Loadout not found");
+
+    // Check source folder read-only
+    var allFoldersForMove = await db.Folders.Where(f => f.UserId == userId).ToListAsync();
+    if (IsFolderOrAncestorReadOnly(allFoldersForMove, loadout.FolderId))
+        return Results.BadRequest("Folder is read-only");
 
     var targetFolder = await db.Folders.FirstOrDefaultAsync(f => f.Id == request.FolderId && f.UserId == userId);
     if (targetFolder == null)

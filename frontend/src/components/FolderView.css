@@ -138,6 +138,17 @@
   font-size: 14px;
 }
 
+.folder-view-action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.folder-view-action-btn-active {
+  background: var(--color-bg-subtle);
+  border-color: #f59e0b;
+  color: #f59e0b;
+}
+
 /* Content */
 .folder-view-content {
   flex: 1;

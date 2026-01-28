@@ -18,6 +18,7 @@ type ReorderTarget = {
 
 interface SidebarProps {
   folderTree: FolderTreeNode | null;
+  effectiveReadOnlyMap: Map<number, boolean>;
   onCreateLoadout?: () => void;
   onViewShare?: (token: string, shareType: 'loadout' | 'folder') => void;
   viewingShareToken?: string | null;
@@ -30,6 +31,7 @@ interface SidebarProps {
 interface TreeNodeProps {
   node: FolderTreeNode;
   level: number;
+  effectiveReadOnlyMap: Map<number, boolean>;
   dragState: DragState | null;
   dropTargetFolderId: number | null;
   reorderTarget: ReorderTarget;
@@ -42,7 +44,7 @@ interface TreeNodeProps {
   onReorderDrop: () => void;
 }
 
-function TreeNode({ node, level, dragState, dropTargetFolderId, reorderTarget, onLoadoutDragStart, onFolderDragStart, onDragEnd, onDropTargetChange, onDrop, onReorderTargetChange, onReorderDrop }: TreeNodeProps) {
+function TreeNode({ node, level, effectiveReadOnlyMap, dragState, dropTargetFolderId, reorderTarget, onLoadoutDragStart, onFolderDragStart, onDragEnd, onDropTargetChange, onDrop, onReorderTargetChange, onReorderDrop }: TreeNodeProps) {
   const {
     selectedLoadoutId,
     selectedFolderId,
@@ -58,15 +60,23 @@ function TreeNode({ node, level, dragState, dropTargetFolderId, reorderTarget, o
   const isSelected = selectedFolderId === node.id && selectedLoadoutId === null;
   const isDropTarget = dropTargetFolderId === node.id;
   const isDraggingThisFolder = dragState?.type === 'folder' && dragState.folderId === node.id;
+  const isFolderEffectivelyReadOnly = effectiveReadOnlyMap.get(node.id) ?? false;
 
   // Can this folder accept a "move into" drop? (dropping ON the folder row)
   const canDropInto = (() => {
     if (!dragState) return false;
+    if (isFolderEffectivelyReadOnly) return false;
     if (dragState.type === 'loadout') {
+      // Also check if source folder is read-only (can't move out of read-only)
+      const sourceReadOnly = effectiveReadOnlyMap.get(dragState.sourceFolderId) ?? false;
+      if (sourceReadOnly) return false;
       return dragState.sourceFolderId !== node.id;
     } else {
       if (dragState.folderId === node.id) return false;
       if (dragState.descendantIds.has(node.id)) return false;
+      // Check if source parent is read-only
+      const sourceReadOnly = effectiveReadOnlyMap.get(dragState.sourceParentId) ?? false;
+      if (sourceReadOnly) return false;
       return true;
     }
   })();
@@ -78,6 +88,8 @@ function TreeNode({ node, level, dragState, dropTargetFolderId, reorderTarget, o
     if (dragState.folderId === node.id) return false;
     if (dragState.descendantIds.has(node.id)) return false;
     if (node.parentId == null) return false;
+    // Block reorder within read-only folders
+    if (node.parentId != null && (effectiveReadOnlyMap.get(node.parentId) ?? false)) return false;
     return true;
   })();
 
@@ -177,13 +189,13 @@ function TreeNode({ node, level, dragState, dropTargetFolderId, reorderTarget, o
         className={`folder-item ${isSelected ? 'selected' : ''} ${isDropTarget && canDropInto ? 'drop-target-active' : ''} ${isDraggingThisFolder ? 'dragging' : ''} ${reorderTarget?.itemType === 'folder' && reorderTarget.targetId === node.id && reorderTarget.position === 'above' ? 'reorder-above' : ''} ${reorderTarget?.itemType === 'folder' && reorderTarget.targetId === node.id && reorderTarget.position === 'below' ? 'reorder-below' : ''}`}
         style={{ paddingLeft: `${level * 16}px` }}
         onClick={() => onFolderSelect(node.id)}
-        draggable={!isRootFolder}
-        onDragStart={!isRootFolder ? (e) => {
+        draggable={!isRootFolder && !isFolderEffectivelyReadOnly}
+        onDragStart={!isRootFolder && !isFolderEffectivelyReadOnly ? (e) => {
           e.dataTransfer.effectAllowed = 'move';
           e.dataTransfer.setData('text/plain', `folder:${node.id}`);
           onFolderDragStart(node.id, node.parentId!);
         } : undefined}
-        onDragEnd={!isRootFolder ? onDragEnd : undefined}
+        onDragEnd={!isRootFolder && !isFolderEffectivelyReadOnly ? onDragEnd : undefined}
         onDragOver={handleFolderDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleFolderDrop}
@@ -204,6 +216,9 @@ function TreeNode({ node, level, dragState, dropTargetFolderId, reorderTarget, o
         <div className="folder-info">
           <i className="fas fa-folder folder-icon" />
           <span className="folder-name">{node.name}</span>
+          {isFolderEffectivelyReadOnly && (
+            <i className="fas fa-lock folder-readonly-icon" title="Read-only" />
+          )}
         </div>
       </div>
 
@@ -214,6 +229,7 @@ function TreeNode({ node, level, dragState, dropTargetFolderId, reorderTarget, o
               key={subFolder.id}
               node={subFolder}
               level={level + 1}
+              effectiveReadOnlyMap={effectiveReadOnlyMap}
               dragState={dragState}
               dropTargetFolderId={dropTargetFolderId}
               reorderTarget={reorderTarget}
@@ -243,13 +259,13 @@ function TreeNode({ node, level, dragState, dropTargetFolderId, reorderTarget, o
                   onQuickExport(loadout.id);
                 }
               }}
-              draggable
-              onDragStart={(e) => {
+              draggable={!isFolderEffectivelyReadOnly}
+              onDragStart={!isFolderEffectivelyReadOnly ? (e) => {
                 e.dataTransfer.effectAllowed = 'move';
                 e.dataTransfer.setData('text/plain', `loadout:${loadout.id}`);
                 onLoadoutDragStart(loadout.id, node.id);
-              }}
-              onDragEnd={onDragEnd}
+              } : undefined}
+              onDragEnd={!isFolderEffectivelyReadOnly ? onDragEnd : undefined}
               onDragOver={(e) => handleLoadoutDragOver(e, loadout.id)}
               onDrop={handleLoadoutDrop}
             >
@@ -375,7 +391,7 @@ function getDescendantIds(tree: FolderTreeNode, folderId: number): Set<number> {
   return descendants;
 }
 
-export function Sidebar({ folderTree, onCreateLoadout, onViewShare, viewingShareToken, viewingSharedFolder, onQuickExportShare, onQuickExportSharedFolderLoadout, onViewSharedFolderLoadout }: SidebarProps) {
+export function Sidebar({ folderTree, effectiveReadOnlyMap, onCreateLoadout, onViewShare, viewingShareToken, viewingSharedFolder, onQuickExportShare, onQuickExportSharedFolderLoadout, onViewSharedFolderLoadout }: SidebarProps) {
   const { onMoveLoadout, onMoveFolder, onMoveToPosition } = useSidebarActions();
   const { savedShares, removeSavedShare } = useSavedShares();
   const { showToast } = useToast();
@@ -510,6 +526,7 @@ export function Sidebar({ folderTree, onCreateLoadout, onViewShare, viewingShare
         <TreeNode
           node={folderTree}
           level={0}
+          effectiveReadOnlyMap={effectiveReadOnlyMap}
           dragState={dragState}
           dropTargetFolderId={dropTargetFolderId}
           reorderTarget={reorderTarget}

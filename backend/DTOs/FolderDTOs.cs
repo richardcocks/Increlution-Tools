@@ -7,6 +7,7 @@ public record FolderTreeNode(
     int Id,
     string Name,
     int? ParentId,
+    bool IsReadOnly,
     List<FolderTreeNode> SubFolders,
     List<LoadoutSummary> Loadouts
 );
@@ -63,6 +64,10 @@ public record DeleteFolderResponse(
     int FoldersDeleted,
     int LoadoutsDeleted,
     int ProtectedLoadoutsMoved
+);
+
+public record SetFolderReadOnlyRequest(
+    bool IsReadOnly
 );
 
 public record ReorderRequest(

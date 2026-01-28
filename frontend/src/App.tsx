@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useNavigate, useParams, useLocation, Link } from 'react-router-dom'
 import LoadoutEditor from './components/LoadoutEditor'
 import type { LoadoutEditorHandle } from './components/LoadoutEditor'
@@ -19,6 +19,7 @@ import { useSavedShares } from './contexts/SavedSharesContext'
 import { api } from './services/api'
 import type { FolderTreeNode, SharedFolderNode } from './types/models'
 import { filterLoadoutByChapters } from './utils/loadoutData'
+import { buildEffectiveReadOnlyMap } from './utils/folderUtils'
 import { SettingsPage } from './pages/SettingsPage'
 import { FavouritesPage } from './pages/FavouritesPage'
 import { ManageSharesPage } from './pages/ManageSharesPage'
@@ -88,6 +89,9 @@ function App() {
       setLoading(false)
     }
   }
+
+  // Compute effective read-only map from folder tree
+  const effectiveReadOnlyMap = useMemo(() => buildEffectiveReadOnlyMap(folderTree), [folderTree])
 
   // Initial fetch of folder tree
   useEffect(() => {
@@ -661,6 +665,31 @@ function App() {
     }
   }
 
+  const handleToggleFolderReadOnly = async (folderId: number) => {
+    const currentFolder = folderTree ? findFolderById(folderTree, folderId) : null
+    if (!currentFolder) return
+
+    const newValue = !currentFolder.isReadOnly
+
+    // Optimistic update
+    const previousTree = folderTree
+    const updateReadOnly = (tree: FolderTreeNode, targetId: number, value: boolean): FolderTreeNode => {
+      if (tree.id === targetId) {
+        return { ...tree, isReadOnly: value }
+      }
+      return { ...tree, subFolders: tree.subFolders.map(sub => updateReadOnly(sub, targetId, value)) }
+    }
+    setFolderTree(prev => prev ? updateReadOnly(prev, folderId, newValue) : prev)
+
+    try {
+      await api.setFolderReadOnly(folderId, newValue)
+    } catch (err) {
+      console.error('Error toggling folder read-only:', err)
+      showToast('Failed to update folder read-only setting', 'error')
+      setFolderTree(previousTree)
+    }
+  }
+
   const handleMoveToPosition = useCallback(async (
     itemType: 'folder' | 'loadout',
     itemId: number,
@@ -886,6 +915,7 @@ function App() {
             folder={currentFolder}
             breadcrumb={folderBreadcrumb}
             isRootFolder={currentFolder.parentId === null}
+            isEffectivelyReadOnly={effectiveReadOnlyMap.get(selectedFolderId) ?? false}
             onRenameFolder={(name) => doRenameFolder(selectedFolderId, name)}
             onCreateFolder={() => handleCreateFolder(selectedFolderId)}
             onCreateLoadout={() => handleCreateLoadout(selectedFolderId)}
@@ -893,6 +923,7 @@ function App() {
             onDuplicateFolder={() => handleDuplicateFolder(selectedFolderId)}
             onDeleteFolder={() => handleDeleteFolder(selectedFolderId)}
             onShareFolder={() => setShareModalState({ type: 'folder', folderId: selectedFolderId, folderName: currentFolder.name })}
+            onToggleReadOnly={() => handleToggleFolderReadOnly(selectedFolderId)}
           />
         );
       }
@@ -903,6 +934,7 @@ function App() {
         ref={loadoutEditorRef}
         loadoutId={selectedLoadoutId}
         folderBreadcrumb={folderBreadcrumb}
+        isFolderReadOnly={selectedFolderId ? (effectiveReadOnlyMap.get(selectedFolderId) ?? false) : false}
         onNameChange={handleLoadoutNameChange}
         onProtectionChange={handleLoadoutProtectionChange}
         onCreateLoadout={() => handleCreateLoadout(selectedFolderId ?? folderTree?.id ?? 0)}
@@ -980,6 +1012,7 @@ function App() {
           <div className="app-body">
             <Sidebar
               folderTree={folderTree}
+              effectiveReadOnlyMap={effectiveReadOnlyMap}
               onCreateLoadout={() => handleCreateLoadout(selectedFolderId ?? folderTree?.id ?? 0)}
               onViewShare={handleViewShare}
               viewingShareToken={viewingShareToken}
