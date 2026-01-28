@@ -57,3 +57,46 @@
   --wheel-track: #fee2e2;
   --wheel-tick: #fca5a5;
 }
+
+/* No animation mode */
+.automation-wheel.no-animation .wheel-needle {
+  transition: none;
+}
+
+/* Greyscale color mode */
+.automation-wheel.greyscale.level-0 {
+  --wheel-needle: #9ca3af;
+  --wheel-track: #e5e7eb;
+  --wheel-tick: #d1d5db;
+}
+
+.automation-wheel.greyscale.level-1 {
+  --wheel-needle: #6b7280;
+  --wheel-track: #e5e7eb;
+  --wheel-tick: #d1d5db;
+}
+
+.automation-wheel.greyscale.level-2 {
+  --wheel-needle: #4b5563;
+  --wheel-track: #d1d5db;
+  --wheel-tick: #9ca3af;
+}
+
+.automation-wheel.greyscale.level-3 {
+  --wheel-needle: #374151;
+  --wheel-track: #d1d5db;
+  --wheel-tick: #9ca3af;
+}
+
+.automation-wheel.greyscale.level-4 {
+  --wheel-needle: #1f2937;
+  --wheel-track: #9ca3af;
+  --wheel-tick: #6b7280;
+}
+
+/* Black and white color mode */
+.automation-wheel.black-and-white {
+  --wheel-needle: #000000;
+  --wheel-track: #d1d5db;
+  --wheel-tick: #000000;
+}

@@ -19,6 +19,22 @@ public static class ThemePreferences
 }
 
 /// <summary>
+/// Valid color mode values for automation wheels
+/// </summary>
+public static class ColorModes
+{
+    public const string Full = "full";
+    public const string Greyscale = "greyscale";
+    public const string BlackAndWhite = "blackAndWhite";
+
+    private static readonly HashSet<string> ValidValues = new() { Full, Greyscale, BlackAndWhite };
+
+    public static bool IsValid(string? value) => value != null && ValidValues.Contains(value);
+
+    public static string Sanitize(string? value) => IsValid(value) ? value! : Full;
+}
+
+/// <summary>
 /// User settings for the automation editor
 /// </summary>
 public record UserSettings
@@ -67,10 +83,22 @@ public record UserSettings
     public string ThemePreference { get; init; } = ThemePreferences.System;
 
     /// <summary>
+    /// When true, disables the needle rotation animation on automation wheels
+    /// </summary>
+    public bool DisableWheelAnimation { get; init; } = false;
+
+    /// <summary>
+    /// Color mode for automation wheels: "full" (default), "greyscale", or "blackAndWhite"
+    /// </summary>
+    [StringLength(20)]
+    public string ColorMode { get; init; } = ColorModes.Full;
+
+    /// <summary>
     /// Returns a copy of the settings with validated/sanitized values
     /// </summary>
     public UserSettings Sanitized() => this with
     {
-        ThemePreference = ThemePreferences.Sanitize(ThemePreference)
+        ThemePreference = ThemePreferences.Sanitize(ThemePreference),
+        ColorMode = ColorModes.Sanitize(ColorMode)
     };
 }

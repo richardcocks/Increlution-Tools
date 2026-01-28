@@ -59,7 +59,7 @@ const AutomationWheel = memo(function AutomationWheel({ level, onChange }: Autom
 
   return (
     <div
-      className={`automation-wheel level-${currentLevel.value}`}
+      className={`automation-wheel level-${currentLevel.value}${settings.disableWheelAnimation ? ' no-animation' : ''}${settings.colorMode === 'greyscale' ? ' greyscale' : settings.colorMode === 'blackAndWhite' ? ' black-and-white' : ''}`}
       onClick={handleClick}
       onContextMenu={handleContextMenu}
       title={`${currentLevel.label} (click/right-click to cycle, Ctrl+click for max/min)`}

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useSettings } from '../contexts/SettingsContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { useGameData } from '../contexts/GameDataContext';
-import type { ThemePreference } from '../types/settings';
+import type { ThemePreference, ColorMode } from '../types/settings';
 import { useToast } from '../components/Toast';
 import type { AutomationLevel } from '../types/models';
 import { ActionType } from '../types/models';
@@ -282,6 +282,45 @@ export function SettingsPage({ onClose }: { onClose: () => void }) {
               <option value="system">System (follow device setting)</option>
               <option value="light">Light</option>
               <option value="dark">Dark</option>
+            </select>
+          </div>
+        </section>
+
+        <section className="settings-section">
+          <h3>Wheel Appearance</h3>
+          <label className="checkbox-option">
+            <input
+              type="checkbox"
+              checked={settings.disableWheelAnimation}
+              onChange={async (e) => {
+                try {
+                  await updateSettings({ disableWheelAnimation: e.target.checked });
+                } catch {
+                  showToast('Failed to save settings', 'error');
+                }
+              }}
+            />
+            <span className="checkbox-label">
+              Disable wheel change animation
+            </span>
+          </label>
+          <div className="theme-select-group">
+            <label htmlFor="color-mode-select">Colour mode:</label>
+            <select
+              id="color-mode-select"
+              value={settings.colorMode}
+              onChange={async (e) => {
+                try {
+                  await updateSettings({ colorMode: e.target.value as ColorMode });
+                } catch {
+                  showToast('Failed to save settings', 'error');
+                }
+              }}
+              className="theme-select"
+            >
+              <option value="full">Full Colour</option>
+              <option value="greyscale">Greyscale</option>
+              <option value="blackAndWhite">Black &amp; White</option>
             </select>
           </div>
         </section>
