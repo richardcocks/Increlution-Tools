@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { api } from '../services/api';
 import type { SharedFolder, SharedFolderNode, SharedFolderLoadout, IncrelutionAction, AutomationLevel } from '../types/models';
 import { ActionType } from '../types/models';
+import { normalizeLoadoutData } from '../utils/loadoutData';
 import { useAuth } from '../contexts/AuthContext';
 import { useSavedShares } from '../contexts/SavedSharesContext';
 import { useGameData } from '../contexts/GameDataContext';
@@ -84,7 +85,7 @@ export function SharedFolderView() {
   const handleExportClipboard = async () => {
     if (!selectedLoadout) return;
     try {
-      const jsonString = JSON.stringify(selectedLoadout.data);
+      const jsonString = JSON.stringify(normalizeLoadoutData(selectedLoadout.data));
       await navigator.clipboard.writeText(jsonString);
       showToast('Copied to clipboard!', 'success');
     } catch {

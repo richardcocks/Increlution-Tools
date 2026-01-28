@@ -68,6 +68,18 @@ export function parseLoadoutJson(json: string): LoadoutData {
  * Filter loadout data to only include actions from unlocked chapters.
  * Actions from locked chapters are excluded from the result.
  */
+/**
+ * Ensure loadout data has all three action type keys (0, 1, 2),
+ * even if empty. Increlution requires all keys to be present on import.
+ */
+export function normalizeLoadoutData(data: LoadoutData): LoadoutData {
+  return {
+    0: data[0] ?? {},
+    1: data[1] ?? {},
+    2: data[2] ?? {},
+  };
+}
+
 export function filterLoadoutByChapters(
   data: LoadoutData,
   actions: IncrelutionAction[],
@@ -82,13 +94,11 @@ export function filterLoadoutByChapters(
     chapterLookup.get(action.type)!.set(action.originalId, action.chapter);
   }
 
-  const result: LoadoutData = {};
+  const result: LoadoutData = { 0: {}, 1: {}, 2: {} };
 
   for (const [typeKey, typeData] of Object.entries(data)) {
     const actionType = Number(typeKey);
     const typeLookup = chapterLookup.get(actionType);
-
-    result[actionType] = {};
 
     for (const [actionKey, level] of Object.entries(typeData)) {
       const originalId = Number(actionKey);

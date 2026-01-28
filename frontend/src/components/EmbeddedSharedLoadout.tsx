@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import { api } from '../services/api';
 import type { SharedLoadout, IncrelutionAction, AutomationLevel } from '../types/models';
 import { ActionType } from '../types/models';
+import { normalizeLoadoutData } from '../utils/loadoutData';
 import { useSavedShares } from '../contexts/SavedSharesContext';
 import { useGameData } from '../contexts/GameDataContext';
 import { useSettings } from '../contexts/SettingsContext';
@@ -62,7 +63,7 @@ export function EmbeddedSharedLoadout({ token, onClose }: EmbeddedSharedLoadoutP
     if (!sharedLoadout) return;
     try {
       // Copy full loadout data (not filtered) so users can import the complete loadout
-      const jsonString = JSON.stringify(sharedLoadout.data);
+      const jsonString = JSON.stringify(normalizeLoadoutData(sharedLoadout.data));
       await navigator.clipboard.writeText(jsonString);
       showToast('Copied to clipboard!', 'success');
     } catch {
