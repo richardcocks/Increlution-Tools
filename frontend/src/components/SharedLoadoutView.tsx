@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { api } from '../services/api';
 import type { SharedLoadout, IncrelutionAction, AutomationLevel } from '../types/models';
@@ -25,6 +25,8 @@ export function SharedLoadoutView() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [searchFilter, setSearchFilter] = useState('');
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!token) return;
@@ -91,6 +93,19 @@ export function SharedLoadoutView() {
     document.addEventListener('keydown', handleCopy);
     return () => document.removeEventListener('keydown', handleCopy);
   }, [handleExportClipboard]);
+
+  const matchingActionIds = useMemo(() => {
+    const normalizedFilter = searchFilter.toLowerCase().trim();
+    if (!normalizedFilter) return null;
+
+    const matchingIds = new Set<number>();
+    actions.forEach(action => {
+      if (action.name.toLowerCase().includes(normalizedFilter)) {
+        matchingIds.add(action.id);
+      }
+    });
+    return matchingIds;
+  }, [actions, searchFilter]);
 
   // Group actions by chapter, then by type
   const actionsByChapterAndType = useMemo(() => {
@@ -244,6 +259,29 @@ export function SharedLoadoutView() {
             </div>
           )}
 
+          <div className="search-bar">
+            <i className="fas fa-search search-icon" />
+            <input
+              ref={searchInputRef}
+              type="text"
+              className="search-input"
+              placeholder="Filter actions..."
+              value={searchFilter}
+              onChange={(e) => setSearchFilter(e.target.value)}
+            />
+            {searchFilter && (
+              <button
+                className="search-clear"
+                onClick={() => {
+                  setSearchFilter('');
+                  searchInputRef.current?.focus();
+                }}
+              >
+                <i className="fas fa-times" />
+              </button>
+            )}
+          </div>
+
           {/* Type headers */}
           <div className="shared-type-headers">
             <h2>Jobs</h2>
@@ -268,8 +306,8 @@ export function SharedLoadoutView() {
                     getAutomationLevel={getAutomationLevel}
                     onAutomationChange={noopChange}
                     onToggleLock={noopToggle}
-                    matchingActionIds={null}
-                    hideNonMatching={false}
+                    matchingActionIds={matchingActionIds}
+                    hideNonMatching={!!matchingActionIds}
                   />
                   <ChapterGroup
                     actions={chapterData.get(ActionType.Construction) || []}
@@ -277,8 +315,8 @@ export function SharedLoadoutView() {
                     getAutomationLevel={getAutomationLevel}
                     onAutomationChange={noopChange}
                     onToggleLock={noopToggle}
-                    matchingActionIds={null}
-                    hideNonMatching={false}
+                    matchingActionIds={matchingActionIds}
+                    hideNonMatching={!!matchingActionIds}
                   />
                   <ChapterGroup
                     actions={chapterData.get(ActionType.Exploration) || []}
@@ -286,8 +324,8 @@ export function SharedLoadoutView() {
                     getAutomationLevel={getAutomationLevel}
                     onAutomationChange={noopChange}
                     onToggleLock={noopToggle}
-                    matchingActionIds={null}
-                    hideNonMatching={false}
+                    matchingActionIds={matchingActionIds}
+                    hideNonMatching={!!matchingActionIds}
                   />
                 </div>
               </div>
