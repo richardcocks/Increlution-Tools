@@ -8,6 +8,7 @@ public class Folder
     public int? UserId { get; set; }  // null = anonymous user (for now)
     public DateTime CreatedAt { get; set; }
     public int SortOrder { get; set; }
+    public bool IsReadOnly { get; set; }
 
     // Navigation properties
     public Folder? Parent { get; set; }

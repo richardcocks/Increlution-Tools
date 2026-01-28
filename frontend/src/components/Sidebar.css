@@ -173,6 +173,13 @@
   margin-right: 4px;
 }
 
+.folder-readonly-icon {
+  color: #f59e0b;
+  font-size: 10px;
+  margin-left: 4px;
+  flex-shrink: 0;
+}
+
 .loadout-item-actions {
   display: flex;
   gap: 4px;

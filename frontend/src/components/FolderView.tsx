@@ -6,6 +6,7 @@ interface FolderViewProps {
   folder: FolderTreeNode;
   breadcrumb: string[];
   isRootFolder: boolean;
+  isEffectivelyReadOnly: boolean;
   onRenameFolder: (name: string) => void;
   onCreateFolder: () => void;
   onCreateLoadout: () => void;
@@ -13,19 +14,22 @@ interface FolderViewProps {
   onDuplicateFolder: () => void;
   onDeleteFolder: () => void;
   onShareFolder: () => void;
+  onToggleReadOnly: () => void;
 }
 
 export function FolderView({
   folder,
   breadcrumb,
   isRootFolder,
+  isEffectivelyReadOnly,
   onRenameFolder,
   onCreateFolder,
   onCreateLoadout,
   onSelectLoadout,
   onDuplicateFolder,
   onDeleteFolder,
-  onShareFolder
+  onShareFolder,
+  onToggleReadOnly
 }: FolderViewProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedName, setEditedName] = useState('');
@@ -40,7 +44,7 @@ export function FolderView({
   };
 
   const handleStartEdit = () => {
-    if (!isRootFolder) {
+    if (!isRootFolder && !isEffectivelyReadOnly) {
       setEditedName(folder.name);
       setIsEditing(true);
     }
@@ -76,7 +80,7 @@ export function FolderView({
           </div>
         )}
         <div className="folder-view-title-row">
-          <i className="fas fa-folder folder-view-icon" />
+          <i className={`fas ${isEffectivelyReadOnly ? 'fa-lock' : 'fa-folder'} folder-view-icon`} />
           {isEditing ? (
             <input
               type="text"
@@ -89,22 +93,30 @@ export function FolderView({
             />
           ) : (
             <h1
-              className={`folder-view-title ${!isRootFolder ? 'editable' : ''}`}
+              className={`folder-view-title ${!isRootFolder && !isEffectivelyReadOnly ? 'editable' : ''}`}
               onClick={handleStartEdit}
             >
               {folder.name}
-              {!isRootFolder && <i className="fas fa-edit folder-view-edit-icon" />}
+              {!isRootFolder && !isEffectivelyReadOnly && <i className="fas fa-edit folder-view-edit-icon" />}
             </h1>
           )}
         </div>
       </div>
 
       <div className="folder-view-actions">
-        <button className="folder-view-action-btn" onClick={onCreateLoadout}>
+        <button
+          className={`folder-view-action-btn secondary ${folder.isReadOnly ? 'folder-view-action-btn-active' : ''}`}
+          onClick={onToggleReadOnly}
+          title={folder.isReadOnly ? 'Make this folder editable' : 'Make this folder read-only'}
+        >
+          <i className={`fas ${folder.isReadOnly ? 'fa-unlock' : 'fa-lock'}`} />
+          {folder.isReadOnly ? 'Set Writeable' : 'Set Readonly'}
+        </button>
+        <button className="folder-view-action-btn" onClick={onCreateLoadout} disabled={isEffectivelyReadOnly}>
           <i className="fas fa-file-medical" />
           New Loadout
         </button>
-        <button className="folder-view-action-btn secondary" onClick={onCreateFolder}>
+        <button className="folder-view-action-btn secondary" onClick={onCreateFolder} disabled={isEffectivelyReadOnly}>
           <i className="fas fa-folder-plus" />
           New Folder
         </button>
@@ -114,11 +126,11 @@ export function FolderView({
               <i className="fas fa-share-alt" />
               Share
             </button>
-            <button className="folder-view-action-btn secondary" onClick={onDuplicateFolder}>
+            <button className="folder-view-action-btn secondary" onClick={onDuplicateFolder} disabled={isEffectivelyReadOnly}>
               <i className="fas fa-copy" />
               Duplicate
             </button>
-            <button className="folder-view-action-btn danger" onClick={onDeleteFolder}>
+            <button className="folder-view-action-btn danger" onClick={onDeleteFolder} disabled={isEffectivelyReadOnly}>
               <i className="fas fa-trash" />
               Delete
             </button>

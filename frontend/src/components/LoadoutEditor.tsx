@@ -16,6 +16,7 @@ import './LoadoutEditor.css';
 interface LoadoutEditorProps {
   loadoutId: number | null;
   folderBreadcrumb?: string[];
+  isFolderReadOnly?: boolean;
   onNameChange?: (loadoutId: number, name: string) => void;
   onProtectionChange?: (loadoutId: number, isProtected: boolean) => void;
   onCreateLoadout?: () => void;
@@ -27,7 +28,7 @@ export interface LoadoutEditorHandle {
   startEditingName: () => void;
 }
 
-const LoadoutEditor = forwardRef<LoadoutEditorHandle, LoadoutEditorProps>(({ loadoutId, folderBreadcrumb, onNameChange, onProtectionChange, onCreateLoadout, onDuplicate, onDelete }, ref) => {
+const LoadoutEditor = forwardRef<LoadoutEditorHandle, LoadoutEditorProps>(({ loadoutId, folderBreadcrumb, isFolderReadOnly = false, onNameChange, onProtectionChange, onCreateLoadout, onDuplicate, onDelete }, ref) => {
   const { actions, skills, loading: gameDataLoading, error: gameDataError } = useGameData();
   const [loadout, setLoadout] = useState<Loadout | null>(null);
   const [loadoutLoading, setLoadoutLoading] = useState(true);
@@ -195,6 +196,7 @@ const LoadoutEditor = forwardRef<LoadoutEditorHandle, LoadoutEditorProps>(({ loa
   // Handle global paste for import
   const handlePasteImport = useCallback(async (text: string) => {
     if (!loadout || !loadoutId) return;
+    if (loadout.isProtected || isFolderReadOnly) return;
 
     pushUndo(loadout.data);
 
@@ -315,6 +317,7 @@ const LoadoutEditor = forwardRef<LoadoutEditorHandle, LoadoutEditorProps>(({ loa
 
   const updateAutomationLevel = useCallback(async (action: IncrelutionAction, level: AutomationLevel) => {
     if (!loadout || !loadoutId) return;
+    if (loadout.isProtected || isFolderReadOnly) return;
 
     pushUndo(loadout.data);
 
@@ -412,6 +415,7 @@ const LoadoutEditor = forwardRef<LoadoutEditorHandle, LoadoutEditorProps>(({ loa
   // Bulk lock/unlock all actions in a scope
   const bulkToggleLock = useCallback(async (scope: number | 'all' | 'fav') => {
     if (!loadout || !loadoutId) return;
+    if (loadout.isProtected || isFolderReadOnly) return;
 
     pushUndo(loadout.data);
 
@@ -646,6 +650,7 @@ const LoadoutEditor = forwardRef<LoadoutEditorHandle, LoadoutEditorProps>(({ loa
         ref={headerRef}
         loadout={loadout}
         folderBreadcrumb={folderBreadcrumb}
+        isFolderReadOnly={isFolderReadOnly}
         onNameChange={updateLoadoutName}
         onImport={handleImport}
         onExportClipboard={handleExportClipboard}

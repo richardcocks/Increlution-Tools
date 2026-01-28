@@ -59,6 +59,7 @@ export interface FolderTreeNode {
   id: number;
   name: string;
   parentId: number | null;
+  isReadOnly: boolean;
   subFolders: FolderTreeNode[];
   loadouts: LoadoutSummary[];
 }
