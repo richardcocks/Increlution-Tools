@@ -6,7 +6,7 @@ export function Footer() {
     <footer className="app-footer">
       <Link to="/about">About</Link>
       <span className="footer-separator">|</span>
-      <Link to="/privacy">Privacy</Link>
+      <Link to="/terms">Terms</Link>
     </footer>
   );
 }
