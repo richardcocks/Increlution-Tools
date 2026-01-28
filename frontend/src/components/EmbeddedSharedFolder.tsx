@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import { api } from '../services/api';
 import type { SharedFolder, SharedFolderNode, SharedFolderLoadout, IncrelutionAction, AutomationLevel } from '../types/models';
 import { ActionType } from '../types/models';
+import { normalizeLoadoutData } from '../utils/loadoutData';
 import { useSavedShares } from '../contexts/SavedSharesContext';
 import { useGameData } from '../contexts/GameDataContext';
 import { useSettings } from '../contexts/SettingsContext';
@@ -81,7 +82,7 @@ export function EmbeddedSharedFolder({ token, onClose }: EmbeddedSharedFolderPro
   const handleExportClipboard = async () => {
     if (!selectedLoadout) return;
     try {
-      const jsonString = JSON.stringify(selectedLoadout.data);
+      const jsonString = JSON.stringify(normalizeLoadoutData(selectedLoadout.data));
       await navigator.clipboard.writeText(jsonString);
       showToast('Copied to clipboard!', 'success');
     } catch {

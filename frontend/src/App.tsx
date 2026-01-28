@@ -18,7 +18,7 @@ import { SidebarActionsProvider } from './contexts/SidebarActionsContext'
 import { useSavedShares } from './contexts/SavedSharesContext'
 import { api } from './services/api'
 import type { FolderTreeNode, SharedFolderNode } from './types/models'
-import { filterLoadoutByChapters } from './utils/loadoutData'
+import { filterLoadoutByChapters, normalizeLoadoutData } from './utils/loadoutData'
 import { buildEffectiveReadOnlyMap } from './utils/folderUtils'
 import { SettingsPage } from './pages/SettingsPage'
 import { FavouritesPage } from './pages/FavouritesPage'
@@ -767,7 +767,7 @@ function App() {
   const handleQuickExportShare = useCallback(async (token: string) => {
     try {
       const sharedLoadout = await api.getSharedLoadout(token)
-      const jsonString = JSON.stringify(sharedLoadout.data)
+      const jsonString = JSON.stringify(normalizeLoadoutData(sharedLoadout.data))
       await navigator.clipboard.writeText(jsonString)
       showToast('Copied to clipboard!', 'success')
     } catch (err) {
@@ -780,7 +780,7 @@ function App() {
   const handleQuickExportSharedFolderLoadout = useCallback(async (folderToken: string, loadoutId: number) => {
     try {
       const loadout = await api.getSharedFolderLoadout(folderToken, loadoutId)
-      const jsonString = JSON.stringify(loadout.data)
+      const jsonString = JSON.stringify(normalizeLoadoutData(loadout.data))
       await navigator.clipboard.writeText(jsonString)
       showToast('Copied to clipboard!', 'success')
     } catch (err) {
