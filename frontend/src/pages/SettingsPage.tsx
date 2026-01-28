@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useSettings } from '../contexts/SettingsContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { useGameData } from '../contexts/GameDataContext';
@@ -41,6 +41,17 @@ export function SettingsPage({ onClose }: { onClose: () => void }) {
     }
     return locked;
   }, [unlockedChaptersSet]);
+
+  // Scroll to hash anchor on mount
+  const location = useLocation();
+  useEffect(() => {
+    if (location.hash) {
+      const el = document.querySelector(location.hash);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  }, [location.hash]);
 
   // Auto-select first locked chapter if none selected
   useEffect(() => {
@@ -204,7 +215,7 @@ export function SettingsPage({ onClose }: { onClose: () => void }) {
       </div>
 
       <div className="settings-content">
-        <section className="settings-section">
+        <section id="chapters" className="settings-section">
           <h3>Chapter Progress</h3>
           <p className="section-description">
             Unlock chapters by entering the name of the first exploration in that chapter.

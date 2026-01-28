@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
 import type { SharedLoadout, IncrelutionAction, AutomationLevel } from '../types/models';
 import { ActionType } from '../types/models';
@@ -18,6 +18,7 @@ export function SharedLoadoutView() {
   const { user } = useAuth();
   const { saveLoadoutShare, savedShares } = useSavedShares();
   const { showToast } = useToast();
+  const navigate = useNavigate();
   const { actions, skills, loading: gameDataLoading } = useGameData();
   const { unlockedChaptersSet, loading: settingsLoading } = useSettings();
 
@@ -178,7 +179,6 @@ export function SharedLoadoutView() {
   }
 
   const sortedChapters = Array.from(actionsByChapterAndType.keys())
-    .filter(ch => unlockedChaptersSet.has(ch))
     .sort((a, b) => a - b);
 
   return (
@@ -293,13 +293,14 @@ export function SharedLoadoutView() {
           {sortedChapters.map(chapterNumber => {
             const chapterData = actionsByChapterAndType.get(chapterNumber);
             if (!chapterData) return null;
+            const isChapterLocked = !unlockedChaptersSet.has(chapterNumber);
 
             return (
-              <div key={chapterNumber} className="shared-chapter-section">
+              <div key={chapterNumber} className={`shared-chapter-section ${isChapterLocked ? 'chapter-section-locked' : ''}`}>
                 <div className="shared-chapter-separator">
                   <span className="shared-chapter-separator-label">Chapter {chapterNumber + 1}</span>
                 </div>
-                <div className="shared-chapter-content">
+                <div className={`shared-chapter-content ${isChapterLocked ? 'chapter-content-locked' : ''}`}>
                   <ChapterGroup
                     actions={chapterData.get(ActionType.Jobs) || []}
                     skills={skills}
@@ -307,7 +308,8 @@ export function SharedLoadoutView() {
                     onAutomationChange={noopChange}
                     onToggleLock={noopToggle}
                     matchingActionIds={matchingActionIds}
-                    hideNonMatching={!!matchingActionIds}
+                    hideNonMatching={!isChapterLocked && !!matchingActionIds}
+                    disabled={isChapterLocked}
                   />
                   <ChapterGroup
                     actions={chapterData.get(ActionType.Construction) || []}
@@ -316,7 +318,8 @@ export function SharedLoadoutView() {
                     onAutomationChange={noopChange}
                     onToggleLock={noopToggle}
                     matchingActionIds={matchingActionIds}
-                    hideNonMatching={!!matchingActionIds}
+                    hideNonMatching={!isChapterLocked && !!matchingActionIds}
+                    disabled={isChapterLocked}
                   />
                   <ChapterGroup
                     actions={chapterData.get(ActionType.Exploration) || []}
@@ -325,8 +328,15 @@ export function SharedLoadoutView() {
                     onAutomationChange={noopChange}
                     onToggleLock={noopToggle}
                     matchingActionIds={matchingActionIds}
-                    hideNonMatching={!!matchingActionIds}
+                    hideNonMatching={!isChapterLocked && !!matchingActionIds}
+                    disabled={isChapterLocked}
                   />
+                  {isChapterLocked && (
+                    <div className="frosted-glass-overlay" onClick={() => user ? navigate('/settings#chapters') : navigate('/login')}>
+                      <i className="fas fa-lock" />
+                      <span>{user ? 'Unlock chapter in settings' : 'Log in to unlock chapters (Copy will export all chapters)'}</span>
+                    </div>
+                  )}
                 </div>
               </div>
             );

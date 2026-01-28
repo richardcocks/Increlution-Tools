@@ -638,7 +638,6 @@ const LoadoutEditor = forwardRef<LoadoutEditorHandle, LoadoutEditorProps>(({ loa
   }
 
   const sortedChapters = Array.from(actionsByChapterAndType.keys())
-    .filter(ch => unlockedChaptersSet.has(ch))
     .sort((a, b) => a - b);
   const currentChapterData = typeof activeChapter === 'number' ? actionsByChapterAndType.get(activeChapter) : null;
   const isAllView = activeChapter === 'all';
@@ -701,12 +700,13 @@ const LoadoutEditor = forwardRef<LoadoutEditorHandle, LoadoutEditorProps>(({ loa
         </button>
         {sortedChapters.map(chapterNumber => {
           const hasMatches = !chaptersWithMatches || chaptersWithMatches.has(chapterNumber);
+          const isChapterLocked = !unlockedChaptersSet.has(chapterNumber);
           return (
             <button
               key={chapterNumber}
-              className={`chapter-tab ${activeChapter === chapterNumber ? 'active' : ''} ${!hasMatches ? 'faded' : ''}`}
-              onClick={(e) => handleChapterClick(e, chapterNumber)}
-              title={`Chapter ${chapterNumber + 1} (Ctrl+click to lock/unlock)`}
+              className={`chapter-tab ${activeChapter === chapterNumber ? 'active' : ''} ${!hasMatches ? 'faded' : ''} ${isChapterLocked ? 'locked' : ''}`}
+              onClick={(e) => isChapterLocked ? setActiveChapter(chapterNumber) : handleChapterClick(e, chapterNumber)}
+              title={isChapterLocked ? `Chapter ${chapterNumber + 1} (locked)` : `Chapter ${chapterNumber + 1} (Ctrl+click to lock/unlock)`}
             >
               {chapterNumber + 1}
             </button>
@@ -739,16 +739,19 @@ const LoadoutEditor = forwardRef<LoadoutEditorHandle, LoadoutEditorProps>(({ loa
       {(isAllView || isFavView) && sortedChapters.map(chapterNumber => {
         const chapterData = actionsByChapterAndType.get(chapterNumber);
         if (!chapterData) return null;
+        const isChapterLocked = !unlockedChaptersSet.has(chapterNumber);
 
-        // Skip chapters with no matching actions when filtering or in fav view
-        if (chaptersToShow && !chaptersToShow.has(chapterNumber)) return null;
+        // Skip chapters with no matching actions when filtering or in fav view (but not locked chapters in all view)
+        if (!isChapterLocked && chaptersToShow && !chaptersToShow.has(chapterNumber)) return null;
+        // Skip locked chapters in fav view
+        if (isChapterLocked && isFavView) return null;
 
         return (
-          <div key={chapterNumber} className="chapter-section">
+          <div key={chapterNumber} className={`chapter-section ${isChapterLocked ? 'chapter-section-locked' : ''}`}>
             <div className="chapter-separator">
               <span className="chapter-separator-label">Chapter {chapterNumber + 1}</span>
             </div>
-            <div className="chapter-content">
+            <div className={`chapter-content ${isChapterLocked ? 'chapter-content-locked' : ''}`}>
               <ChapterGroup
                 actions={chapterData.get(ActionType.Jobs) || []}
                 skills={skills}
@@ -756,7 +759,8 @@ const LoadoutEditor = forwardRef<LoadoutEditorHandle, LoadoutEditorProps>(({ loa
                 onAutomationChange={updateAutomationLevel}
                 onToggleLock={toggleActionLock}
                 matchingActionIds={matchingActionIds}
-                hideNonMatching={true}
+                hideNonMatching={!isChapterLocked}
+                disabled={isChapterLocked}
               />
               <ChapterGroup
                 actions={chapterData.get(ActionType.Construction) || []}
@@ -765,7 +769,8 @@ const LoadoutEditor = forwardRef<LoadoutEditorHandle, LoadoutEditorProps>(({ loa
                 onAutomationChange={updateAutomationLevel}
                 onToggleLock={toggleActionLock}
                 matchingActionIds={matchingActionIds}
-                hideNonMatching={true}
+                hideNonMatching={!isChapterLocked}
+                disabled={isChapterLocked}
               />
               <ChapterGroup
                 actions={chapterData.get(ActionType.Exploration) || []}
@@ -774,45 +779,64 @@ const LoadoutEditor = forwardRef<LoadoutEditorHandle, LoadoutEditorProps>(({ loa
                 onAutomationChange={updateAutomationLevel}
                 onToggleLock={toggleActionLock}
                 matchingActionIds={matchingActionIds}
-                hideNonMatching={true}
+                hideNonMatching={!isChapterLocked}
+                disabled={isChapterLocked}
               />
+              {isChapterLocked && (
+                <div className="frosted-glass-overlay" onClick={() => navigate('/settings#chapters')}>
+                  <i className="fas fa-lock" />
+                  <span>Unlock chapter in settings</span>
+                </div>
+              )}
             </div>
           </div>
         );
       })}
 
       {/* Single Chapter View */}
-      {currentChapterData && (
-        <div className="chapter-content">
-          <ChapterGroup
-            actions={currentChapterData.get(ActionType.Jobs) || []}
-            skills={skills}
-            getAutomationLevel={getAutomationLevel}
-            onAutomationChange={updateAutomationLevel}
-            onToggleLock={toggleActionLock}
-            matchingActionIds={matchingActionIds}
-            hideNonMatching={false}
-          />
-          <ChapterGroup
-            actions={currentChapterData.get(ActionType.Construction) || []}
-            skills={skills}
-            getAutomationLevel={getAutomationLevel}
-            onAutomationChange={updateAutomationLevel}
-            onToggleLock={toggleActionLock}
-            matchingActionIds={matchingActionIds}
-            hideNonMatching={false}
-          />
-          <ChapterGroup
-            actions={currentChapterData.get(ActionType.Exploration) || []}
-            skills={skills}
-            getAutomationLevel={getAutomationLevel}
-            onAutomationChange={updateAutomationLevel}
-            onToggleLock={toggleActionLock}
-            matchingActionIds={matchingActionIds}
-            hideNonMatching={false}
-          />
-        </div>
-      )}
+      {currentChapterData && (() => {
+        const isChapterLocked = typeof activeChapter === 'number' && !unlockedChaptersSet.has(activeChapter);
+        return (
+          <div className={`chapter-content ${isChapterLocked ? 'chapter-content-locked' : ''}`}>
+            <ChapterGroup
+              actions={currentChapterData.get(ActionType.Jobs) || []}
+              skills={skills}
+              getAutomationLevel={getAutomationLevel}
+              onAutomationChange={updateAutomationLevel}
+              onToggleLock={toggleActionLock}
+              matchingActionIds={matchingActionIds}
+              hideNonMatching={false}
+              disabled={isChapterLocked}
+            />
+            <ChapterGroup
+              actions={currentChapterData.get(ActionType.Construction) || []}
+              skills={skills}
+              getAutomationLevel={getAutomationLevel}
+              onAutomationChange={updateAutomationLevel}
+              onToggleLock={toggleActionLock}
+              matchingActionIds={matchingActionIds}
+              hideNonMatching={false}
+              disabled={isChapterLocked}
+            />
+            <ChapterGroup
+              actions={currentChapterData.get(ActionType.Exploration) || []}
+              skills={skills}
+              getAutomationLevel={getAutomationLevel}
+              onAutomationChange={updateAutomationLevel}
+              onToggleLock={toggleActionLock}
+              matchingActionIds={matchingActionIds}
+              hideNonMatching={false}
+              disabled={isChapterLocked}
+            />
+            {isChapterLocked && (
+              <div className="frosted-glass-overlay" onClick={() => navigate('/settings#chapters')}>
+                <i className="fas fa-lock" />
+                <span>Unlock chapter in settings</span>
+              </div>
+            )}
+          </div>
+        );
+      })()}
     </div>
   );
 });
