@@ -41,7 +41,7 @@ export function EmbeddedSharedFolderLoadout({ folderToken, loadoutId, onClose }:
     fetchLoadout();
   }, [folderToken, loadoutId]);
 
-  const handleExportClipboard = async () => {
+  const handleExportClipboard = useCallback(async () => {
     if (!loadout) return;
     try {
       const jsonString = JSON.stringify(normalizeLoadoutData(loadout.data));
@@ -50,7 +50,25 @@ export function EmbeddedSharedFolderLoadout({ folderToken, loadoutId, onClose }:
     } catch {
       showToast('Failed to copy to clipboard', 'error');
     }
-  };
+  }, [loadout, showToast]);
+
+  useEffect(() => {
+    const handleCopy = (e: KeyboardEvent) => {
+      if (!(e.ctrlKey || e.metaKey) || e.key !== 'c') return;
+
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return;
+
+      const selection = window.getSelection();
+      if (selection && selection.toString().length > 0) return;
+
+      e.preventDefault();
+      handleExportClipboard();
+    };
+
+    document.addEventListener('keydown', handleCopy);
+    return () => document.removeEventListener('keydown', handleCopy);
+  }, [handleExportClipboard]);
 
   // Group actions by chapter, then by type
   const actionsByChapterAndType = useMemo(() => {

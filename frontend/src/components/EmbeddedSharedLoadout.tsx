@@ -59,7 +59,7 @@ export function EmbeddedSharedLoadout({ token, onClose }: EmbeddedSharedLoadoutP
     }
   };
 
-  const handleExportClipboard = async () => {
+  const handleExportClipboard = useCallback(async () => {
     if (!sharedLoadout) return;
     try {
       // Copy full loadout data (not filtered) so users can import the complete loadout
@@ -69,7 +69,25 @@ export function EmbeddedSharedLoadout({ token, onClose }: EmbeddedSharedLoadoutP
     } catch {
       showToast('Failed to copy to clipboard', 'error');
     }
-  };
+  }, [sharedLoadout, showToast]);
+
+  useEffect(() => {
+    const handleCopy = (e: KeyboardEvent) => {
+      if (!(e.ctrlKey || e.metaKey) || e.key !== 'c') return;
+
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return;
+
+      const selection = window.getSelection();
+      if (selection && selection.toString().length > 0) return;
+
+      e.preventDefault();
+      handleExportClipboard();
+    };
+
+    document.addEventListener('keydown', handleCopy);
+    return () => document.removeEventListener('keydown', handleCopy);
+  }, [handleExportClipboard]);
 
   // Group actions by chapter, then by type
   const actionsByChapterAndType = useMemo(() => {
