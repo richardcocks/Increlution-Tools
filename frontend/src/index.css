@@ -138,3 +138,52 @@ body {
 .search-clear:hover {
   background: var(--color-border-default);
 }
+
+/* Frosted Glass Overlay for Locked Chapters */
+.chapter-section-locked {
+  position: relative;
+}
+
+.chapter-content-locked {
+  position: relative;
+}
+
+.frosted-glass-overlay {
+  position: absolute;
+  inset: 0;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  z-index: 1;
+  transition: background 0.2s;
+}
+
+.frosted-glass-overlay:hover {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+[data-theme="dark"] .frosted-glass-overlay {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .frosted-glass-overlay:hover {
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.frosted-glass-overlay i {
+  font-size: 24px;
+  color: var(--color-text-muted);
+}
+
+.frosted-glass-overlay span {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}

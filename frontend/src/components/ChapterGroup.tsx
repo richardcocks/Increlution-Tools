@@ -10,11 +10,12 @@ interface ChapterGroupProps {
   onToggleLock: (action: IncrelutionAction) => void;
   matchingActionIds: Set<number> | null;
   hideNonMatching: boolean;
+  disabled?: boolean;
 }
 
-const ChapterGroup = memo(function ChapterGroup({ actions, skills, getAutomationLevel, onAutomationChange, onToggleLock, matchingActionIds, hideNonMatching }: ChapterGroupProps) {
+const ChapterGroup = memo(function ChapterGroup({ actions, skills, getAutomationLevel, onAutomationChange, onToggleLock, matchingActionIds, hideNonMatching, disabled }: ChapterGroupProps) {
   return (
-    <div className="chapter-group">
+    <div className="chapter-group" style={disabled ? { pointerEvents: 'none' } : undefined}>
       <div className="actions-list">
         {actions.map((action) => {
           const isNonMatching = matchingActionIds !== null && !matchingActionIds.has(action.id);

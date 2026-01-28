@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
 import type { SharedFolder, SharedFolderNode, SharedFolderLoadout, IncrelutionAction, AutomationLevel } from '../types/models';
 import { ActionType } from '../types/models';
@@ -19,6 +20,7 @@ interface EmbeddedSharedFolderProps {
 export function EmbeddedSharedFolder({ token, onClose }: EmbeddedSharedFolderProps) {
   const { saveFolderShare, savedShares } = useSavedShares();
   const { showToast } = useToast();
+  const navigate = useNavigate();
   const { actions, skills, loading: gameDataLoading } = useGameData();
   const { unlockedChaptersSet } = useSettings();
 
@@ -244,7 +246,6 @@ export function EmbeddedSharedFolder({ token, onClose }: EmbeddedSharedFolderPro
   }
 
   const sortedChapters = Array.from(actionsByChapterAndType.keys())
-    .filter(ch => unlockedChaptersSet.has(ch))
     .sort((a, b) => a - b);
 
   return (
@@ -381,13 +382,14 @@ export function EmbeddedSharedFolder({ token, onClose }: EmbeddedSharedFolderPro
                 {sortedChapters.map(chapterNumber => {
                   const chapterData = actionsByChapterAndType.get(chapterNumber);
                   if (!chapterData) return null;
+                  const isChapterLocked = !unlockedChaptersSet.has(chapterNumber);
 
                   return (
-                    <div key={chapterNumber} className="chapter-section">
+                    <div key={chapterNumber} className={`chapter-section ${isChapterLocked ? 'chapter-section-locked' : ''}`}>
                       <div className="chapter-separator">
                         <span className="chapter-separator-label">Chapter {chapterNumber + 1}</span>
                       </div>
-                      <div className="chapter-content embedded-readonly">
+                      <div className={`chapter-content embedded-readonly ${isChapterLocked ? 'chapter-content-locked' : ''}`}>
                         <ChapterGroup
                           actions={chapterData.get(ActionType.Jobs) || []}
                           skills={skills}
@@ -395,7 +397,8 @@ export function EmbeddedSharedFolder({ token, onClose }: EmbeddedSharedFolderPro
                           onAutomationChange={noopChange}
                           onToggleLock={noopToggle}
                           matchingActionIds={matchingActionIds}
-                          hideNonMatching={!!matchingActionIds}
+                          hideNonMatching={!isChapterLocked && !!matchingActionIds}
+                          disabled={isChapterLocked}
                         />
                         <ChapterGroup
                           actions={chapterData.get(ActionType.Construction) || []}
@@ -404,7 +407,8 @@ export function EmbeddedSharedFolder({ token, onClose }: EmbeddedSharedFolderPro
                           onAutomationChange={noopChange}
                           onToggleLock={noopToggle}
                           matchingActionIds={matchingActionIds}
-                          hideNonMatching={!!matchingActionIds}
+                          hideNonMatching={!isChapterLocked && !!matchingActionIds}
+                          disabled={isChapterLocked}
                         />
                         <ChapterGroup
                           actions={chapterData.get(ActionType.Exploration) || []}
@@ -413,8 +417,15 @@ export function EmbeddedSharedFolder({ token, onClose }: EmbeddedSharedFolderPro
                           onAutomationChange={noopChange}
                           onToggleLock={noopToggle}
                           matchingActionIds={matchingActionIds}
-                          hideNonMatching={!!matchingActionIds}
+                          hideNonMatching={!isChapterLocked && !!matchingActionIds}
+                          disabled={isChapterLocked}
                         />
+                        {isChapterLocked && (
+                          <div className="frosted-glass-overlay" onClick={() => navigate('/settings#chapters')}>
+                            <i className="fas fa-lock" />
+                            <span>Unlock chapter in settings</span>
+                          </div>
+                        )}
                       </div>
                     </div>
                   );
