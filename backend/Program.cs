@@ -2191,11 +2191,13 @@ SharedFolderNode BuildSharedFolderTree(
 
     var subFolders = allFolders
         .Where(f => f.ParentId == folder.Id)
+        .OrderBy(f => f.SortOrder)
         .Select(f => BuildSharedFolderTree(f, allFolders, allLoadouts, unlockedChapters, allActions))
         .ToList();
 
     var loadouts = allLoadouts
         .Where(l => l.FolderId == folder.Id)
+        .OrderBy(l => l.SortOrder)
         .Select(l => new SharedLoadoutSummary(l.Id, l.Name, l.UpdatedAt))
         .ToList();
 
