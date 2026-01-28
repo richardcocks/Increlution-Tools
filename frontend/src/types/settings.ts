@@ -2,6 +2,7 @@
 export type SkillActionKey = string;
 
 export type ThemePreference = 'system' | 'dark' | 'light';
+export type ColorMode = 'full' | 'greyscale' | 'blackAndWhite';
 
 export interface UserSettings {
   invertMouse: boolean;
@@ -12,6 +13,8 @@ export interface UserSettings {
   favouriteActions: number[];
   unlockedChapters: number[];
   themePreference: ThemePreference;
+  disableWheelAnimation: boolean;
+  colorMode: ColorMode;
 }
 
 export const defaultSettings: UserSettings = {
@@ -22,7 +25,9 @@ export const defaultSettings: UserSettings = {
   overwriteWhenNull: false,
   favouriteActions: [],
   unlockedChapters: [0],
-  themePreference: 'system'
+  themePreference: 'system',
+  disableWheelAnimation: false,
+  colorMode: 'full'
 };
 
 // Helper functions for skill-action keys
