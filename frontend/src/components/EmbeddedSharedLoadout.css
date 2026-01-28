@@ -12,7 +12,7 @@
   justify-content: center;
   height: 50vh;
   text-align: center;
-  color: #666;
+  color: var(--color-text-secondary);
 }
 
 .embedded-shared-loading i,
@@ -27,7 +27,7 @@
 
 .embedded-shared-error h2 {
   margin: 0 0 8px 0;
-  color: #333;
+  color: var(--color-text-primary);
 }
 
 .embedded-shared-error p {
@@ -37,7 +37,7 @@
 .embedded-shared-header {
   margin-bottom: 24px;
   padding-bottom: 20px;
-  border-bottom: 2px solid #e0e0e0;
+  border-bottom: 2px solid var(--color-border-default);
 }
 
 .embedded-shared-title-row {
@@ -53,17 +53,17 @@
   justify-content: center;
   gap: 8px;
   padding: 8px 12px;
-  background: #f3f4f6;
+  background: var(--color-bg-subtle);
   border: none;
   border-radius: 6px;
-  color: #374151;
+  color: var(--color-text-primary);
   font-size: 14px;
   cursor: pointer;
   transition: background 0.2s;
 }
 
 .embedded-shared-back:hover {
-  background: #e5e7eb;
+  background: var(--color-border-default);
 }
 
 .embedded-shared-title {
@@ -75,7 +75,7 @@
 .embedded-shared-title h1 {
   margin: 0;
   font-size: 28px;
-  color: #333;
+  color: var(--color-text-primary);
 }
 
 .embedded-shared-badge {
@@ -95,7 +95,7 @@
   align-items: center;
   gap: 16px;
   font-size: 14px;
-  color: #666;
+  color: var(--color-text-secondary);
   margin-bottom: 16px;
 }
 
@@ -142,12 +142,12 @@
 }
 
 .embedded-action-button.secondary {
-  background: #e5e7eb;
-  color: #374151;
+  background: var(--color-bg-subtle);
+  color: var(--color-text-primary);
 }
 
 .embedded-action-button.secondary:hover {
-  background: #d1d5db;
+  background: var(--color-border-default);
 }
 
 .embedded-shared-content {
