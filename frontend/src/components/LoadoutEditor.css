@@ -377,6 +377,14 @@
   color: var(--color-text-muted);
 }
 
+.action-row:hover {
+  background: var(--color-bg-muted);
+}
+
+.action-row:has(.automation-wheel:hover) .action-name {
+  font-weight: 700;
+}
+
 .action-row-faded {
   opacity: 0.25;
 }
