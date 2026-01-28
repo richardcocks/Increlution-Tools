@@ -82,7 +82,7 @@ export function SharedFolderView() {
     }
   };
 
-  const handleExportClipboard = async () => {
+  const handleExportClipboard = useCallback(async () => {
     if (!selectedLoadout) return;
     try {
       const jsonString = JSON.stringify(normalizeLoadoutData(selectedLoadout.data));
@@ -91,7 +91,7 @@ export function SharedFolderView() {
     } catch {
       showToast('Failed to copy to clipboard', 'error');
     }
-  };
+  }, [selectedLoadout, showToast]);
 
   const toggleFolder = (folderId: number) => {
     setExpandedFolders(prev => {
@@ -104,6 +104,24 @@ export function SharedFolderView() {
       return next;
     });
   };
+
+  useEffect(() => {
+    const handleCopy = (e: KeyboardEvent) => {
+      if (!(e.ctrlKey || e.metaKey) || e.key !== 'c') return;
+
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return;
+
+      const selection = window.getSelection();
+      if (selection && selection.toString().length > 0) return;
+
+      e.preventDefault();
+      handleExportClipboard();
+    };
+
+    document.addEventListener('keydown', handleCopy);
+    return () => document.removeEventListener('keydown', handleCopy);
+  }, [handleExportClipboard]);
 
   // Group actions by chapter, then by type
   const actionsByChapterAndType = useMemo(() => {
