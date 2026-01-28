@@ -1,11 +1,95 @@
 .sidebar {
-  width: 280px;
   height: 100vh;
   background: var(--color-sidebar-bg);
   border-right: 1px solid var(--color-border-strong);
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.sidebar-resize-handle {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 12px;
+  height: 100%;
+  cursor: col-resize;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+}
+
+/* Visible vertical line */
+.sidebar-resize-handle::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 1px;
+  height: 100%;
+  background: var(--color-border-strong);
+  transition: width 0.15s, background 0.15s;
+}
+
+/* Grip dots in the middle */
+.sidebar-resize-handle::after {
+  content: '';
+  width: 6px;
+  height: 48px;
+  border-radius: 3px;
+  background: var(--color-border-strong);
+  z-index: 1;
+  transition: background 0.15s, box-shadow 0.15s;
+}
+
+.sidebar-resize-handle:hover::before,
+.sidebar-resize-handle:active::before {
+  width: 3px;
+  background: #1976d2;
+}
+
+.sidebar-resize-handle:hover::after,
+.sidebar-resize-handle:active::after {
+  background: #1976d2;
+  box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.2);
+}
+
+[data-theme="dark"] .sidebar-resize-handle:hover::before,
+[data-theme="dark"] .sidebar-resize-handle:active::before {
+  background: #3b82f6;
+}
+
+[data-theme="dark"] .sidebar-resize-handle:hover::after,
+[data-theme="dark"] .sidebar-resize-handle:active::after {
+  background: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+/* Thin scrollbar for sidebar */
+.sidebar-content::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sidebar-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-content::-webkit-scrollbar-thumb {
+  background: var(--color-border-strong);
+  border-radius: 2px;
+}
+
+.sidebar-content::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-muted);
+}
+
+.sidebar-content {
+  scrollbar-width: thin;
+  margin-right: 12px;
 }
 
 .sidebar-header {
