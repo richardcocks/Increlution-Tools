@@ -2,6 +2,7 @@
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
+  overflow-x: auto;
 }
 
 .loadout-editor-placeholder {
@@ -287,6 +288,7 @@
   grid-template-columns: repeat(3, 1fr);
   gap: 12px;
   margin-bottom: 15px;
+  min-width: 900px;
 }
 
 .type-heading {
@@ -336,6 +338,7 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 12px;
+  min-width: 900px;
 }
 
 /* Chapter Group */
@@ -444,16 +447,6 @@
 }
 
 /* Responsive */
-@media (max-width: 1200px) {
-  .chapter-content {
-    grid-template-columns: 1fr;
-  }
-
-  .type-heading {
-    font-size: 18px;
-  }
-}
-
 @media (max-width: 768px) {
   .loadout-editor {
     padding: 10px;
