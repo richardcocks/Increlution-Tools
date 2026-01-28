@@ -84,9 +84,5 @@
 .embedded-folder-page-body {
   flex: 1;
   overflow: hidden;
-  background: #fff;
-}
-
-[data-theme="dark"] .embedded-folder-page-body {
-  background: #0f0f1a;
+  background: var(--color-bg-base);
 }
