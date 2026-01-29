@@ -53,6 +53,8 @@ function App() {
   const [pendingDelete, setPendingDelete] = useState<PendingDelete>(null)
   const [viewingShareToken, setViewingShareToken] = useState<string | null>(null)
   const [viewingSharedFolder, setViewingSharedFolder] = useState<ViewingSharedFolder>(null)
+  const [renamingFolderId, setRenamingFolderId] = useState<number | null>(null)
+  const pendingRenameLoadoutRef = useRef(false)
   const [folderModal, setFolderModal] = useState<FolderModal>(null)
   const [shareModalState, setShareModalState] = useState<ShareModalState>(null)
   const { showToast } = useToast()
@@ -70,6 +72,18 @@ function App() {
     folderToken?: string
   }>()
   const loadoutEditorRef = useRef<LoadoutEditorHandle>(null)
+
+  // Poll to trigger rename after loadout editor finishes loading
+  useEffect(() => {
+    if (!pendingRenameLoadoutRef.current) return
+    const interval = setInterval(() => {
+      if (loadoutEditorRef.current?.startEditingName()) {
+        pendingRenameLoadoutRef.current = false
+        clearInterval(interval)
+      }
+    }, 50)
+    return () => clearInterval(interval)
+  }, [selectedLoadoutId])
 
   // Derive page state from URL
   const showSettings = location.pathname === '/settings'
@@ -916,6 +930,8 @@ function App() {
             breadcrumb={folderBreadcrumb}
             isRootFolder={currentFolder.parentId === null}
             isEffectivelyReadOnly={effectiveReadOnlyMap.get(selectedFolderId) ?? false}
+            startEditing={renamingFolderId === selectedFolderId}
+            onStartEditingConsumed={() => setRenamingFolderId(null)}
             onRenameFolder={(name) => doRenameFolder(selectedFolderId, name)}
             onCreateFolder={() => handleCreateFolder(selectedFolderId)}
             onCreateLoadout={() => handleCreateLoadout(selectedFolderId)}
@@ -1008,6 +1024,15 @@ function App() {
           onMoveFolder={handleMoveFolder}
           onQuickExport={handleQuickExport}
           onMoveToPosition={handleMoveToPosition}
+          onStartRenameFolder={(folderId) => setRenamingFolderId(folderId)}
+          onStartRenameLoadout={(loadoutId, folderId) => {
+            if (loadoutId === selectedLoadoutId) {
+              loadoutEditorRef.current?.startEditingName()
+            } else {
+              pendingRenameLoadoutRef.current = true
+              handleLoadoutSelect(loadoutId, folderId)
+            }
+          }}
         >
           <div className="app-body">
             <Sidebar

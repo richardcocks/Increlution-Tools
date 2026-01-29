@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useImperativeHandle, forwardRef } from 'react';
+import { useState, useRef, useEffect, useCallback, useImperativeHandle, forwardRef } from 'react';
 import type { Loadout } from '../types/models';
 import type { LoadoutData } from '../types/models';
 import { useToast } from './Toast';
@@ -27,6 +27,7 @@ const LoadoutHeader = forwardRef<LoadoutHeaderHandle, LoadoutHeaderProps>(({ loa
   const [isPasteMode, setIsPasteMode] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const pasteInputRef = useRef<HTMLTextAreaElement>(null);
+  const editStartedAtRef = useRef<number>(0);
   const { showToast } = useToast();
 
   useEffect(() => {
@@ -63,18 +64,22 @@ const LoadoutHeader = forwardRef<LoadoutHeaderHandle, LoadoutHeaderProps>(({ loa
 
   const isEffectivelyProtected = (loadout?.isProtected ?? false) || isFolderReadOnly;
 
-  const handleStartEdit = () => {
+  const handleStartEdit = useCallback(() => {
     if (loadout && !isEffectivelyProtected) {
       setEditedName(loadout.name);
       setIsEditing(true);
+      editStartedAtRef.current = Date.now();
     }
-  };
+  }, [loadout, isEffectivelyProtected]);
 
   useImperativeHandle(ref, () => ({
     startEditing: handleStartEdit
-  }));
+  }), [handleStartEdit]);
 
   const handleSave = () => {
+    // Ignore blur events that fire immediately after entering edit mode
+    // (e.g. when triggered programmatically via shift-click in sidebar)
+    if (Date.now() - editStartedAtRef.current < 100) return;
     if (editedName.trim()) {
       onNameChange(editedName.trim());
       setIsEditing(false);

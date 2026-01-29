@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { FolderTreeNode, LoadoutSummary } from '../types/models';
 import './FolderView.css';
 
@@ -7,6 +7,8 @@ interface FolderViewProps {
   breadcrumb: string[];
   isRootFolder: boolean;
   isEffectivelyReadOnly: boolean;
+  startEditing?: boolean;
+  onStartEditingConsumed?: () => void;
   onRenameFolder: (name: string) => void;
   onCreateFolder: () => void;
   onCreateLoadout: () => void;
@@ -29,10 +31,22 @@ export function FolderView({
   onDuplicateFolder,
   onDeleteFolder,
   onShareFolder,
-  onToggleReadOnly
+  onToggleReadOnly,
+  startEditing: startEditingProp,
+  onStartEditingConsumed
 }: FolderViewProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedName, setEditedName] = useState('');
+  const editStartedAtRef = useRef<number>(0);
+
+  useEffect(() => {
+    if (startEditingProp) {
+      setEditedName(folder.name);
+      setIsEditing(true);
+      editStartedAtRef.current = Date.now();
+      onStartEditingConsumed?.();
+    }
+  }, [startEditingProp, onStartEditingConsumed]);
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -47,10 +61,14 @@ export function FolderView({
     if (!isRootFolder && !isEffectivelyReadOnly) {
       setEditedName(folder.name);
       setIsEditing(true);
+      editStartedAtRef.current = Date.now();
     }
   };
 
   const handleSave = () => {
+    // Ignore blur events that fire immediately after entering edit mode
+    // (e.g. when triggered programmatically via shift-click in sidebar)
+    if (Date.now() - editStartedAtRef.current < 100) return;
     const trimmedName = editedName.trim();
     if (trimmedName && trimmedName !== folder.name) {
       onRenameFolder(trimmedName);

@@ -11,6 +11,8 @@ interface SidebarActionsContextValue {
   onMoveFolder: (folderId: number, targetParentId: number, sourceParentId: number) => void;
   onQuickExport: (loadoutId: number) => void;
   onMoveToPosition: (itemType: 'folder' | 'loadout', itemId: number, sourceFolderId: number, targetFolderId: number, orderedIds: number[]) => void;
+  onStartRenameFolder: (folderId: number) => void;
+  onStartRenameLoadout: (loadoutId: number, folderId: number) => void;
 }
 
 const SidebarActionsContext = createContext<SidebarActionsContextValue | null>(null);
@@ -25,6 +27,8 @@ interface SidebarActionsProviderProps {
   onMoveFolder: (folderId: number, targetParentId: number, sourceParentId: number) => void;
   onQuickExport: (loadoutId: number) => void;
   onMoveToPosition: (itemType: 'folder' | 'loadout', itemId: number, sourceFolderId: number, targetFolderId: number, orderedIds: number[]) => void;
+  onStartRenameFolder: (folderId: number) => void;
+  onStartRenameLoadout: (loadoutId: number, folderId: number) => void;
 }
 
 export function SidebarActionsProvider({
@@ -36,7 +40,9 @@ export function SidebarActionsProvider({
   onMoveLoadout,
   onMoveFolder,
   onQuickExport,
-  onMoveToPosition
+  onMoveToPosition,
+  onStartRenameFolder,
+  onStartRenameLoadout
 }: SidebarActionsProviderProps) {
   const value = useMemo(() => ({
     selectedLoadoutId,
@@ -46,7 +52,9 @@ export function SidebarActionsProvider({
     onMoveLoadout,
     onMoveFolder,
     onQuickExport,
-    onMoveToPosition
+    onMoveToPosition,
+    onStartRenameFolder,
+    onStartRenameLoadout
   }), [
     selectedLoadoutId,
     selectedFolderId,
@@ -55,7 +63,9 @@ export function SidebarActionsProvider({
     onMoveLoadout,
     onMoveFolder,
     onQuickExport,
-    onMoveToPosition
+    onMoveToPosition,
+    onStartRenameFolder,
+    onStartRenameLoadout
   ]);
 
   return (
