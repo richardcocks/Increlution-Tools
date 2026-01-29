@@ -50,7 +50,9 @@ function TreeNode({ node, level, effectiveReadOnlyMap, dragState, dropTargetFold
     selectedFolderId,
     onLoadoutSelect,
     onFolderSelect,
-    onQuickExport
+    onQuickExport,
+    onStartRenameFolder,
+    onStartRenameLoadout
   } = useSidebarActions();
 
   const [expanded, setExpanded] = useState(true);
@@ -215,7 +217,16 @@ function TreeNode({ node, level, effectiveReadOnlyMap, dragState, dropTargetFold
         {!hasChildren && <span className="expand-placeholder" />}
         <div className="folder-info">
           <i className="fas fa-folder folder-icon" />
-          <span className="folder-name">{node.name}</span>
+          <span
+            className="folder-name"
+            onClick={(e) => {
+              if (e.shiftKey && !isRootFolder && !isFolderEffectivelyReadOnly) {
+                e.stopPropagation();
+                onFolderSelect(node.id);
+                onStartRenameFolder(node.id);
+              }
+            }}
+          >{node.name}</span>
           {isFolderEffectivelyReadOnly && (
             <i className="fas fa-lock folder-readonly-icon" title="Read-only" />
           )}
@@ -271,7 +282,16 @@ function TreeNode({ node, level, effectiveReadOnlyMap, dragState, dropTargetFold
             >
               <i className="fas fa-grip-vertical drag-handle" />
               <i className="fas fa-file-alt loadout-icon" />
-              <span className="loadout-name">{loadout.name}</span>
+              <span
+                className="loadout-name"
+                onClick={(e) => {
+                  if (e.shiftKey && !loadout.isProtected && !isFolderEffectivelyReadOnly) {
+                    e.stopPropagation();
+                    onLoadoutSelect(loadout.id, node.id);
+                    onStartRenameLoadout(loadout.id, node.id);
+                  }
+                }}
+              >{loadout.name}</span>
               {loadout.isProtected && (
                 <i className="fas fa-lock loadout-protected-icon" title="Protected" />
               )}

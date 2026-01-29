@@ -25,7 +25,7 @@ interface LoadoutEditorProps {
 }
 
 export interface LoadoutEditorHandle {
-  startEditingName: () => void;
+  startEditingName: () => boolean;
 }
 
 const LoadoutEditor = forwardRef<LoadoutEditorHandle, LoadoutEditorProps>(({ loadoutId, folderBreadcrumb, isFolderReadOnly = false, onNameChange, onProtectionChange, onCreateLoadout, onDuplicate, onDelete }, ref) => {
@@ -53,8 +53,14 @@ const LoadoutEditor = forwardRef<LoadoutEditorHandle, LoadoutEditorProps>(({ loa
   const MAX_UNDO_HISTORY = 50;
 
   useImperativeHandle(ref, () => ({
-    startEditingName: () => headerRef.current?.startEditing()
-  }));
+    startEditingName: () => {
+      if (headerRef.current) {
+        headerRef.current.startEditing();
+        return true;
+      }
+      return false;
+    }
+  }), []);
 
   // Merge imported data with existing loadout data
   // When overwriteWhenNull is false, null values in the import are ignored and existing values preserved
