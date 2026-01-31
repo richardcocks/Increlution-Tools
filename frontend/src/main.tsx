@@ -1,4 +1,4 @@
-import { StrictMode } from 'react'
+import { StrictMode, useMemo } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import '@fortawesome/fontawesome-free/css/all.min.css'
@@ -11,6 +11,7 @@ import { GameDataProvider } from './contexts/GameDataContext.tsx'
 import { SettingsProvider } from './contexts/SettingsContext.tsx'
 import { ThemeProvider } from './contexts/ThemeContext.tsx'
 import { SavedSharesProvider } from './contexts/SavedSharesContext.tsx'
+import { ServerApiProvider, GuestApiProvider } from './contexts/ApiContext.tsx'
 import { ProtectedRoute } from './components/ProtectedRoute.tsx'
 import { LoginPage } from './pages/LoginPage.tsx'
 import { LandingPage } from './pages/LandingPage.tsx'
@@ -19,11 +20,44 @@ import TermsPage from './pages/TermsPage.tsx'
 import { AuthAwareShareRoute } from './components/AuthAwareShareRoute.tsx'
 import { AuthAwareFolderShareRoute } from './components/AuthAwareFolderShareRoute.tsx'
 import { DeleteAccountPage } from './pages/DeleteAccountPage.tsx'
+import { createGuestApi } from './services/guestApi.ts'
+import type { ReactNode } from 'react'
+
+/* eslint-disable react-refresh/only-export-components */
+function GuestWrapper({ children }: { children: ReactNode }) {
+  const guestApi = useMemo(() => createGuestApi(), [])
+  return (
+    <GuestApiProvider guestApi={guestApi}>
+      <AuthProvider guestMode>
+        <SettingsProvider>
+          <ThemeProvider>
+            <SavedSharesProvider>
+              <ToastProvider>
+                <GameDataProvider>
+                  {children}
+                </GameDataProvider>
+              </ToastProvider>
+            </SavedSharesProvider>
+          </ThemeProvider>
+        </SettingsProvider>
+      </AuthProvider>
+    </GuestApiProvider>
+  )
+}
+
+function GuestRoute() {
+  return (
+    <GuestWrapper>
+      <App />
+    </GuestWrapper>
+  )
+}
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>
       <AuthProvider>
+        <ServerApiProvider>
         <SettingsProvider>
           <ThemeProvider>
           <SavedSharesProvider>
@@ -124,6 +158,16 @@ createRoot(document.getElementById('root')!).render(
                         <DeleteAccountPage />
                       </ProtectedRoute>
                     } />
+                    {/* Guest routes */}
+                    <Route path="/guest" element={<GuestRoute />} />
+                    <Route path="/guest/folder/:folderId" element={<GuestRoute />} />
+                    <Route path="/guest/loadout/:loadoutId" element={<GuestRoute />} />
+                    <Route path="/guest/shared/:token" element={<GuestRoute />} />
+                    <Route path="/guest/shared/folder/:folderToken" element={<GuestRoute />} />
+                    <Route path="/guest/shared/folder/:folderToken/:loadoutId" element={<GuestRoute />} />
+                    <Route path="/guest/settings" element={<GuestRoute />} />
+                    <Route path="/guest/favourites" element={<GuestRoute />} />
+                    <Route path="/guest/help" element={<GuestRoute />} />
                   </Routes>
                 </div>
                 <Footer />
@@ -132,6 +176,7 @@ createRoot(document.getElementById('root')!).render(
           </SavedSharesProvider>
           </ThemeProvider>
         </SettingsProvider>
+        </ServerApiProvider>
       </AuthProvider>
     </BrowserRouter>
   </StrictMode>,

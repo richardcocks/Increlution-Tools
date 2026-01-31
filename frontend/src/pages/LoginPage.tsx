@@ -83,6 +83,18 @@ export function LoginPage() {
           <span>We only access your Discord username. No email or personal data is stored.</span>
         </div>
 
+        <div className="login-or-divider">
+          <span>or</span>
+        </div>
+
+        <Link to="/guest" className="guest-login-button">
+          <i className="fas fa-user" />
+          Continue as Guest
+        </Link>
+        <p className="guest-login-note">
+          Data saved to this browser only. No account required.
+        </p>
+
         <div className="login-footer">
           <Link to="/">Back to home</Link>
           <span className="separator">|</span>

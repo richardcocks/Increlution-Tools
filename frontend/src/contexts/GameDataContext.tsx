@@ -1,7 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
-import { api } from '../services/api';
+import { useApi } from './ApiContext';
 import type { IncrelutionAction, Skill } from '../types/models';
 
 interface GameDataContextValue {
@@ -14,6 +14,7 @@ interface GameDataContextValue {
 const GameDataContext = createContext<GameDataContextValue | null>(null);
 
 export function GameDataProvider({ children }: { children: ReactNode }) {
+  const { api } = useApi();
   const [actions, setActions] = useState<IncrelutionAction[]>([]);
   const [skills, setSkills] = useState<Record<number, Skill>>({});
   const [loading, setLoading] = useState(true);
@@ -38,7 +39,7 @@ export function GameDataProvider({ children }: { children: ReactNode }) {
     };
 
     fetchGameData();
-  }, []);
+  }, [api]);
 
   return (
     <GameDataContext.Provider value={{ actions, skills, loading, error }}>

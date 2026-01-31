@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { api } from '../services/api';
+import { useApi } from '../contexts/ApiContext';
 import type { SharedLoadout, IncrelutionAction, AutomationLevel } from '../types/models';
 import { ActionType } from '../types/models';
 import { normalizeLoadoutData } from '../utils/loadoutData';
@@ -17,6 +17,7 @@ interface EmbeddedSharedLoadoutProps {
 }
 
 export function EmbeddedSharedLoadout({ token, onClose }: EmbeddedSharedLoadoutProps) {
+  const { api, isGuest } = useApi();
   const { saveLoadoutShare, savedShares } = useSavedShares();
   const { showToast } = useToast();
   const navigate = useNavigate();
@@ -45,7 +46,7 @@ export function EmbeddedSharedLoadout({ token, onClose }: EmbeddedSharedLoadoutP
     };
 
     fetchSharedLoadout();
-  }, [token]);
+  }, [token, api]);
 
   const isSaved = useMemo(() => {
     return savedShares.some(s => s.shareToken === token);
@@ -308,7 +309,7 @@ export function EmbeddedSharedLoadout({ token, onClose }: EmbeddedSharedLoadoutP
                   disabled={isChapterLocked}
                 />
                 {isChapterLocked && (
-                  <div className="frosted-glass-overlay" onClick={() => navigate('/settings#chapters')}>
+                  <div className="frosted-glass-overlay" onClick={() => navigate(isGuest ? '/guest/settings#chapters' : '/settings#chapters')}>
                     <i className="fas fa-lock" />
                     <span>Unlock chapter in settings</span>
                   </div>

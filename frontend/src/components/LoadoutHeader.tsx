@@ -15,13 +15,14 @@ interface LoadoutHeaderProps {
   onToggleProtection: () => void;
   onDuplicate: () => void;
   onDelete: () => void;
+  hideShare?: boolean;
 }
 
 export interface LoadoutHeaderHandle {
   startEditing: () => void;
 }
 
-const LoadoutHeader = forwardRef<LoadoutHeaderHandle, LoadoutHeaderProps>(({ loadout, folderBreadcrumb, isFolderReadOnly = false, onNameChange, onImport, onExportClipboard, onToggleProtection, onDuplicate, onDelete }, ref) => {
+const LoadoutHeader = forwardRef<LoadoutHeaderHandle, LoadoutHeaderProps>(({ loadout, folderBreadcrumb, isFolderReadOnly = false, onNameChange, onImport, onExportClipboard, onToggleProtection, onDuplicate, onDelete, hideShare }, ref) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedName, setEditedName] = useState('');
   const [isPasteMode, setIsPasteMode] = useState(false);
@@ -165,13 +166,15 @@ const LoadoutHeader = forwardRef<LoadoutHeaderHandle, LoadoutHeaderProps>(({ loa
         <button onClick={onExportClipboard} className="loadout-button" title="Copy loadout data to paste into Increlution">
           <i className="fas fa-copy"></i> Copy for Game
         </button>
-        <button
-          onClick={() => setShowShareModal(true)}
-          className="loadout-button loadout-button-share"
-          title="Share this loadout"
-        >
-          <i className="fas fa-share-alt"></i> Share
-        </button>
+        {!hideShare && (
+          <button
+            onClick={() => setShowShareModal(true)}
+            className="loadout-button loadout-button-share"
+            title="Share this loadout"
+          >
+            <i className="fas fa-share-alt"></i> Share
+          </button>
+        )}
         <button
           onClick={onDuplicate}
           className="loadout-button"

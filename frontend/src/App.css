@@ -263,3 +263,21 @@
   color: var(--color-text-secondary);
   font-size: 0.75rem;
 }
+
+.guest-banner {
+  background: #2a4a6b;
+  color: #c8ddf0;
+  text-align: center;
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+  border-bottom: 1px solid #3a5a7b;
+}
+
+.guest-banner a {
+  color: #7cb3f0;
+  text-decoration: underline;
+}
+
+.guest-banner a:hover {
+  color: #a0cbf5;
+}

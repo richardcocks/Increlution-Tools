@@ -189,6 +189,67 @@
   font-size: 1.25rem;
 }
 
+.login-or-divider {
+  text-align: center;
+  margin: 1.25rem 0;
+  position: relative;
+}
+
+.login-or-divider::before,
+.login-or-divider::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: calc(50% - 1.25rem);
+  height: 1px;
+  background-color: #4a4a4a;
+}
+
+.login-or-divider::before {
+  left: 0;
+}
+
+.login-or-divider::after {
+  right: 0;
+}
+
+.login-or-divider span {
+  color: #777;
+  font-size: 0.85rem;
+  text-transform: lowercase;
+}
+
+.guest-login-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background-color: transparent;
+  color: #b8b8b8;
+  border: 1px solid #4a4a4a;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.guest-login-button:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-color: #666;
+  color: #e3e3e3;
+}
+
+.guest-login-note {
+  text-align: center;
+  color: #777;
+  font-size: 0.8rem;
+  margin: 0.5rem 0 0;
+}
+
 /* Development-only test login */
 .dev-login-section {
   margin-top: 2rem;

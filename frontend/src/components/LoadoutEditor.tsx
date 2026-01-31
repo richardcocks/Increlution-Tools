@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useCallback, useImperativeHandle, forward
 import { useNavigate } from 'react-router-dom';
 import type { IncrelutionAction, Loadout, AutomationLevel, LoadoutData } from '../types/models';
 import { ActionType } from '../types/models';
-import { api } from '../services/api';
+import { useApi } from '../contexts/ApiContext';
 import { useToast } from './Toast';
 import { useSettings } from '../contexts/SettingsContext';
 import { useGameData } from '../contexts/GameDataContext';
@@ -22,13 +22,15 @@ interface LoadoutEditorProps {
   onCreateLoadout?: () => void;
   onDuplicate?: () => void;
   onDelete?: () => void;
+  hideShare?: boolean;
 }
 
 export interface LoadoutEditorHandle {
   startEditingName: () => boolean;
 }
 
-const LoadoutEditor = forwardRef<LoadoutEditorHandle, LoadoutEditorProps>(({ loadoutId, folderBreadcrumb, isFolderReadOnly = false, onNameChange, onProtectionChange, onCreateLoadout, onDuplicate, onDelete }, ref) => {
+const LoadoutEditor = forwardRef<LoadoutEditorHandle, LoadoutEditorProps>(({ loadoutId, folderBreadcrumb, isFolderReadOnly = false, onNameChange, onProtectionChange, onCreateLoadout, onDuplicate, onDelete, hideShare }, ref) => {
+  const { api, isGuest } = useApi();
   const { actions, skills, loading: gameDataLoading, error: gameDataError } = useGameData();
   const [loadout, setLoadout] = useState<Loadout | null>(null);
   const [loadoutLoading, setLoadoutLoading] = useState(true);
@@ -158,7 +160,7 @@ const LoadoutEditor = forwardRef<LoadoutEditorHandle, LoadoutEditorProps>(({ loa
     redoStackRef.current = [];
 
     fetchLoadout();
-  }, [loadoutId]);
+  }, [loadoutId, api]);
 
   // Push current loadout data onto the undo stack
   const pushUndo = useCallback((currentData: LoadoutData) => {
@@ -189,7 +191,7 @@ const LoadoutEditor = forwardRef<LoadoutEditorHandle, LoadoutEditorProps>(({ loa
       const loadoutData = await api.getLoadout(loadoutId);
       setLoadout(loadoutData);
     }
-  }, [loadout, loadoutId, showToast]);
+  }, [loadout, loadoutId, showToast, api]);
 
   const undo = useCallback(() => {
     applyUndoRedo(undoStackRef.current, redoStackRef.current, 'Undo');
@@ -225,7 +227,7 @@ const LoadoutEditor = forwardRef<LoadoutEditorHandle, LoadoutEditorProps>(({ loa
         showToast('Failed to import loadout', 'error');
       }
     }
-  }, [loadout, loadoutId, showToast, mergeWithExisting, applyDefaultsToImport]);
+  }, [loadout, loadoutId, showToast, mergeWithExisting, applyDefaultsToImport, api, isFolderReadOnly, pushUndo]);
 
   useEffect(() => {
     const handlePaste = (e: ClipboardEvent) => {
@@ -384,7 +386,7 @@ const LoadoutEditor = forwardRef<LoadoutEditorHandle, LoadoutEditorProps>(({ loa
         pendingUpdatesRef.current.delete(actionKey);
       }
     }
-  }, [loadout, loadoutId]);
+  }, [loadout, loadoutId, api, isFolderReadOnly, pushUndo]);
 
   const toggleActionLock = useCallback((action: IncrelutionAction) => {
     const currentLevel = getAutomationLevel(action);
@@ -476,7 +478,7 @@ const LoadoutEditor = forwardRef<LoadoutEditorHandle, LoadoutEditorProps>(({ loa
       showToast('Failed to update actions', 'error');
       setLoadout(prev => prev ? { ...prev, data: previousData } : prev);
     }
-  }, [loadout, loadoutId, getActionsForScope, settings.defaultSkillPriorities, showToast]);
+  }, [loadout, loadoutId, getActionsForScope, settings.defaultSkillPriorities, showToast, api, isFolderReadOnly, pushUndo]);
 
   const handleChapterClick = useCallback((e: React.MouseEvent, chapter: number | 'all' | 'fav') => {
     if (e.ctrlKey || e.metaKey) {
@@ -570,7 +572,7 @@ const LoadoutEditor = forwardRef<LoadoutEditorHandle, LoadoutEditorProps>(({ loa
       console.error('Error exporting to clipboard:', err);
       showToast('Failed to copy to clipboard', 'error');
     }
-  }, [loadoutId, actions, unlockedChaptersSet, showToast]);
+  }, [loadoutId, actions, unlockedChaptersSet, showToast, api]);
 
   useEffect(() => {
     const handleCopy = (e: KeyboardEvent) => {
@@ -662,6 +664,7 @@ const LoadoutEditor = forwardRef<LoadoutEditorHandle, LoadoutEditorProps>(({ loa
         onToggleProtection={toggleProtection}
         onDuplicate={onDuplicate ?? (() => {})}
         onDelete={onDelete ?? (() => {})}
+        hideShare={hideShare}
       />
 
       {/* Search Bar */}
@@ -733,7 +736,7 @@ const LoadoutEditor = forwardRef<LoadoutEditorHandle, LoadoutEditorProps>(({ loa
           <p>You haven't added any favourite actions yet.</p>
           <p>
             Visit the{' '}
-            <button className="link-button" onClick={() => navigate('/favourites')}>
+            <button className="link-button" onClick={() => navigate(isGuest ? '/guest/favourites' : '/favourites')}>
               Favourites page
             </button>{' '}
             to mark actions for quick access.
@@ -789,7 +792,7 @@ const LoadoutEditor = forwardRef<LoadoutEditorHandle, LoadoutEditorProps>(({ loa
                 disabled={isChapterLocked}
               />
               {isChapterLocked && (
-                <div className="frosted-glass-overlay" onClick={() => navigate('/settings#chapters')}>
+                <div className="frosted-glass-overlay" onClick={() => navigate(isGuest ? '/guest/settings#chapters' : '/settings#chapters')}>
                   <i className="fas fa-lock" />
                   <span>Unlock chapter in settings</span>
                 </div>
@@ -835,7 +838,7 @@ const LoadoutEditor = forwardRef<LoadoutEditorHandle, LoadoutEditorProps>(({ loa
               disabled={isChapterLocked}
             />
             {isChapterLocked && (
-              <div className="frosted-glass-overlay" onClick={() => navigate('/settings#chapters')}>
+              <div className="frosted-glass-overlay" onClick={() => navigate(isGuest ? '/guest/settings#chapters' : '/settings#chapters')}>
                 <i className="fas fa-lock" />
                 <span>Unlock chapter in settings</span>
               </div>

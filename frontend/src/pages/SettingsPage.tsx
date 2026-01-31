@@ -5,6 +5,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import { useGameData } from '../contexts/GameDataContext';
 import type { ThemePreference, ColorMode } from '../types/settings';
 import { useToast } from '../components/Toast';
+import { useApi } from '../contexts/ApiContext';
 import type { AutomationLevel } from '../types/models';
 import { ActionType } from '../types/models';
 import { makeSkillActionKey } from '../types/settings';
@@ -23,6 +24,7 @@ export function SettingsPage({ onClose }: { onClose: () => void }) {
   const { themePreference, setThemePreference } = useTheme();
   const { skills, loading: skillsLoading } = useGameData();
   const { showToast } = useToast();
+  const { isGuest } = useApi();
 
   // Chapter unlock form state
   const [selectedChapter, setSelectedChapter] = useState<number | null>(null);
@@ -85,30 +87,6 @@ export function SettingsPage({ onClose }: { onClose: () => void }) {
       setIsUnlocking(false);
     }
   };
-
-  // Migrate old format settings (numeric keys) to new format (skillId-actionType keys)
-  // and initialize defaults for new users
-  useEffect(() => {
-    if (skillsLoading || settingsLoading) return;
-
-    const skillIds = Object.keys(skills);
-    if (skillIds.length === 0) return;
-
-    // Check if we have old-format settings (keys without "-" are old numeric format)
-    const existingKeys = Object.keys(settings.defaultSkillPriorities);
-    const hasOldFormat = existingKeys.length > 0 && existingKeys.some(key => !key.includes('-'));
-
-    if (hasOldFormat || !settings.skillPrioritiesInitialized) {
-      // Clear old format and initialize with new format
-      const defaultPriorities: Record<string, number> = {};
-      skillIds.forEach(id => {
-        ACTION_TYPES.forEach(({ type }) => {
-          defaultPriorities[makeSkillActionKey(Number(id), type)] = 2;
-        });
-      });
-      updateSettings({ defaultSkillPriorities: defaultPriorities, skillPrioritiesInitialized: true });
-    }
-  }, [skills, skillsLoading, settingsLoading, settings.skillPrioritiesInitialized, settings.defaultSkillPriorities, updateSettings]);
 
   const handleInvertMouseChange = async (value: boolean) => {
     try {
@@ -437,17 +415,27 @@ export function SettingsPage({ onClose }: { onClose: () => void }) {
           <h3>Danger Zone</h3>
           <div className="danger-zone-content">
             <div className="danger-zone-info">
-              <p className="danger-zone-title">Delete Account</p>
+              <p className="danger-zone-title">{isGuest ? 'Clear Data' : 'Delete Account'}</p>
               <p className="danger-zone-description">
-                Permanently delete your account and all associated data.
-                This action cannot be undone.
+                {isGuest
+                  ? 'Clear all guest data stored in this browser. This action cannot be undone.'
+                  : 'Permanently delete your account and all associated data. This action cannot be undone.'}
               </p>
             </div>
             <button
               className="delete-account-button"
-              onClick={() => navigate('/delete-account')}
+              onClick={() => {
+                if (isGuest) {
+                  if (window.confirm('Are you sure you want to clear all guest data? This cannot be undone.')) {
+                    localStorage.removeItem('guest_data');
+                    window.location.href = '/guest';
+                  }
+                } else {
+                  navigate('/delete-account');
+                }
+              }}
             >
-              Delete Account
+              {isGuest ? 'Clear Data' : 'Delete Account'}
             </button>
           </div>
         </section>
