@@ -6,6 +6,7 @@ import { Sidebar } from './components/Sidebar'
 import { useToast } from './components/Toast'
 import { DeleteConfirmation } from './components/DeleteConfirmation'
 import { EmbeddedSharedLoadout } from './components/EmbeddedSharedLoadout'
+import { EmbeddedSharedFolder } from './components/EmbeddedSharedFolder'
 import { EmbeddedSharedFolderLoadout } from './components/EmbeddedSharedFolderLoadout'
 import { TextInputModal } from './components/TextInputModal'
 import { FolderView } from './components/FolderView'
@@ -15,9 +16,8 @@ import { useSettings } from './contexts/SettingsContext'
 import { useTheme } from './contexts/ThemeContext'
 import { useGameData } from './contexts/GameDataContext'
 import { SidebarActionsProvider } from './contexts/SidebarActionsContext'
-import { useSavedShares } from './contexts/SavedSharesContext'
 import { useApi } from './contexts/ApiContext'
-import type { FolderTreeNode, SharedFolderNode } from './types/models'
+import type { FolderTreeNode } from './types/models'
 import { ActionType } from './types/models'
 import { makeSkillActionKey } from './types/settings'
 import { filterLoadoutByChapters, normalizeLoadoutData } from './utils/loadoutData'
@@ -65,7 +65,6 @@ function App() {
   const { unlockedChaptersSet, settings, updateSettings, loading: settingsLoading } = useSettings()
   const { themePreference, effectiveTheme, cycleTheme } = useTheme()
   const { actions, skills, loading: gameDataLoading } = useGameData()
-  const { savedShares } = useSavedShares()
   const navigate = useNavigate()
   const location = useLocation()
   const params = useParams<{
@@ -858,66 +857,11 @@ function App() {
           />
         );
       } else {
-        // Folder selected but no loadout - show the folder contents
-        const sharedFolderData = savedShares.find(s => s.shareToken === viewingSharedFolder.token && s.shareType === 'folder');
-
-        // Helper to collect all loadouts from folder tree
-        const collectLoadouts = (node: SharedFolderNode | undefined, path: string[] = []): Array<{ id: number; name: string; path: string[] }> => {
-          if (!node) return [];
-          const results: Array<{ id: number; name: string; path: string[] }> = [];
-          const currentPath = [...path, node.name];
-
-          for (const loadout of node.loadouts) {
-            results.push({ id: loadout.id, name: loadout.name, path: currentPath });
-          }
-          for (const subFolder of node.subFolders) {
-            results.push(...collectLoadouts(subFolder, currentPath));
-          }
-          return results;
-        };
-
-        const allLoadouts = sharedFolderData?.folderTree ? collectLoadouts(sharedFolderData.folderTree) : [];
-
         return (
-          <div className="shared-folder-content-view">
-            <div className="shared-folder-content-header">
-              <i className="fas fa-folder-open" />
-              <div className="shared-folder-content-title">
-                <h1>{sharedFolderData?.itemName ?? 'Shared Folder'}</h1>
-                {sharedFolderData?.ownerName && (
-                  <span className="shared-folder-owner">Shared by {sharedFolderData.ownerName}</span>
-                )}
-              </div>
-            </div>
-
-            {allLoadouts.length === 0 ? (
-              <div className="shared-folder-empty">
-                <p>This folder is empty.</p>
-              </div>
-            ) : (
-              <div className="shared-folder-loadout-list">
-                <h2>Loadouts ({allLoadouts.length})</h2>
-                <div className="shared-folder-loadouts">
-                  {allLoadouts.map(loadout => (
-                    <div
-                      key={loadout.id}
-                      className="shared-folder-loadout-item"
-                      onClick={() => handleViewSharedFolderLoadout(viewingSharedFolder.token, loadout.id)}
-                    >
-                      <i className="fas fa-file-alt" />
-                      <div className="shared-folder-loadout-info">
-                        <span className="shared-folder-loadout-name">{loadout.name}</span>
-                        {loadout.path.length > 1 && (
-                          <span className="shared-folder-loadout-path">{loadout.path.slice(1).join(' / ')}</span>
-                        )}
-                      </div>
-                      <i className="fas fa-chevron-right" />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
+          <EmbeddedSharedFolder
+            token={viewingSharedFolder.token}
+            onClose={handleCloseShare}
+          />
         );
       }
     }

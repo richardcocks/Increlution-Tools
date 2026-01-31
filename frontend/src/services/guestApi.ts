@@ -200,7 +200,7 @@ export function createGuestApi(): ApiType {
       return { id: -1, username: 'Guest' };
     },
 
-    // Game data - delegate to real API (public endpoints)
+    // Game data - delegate to real API (public endpoints, already cached in api.ts)
     async getActions() {
       const actions = await api.getActions();
       cachedActions = actions;

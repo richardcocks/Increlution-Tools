@@ -732,21 +732,37 @@ app.MapPost("/api/settings/unlock-chapter", async (
 // === Game Data Endpoints (public) ===
 
 // GET /api/actions - Get all Increlution actions (from in-memory data)
-app.MapGet("/api/actions", (GameDataService gameData) =>
+app.MapGet("/api/actions", (HttpContext ctx, GameDataService gameData) =>
 {
-    return gameData.GetAllActions();
+    var ifNoneMatch = ctx.Request.Headers.IfNoneMatch.ToString();
+    if (ifNoneMatch == gameData.ETag)
+    {
+        ctx.Response.Headers.ETag = gameData.ETag;
+        ctx.Response.Headers.CacheControl = "public, max-age=86400";
+        return Results.StatusCode(304);
+    }
+    ctx.Response.Headers.ETag = gameData.ETag;
+    ctx.Response.Headers.CacheControl = "public, max-age=86400";
+    return Results.Ok(gameData.GetAllActions());
 })
 .RequireRateLimiting("public-or-api")
-.CacheOutput("GameData")
 .WithName("GetActions");
 
 // GET /api/skills - Get all skills (from in-memory data)
-app.MapGet("/api/skills", (GameDataService gameData) =>
+app.MapGet("/api/skills", (HttpContext ctx, GameDataService gameData) =>
 {
-    return gameData.GetAllSkills();
+    var ifNoneMatch = ctx.Request.Headers.IfNoneMatch.ToString();
+    if (ifNoneMatch == gameData.ETag)
+    {
+        ctx.Response.Headers.ETag = gameData.ETag;
+        ctx.Response.Headers.CacheControl = "public, max-age=86400";
+        return Results.StatusCode(304);
+    }
+    ctx.Response.Headers.ETag = gameData.ETag;
+    ctx.Response.Headers.CacheControl = "public, max-age=86400";
+    return Results.Ok(gameData.GetAllSkills());
 })
 .RequireRateLimiting("public-or-api")
-.CacheOutput("GameData")
 .WithName("GetSkills");
 
 // === Protected Endpoints ===
