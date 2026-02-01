@@ -1,13 +1,41 @@
 .auth-page {
   display: flex;
+  flex-direction: column;
+  flex: 1;
+  background-color: var(--color-bg-base);
+}
+
+.auth-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background: var(--color-bg-elevated);
+  color: var(--color-text-primary);
+  border-bottom: 1px solid var(--color-border-default);
+  flex-shrink: 0;
+}
+
+.auth-page-header-title {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--color-text-primary);
+  text-decoration: none;
+}
+
+.auth-page-header-title:hover {
+  text-decoration: none;
+}
+
+.auth-page-body {
+  display: flex;
   justify-content: center;
   align-items: center;
   flex: 1;
-  background-color: #2f2f2f;
 }
 
 .auth-container {
-  background-color: #373737;
+  background-color: var(--color-bg-elevated);
   padding: 2rem;
   border-radius: 8px;
   width: 100%;
@@ -16,7 +44,7 @@
 }
 
 .auth-container h1 {
-  color: #e3e3e3;
+  color: var(--color-text-primary);
   text-align: center;
   margin-bottom: 0.5rem;
   font-size: 1.5rem;
@@ -31,7 +59,7 @@
 }
 
 .login-subtitle {
-  color: #b8b8b8;
+  color: var(--color-text-secondary);
   text-align: center;
   font-size: 0.95rem;
   margin: 0;
@@ -43,14 +71,14 @@
   gap: 0.75rem;
   margin-top: 1.5rem;
   padding: 1rem;
-  background-color: rgba(122, 162, 247, 0.1);
+  background-color: var(--color-accent-subtle-bg);
   border-radius: 6px;
   font-size: 0.85rem;
-  color: #b8b8b8;
+  color: var(--color-text-secondary);
 }
 
 .login-privacy i {
-  color: #7aa2f7;
+  color: var(--color-accent);
   margin-top: 2px;
 }
 
@@ -61,7 +89,7 @@
 }
 
 .login-footer a {
-  color: #7aa2f7;
+  color: var(--color-accent);
   text-decoration: none;
 }
 
@@ -70,7 +98,7 @@
 }
 
 .login-footer .separator {
-  color: #4a4a4a;
+  color: var(--color-border-default);
   margin: 0 0.75rem;
 }
 
@@ -87,28 +115,28 @@
 }
 
 .form-group label {
-  color: #b8b8b8;
+  color: var(--color-text-secondary);
   font-size: 0.875rem;
 }
 
 .form-group input {
   padding: 0.75rem;
-  border: 1px solid #4a4a4a;
+  border: 1px solid var(--color-border-default);
   border-radius: 4px;
-  background-color: #2f2f2f;
-  color: #e3e3e3;
+  background-color: var(--color-input-bg);
+  color: var(--color-text-primary);
   font-size: 1rem;
 }
 
 .form-group input:focus {
   outline: none;
-  border-color: #7aa2f7;
+  border-color: var(--color-input-focus-border);
 }
 
 .auth-button {
   padding: 0.75rem;
-  background-color: #7aa2f7;
-  color: #2f2f2f;
+  background-color: var(--color-accent);
+  color: var(--color-accent-text);
   border: none;
   border-radius: 4px;
   font-size: 1rem;
@@ -119,7 +147,7 @@
 }
 
 .auth-button:hover:not(:disabled) {
-  background-color: #89b4fa;
+  background-color: var(--color-accent-hover);
 }
 
 .auth-button:disabled {
@@ -128,23 +156,23 @@
 }
 
 .auth-error {
-  color: #f7768e;
+  color: var(--color-danger-text);
   font-size: 0.875rem;
   text-align: center;
   padding: 0.5rem;
-  background-color: rgba(247, 118, 142, 0.1);
+  background-color: var(--color-danger-bg);
   border-radius: 4px;
 }
 
 .auth-link {
   text-align: center;
   margin-top: 1rem;
-  color: #b8b8b8;
+  color: var(--color-text-secondary);
   font-size: 0.875rem;
 }
 
 .auth-link a {
-  color: #7aa2f7;
+  color: var(--color-accent);
   text-decoration: none;
 }
 
@@ -153,7 +181,7 @@
 }
 
 .auth-description {
-  color: #b8b8b8;
+  color: var(--color-text-secondary);
   text-align: center;
   margin-bottom: 1.5rem;
   font-size: 0.9rem;
@@ -254,7 +282,7 @@
 .dev-login-section {
   margin-top: 2rem;
   padding-top: 1.5rem;
-  border-top: 1px dashed #4a4a4a;
+  border-top: 1px dashed var(--color-border-default);
 }
 
 .dev-login-divider {
@@ -280,10 +308,10 @@
 .dev-login-input {
   flex: 1;
   padding: 0.5rem 0.75rem;
-  border: 1px solid #4a4a4a;
+  border: 1px solid var(--color-border-default);
   border-radius: 4px;
-  background-color: #2f2f2f;
-  color: #e3e3e3;
+  background-color: var(--color-input-bg);
+  color: var(--color-text-primary);
   font-size: 0.9rem;
 }
 
@@ -316,7 +344,7 @@
 
 .dev-login-error {
   margin-top: 0.5rem;
-  color: #f7768e;
+  color: var(--color-danger-text);
   font-size: 0.8rem;
   text-align: center;
 }
