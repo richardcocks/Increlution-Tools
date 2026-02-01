@@ -1,6 +1,7 @@
 import { api } from './api';
 import type { ApiType } from '../contexts/ApiContext';
 import type { FolderTreeNode, IncrelutionAction, Loadout, LoadoutData, SavedShareUnified } from '../types/models';
+import { ActionType } from '../types/models';
 import type { UserSettings } from '../types/settings';
 import { defaultSettings, makeSkillActionKey } from '../types/settings';
 
@@ -44,7 +45,53 @@ function getDefaultData(): GuestData {
 }
 
 function persist(data: GuestData): void {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  } catch (e) {
+    if (e instanceof DOMException && e.name === 'QuotaExceededError') {
+      throw new Error('Browser storage is full. Try deleting some loadouts or folders to free up space.');
+    }
+    throw e;
+  }
+}
+
+function levenshteinDistance(s1: string, s2: string): number {
+  const n = s1.length;
+  const m = s2.length;
+  const d: number[][] = Array.from({ length: n + 1 }, () => new Array<number>(m + 1).fill(0));
+
+  for (let i = 0; i <= n; i++) d[i][0] = i;
+  for (let j = 0; j <= m; j++) d[0][j] = j;
+
+  for (let i = 1; i <= n; i++) {
+    for (let j = 1; j <= m; j++) {
+      const cost = s1[i - 1].toLowerCase() === s2[j - 1].toLowerCase() ? 0 : 1;
+      d[i][j] = Math.min(
+        d[i - 1][j] + 1,
+        d[i][j - 1] + 1,
+        d[i - 1][j - 1] + cost
+      );
+    }
+  }
+  return d[n][m];
+}
+
+function fuzzyMatch(input: string, target: string, baseMaxDistance = 2): boolean {
+  const normalizedInput = input.trim();
+  const normalizedTarget = target.trim();
+
+  if (normalizedInput.toLowerCase() === normalizedTarget.toLowerCase()) return true;
+
+  const distance = levenshteinDistance(normalizedInput, normalizedTarget);
+  const effectiveMaxDistance = Math.max(baseMaxDistance, Math.floor(target.length / 6));
+  return distance <= effectiveMaxDistance;
+}
+
+function getFirstExplorationName(actions: IncrelutionAction[], chapter: number): string | null {
+  const explorations = actions
+    .filter(a => a.type === ActionType.Exploration && a.chapter === chapter)
+    .sort((a, b) => a.sortOrder - b.sortOrder);
+  return explorations.length > 0 ? explorations[0].name : null;
 }
 
 function allocateId(data: GuestData): number {
@@ -493,8 +540,24 @@ export function createGuestApi(): ApiType {
       return data.settings;
     },
 
-    async unlockChapter(chapter: number) {
-      // Guest mode: accept any exploration name (no server validation)
+    async unlockChapter(chapter: number, explorationName: string) {
+      if (chapter < 1 || chapter > 10) {
+        return { success: false, message: 'Invalid chapter number' };
+      }
+
+      if (!cachedActions) {
+        return { success: false, message: 'Game data not loaded yet' };
+      }
+
+      const expectedName = getFirstExplorationName(cachedActions, chapter);
+      if (!expectedName) {
+        return { success: false, message: 'Chapter not found' };
+      }
+
+      if (!fuzzyMatch(explorationName, expectedName)) {
+        return { success: false, message: 'Incorrect exploration name' };
+      }
+
       const chapters = new Set(data.settings.unlockedChapters);
       for (let i = 0; i <= chapter; i++) {
         chapters.add(i);
