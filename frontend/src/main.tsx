@@ -1,6 +1,6 @@
 import { StrictMode, useMemo } from 'react'
 import { createRoot } from 'react-dom/client'
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom'
 import '@fortawesome/fontawesome-free/css/all.min.css'
 import './index.css'
 import App from './App.tsx'
@@ -22,10 +22,9 @@ import { AuthAwareFolderShareRoute } from './components/AuthAwareFolderShareRout
 import { DeleteAccountPage } from './pages/DeleteAccountPage.tsx'
 import { MigratePage } from './pages/MigratePage.tsx'
 import { createGuestApi } from './services/guestApi.ts'
-import type { ReactNode } from 'react'
 
 /* eslint-disable react-refresh/only-export-components */
-function GuestWrapper({ children }: { children: ReactNode }) {
+function GuestLayout() {
   const guestApi = useMemo(() => createGuestApi(), [])
   return (
     <GuestApiProvider guestApi={guestApi}>
@@ -35,7 +34,7 @@ function GuestWrapper({ children }: { children: ReactNode }) {
             <SavedSharesProvider>
               <ToastProvider>
                 <GameDataProvider>
-                  {children}
+                  <Outlet />
                 </GameDataProvider>
               </ToastProvider>
             </SavedSharesProvider>
@@ -43,14 +42,6 @@ function GuestWrapper({ children }: { children: ReactNode }) {
         </SettingsProvider>
       </AuthProvider>
     </GuestApiProvider>
-  )
-}
-
-function GuestRoute() {
-  return (
-    <GuestWrapper>
-      <App />
-    </GuestWrapper>
   )
 }
 
@@ -165,15 +156,17 @@ createRoot(document.getElementById('root')!).render(
                       </ProtectedRoute>
                     } />
                     {/* Guest routes */}
-                    <Route path="/guest" element={<GuestRoute />} />
-                    <Route path="/guest/folder/:folderId" element={<GuestRoute />} />
-                    <Route path="/guest/loadout/:loadoutId" element={<GuestRoute />} />
-                    <Route path="/guest/shared/:token" element={<GuestRoute />} />
-                    <Route path="/guest/shared/folder/:folderToken" element={<GuestRoute />} />
-                    <Route path="/guest/shared/folder/:folderToken/:loadoutId" element={<GuestRoute />} />
-                    <Route path="/guest/settings" element={<GuestRoute />} />
-                    <Route path="/guest/favourites" element={<GuestRoute />} />
-                    <Route path="/guest/help" element={<GuestRoute />} />
+                    <Route path="/guest" element={<GuestLayout />}>
+                      <Route index element={<App />} />
+                      <Route path="folder/:folderId" element={<App />} />
+                      <Route path="loadout/:loadoutId" element={<App />} />
+                      <Route path="shared/:token" element={<App />} />
+                      <Route path="shared/folder/:folderToken" element={<App />} />
+                      <Route path="shared/folder/:folderToken/:loadoutId" element={<App />} />
+                      <Route path="settings" element={<App />} />
+                      <Route path="favourites" element={<App />} />
+                      <Route path="help" element={<App />} />
+                    </Route>
                   </Routes>
                 </div>
                 <Footer />

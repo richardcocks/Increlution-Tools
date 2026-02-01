@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useSettings } from '../contexts/SettingsContext';
 import { api } from '../services/api';
 import {
   readGuestData,
@@ -19,6 +20,7 @@ type Phase = 'choose' | 'confirm-discard' | 'migrating' | 'done' | 'error';
 export function MigratePage() {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const { refetchSettings } = useSettings();
   const [phase, setPhase] = useState<Phase>('choose');
   const [guestData, setGuestData] = useState<GuestData | null>(null);
   const [importLoadoutsChecked, setImportLoadoutsChecked] = useState(true);
@@ -106,6 +108,7 @@ export function MigratePage() {
         setProgress(prev => ({ ...prev, phase: 'Merging settings...' }));
         await migrateSettings(api, guestData);
         settingsMerged = true;
+        await refetchSettings();
       }
 
       setResult({ foldersCreated, loadoutsImported, settingsMerged });

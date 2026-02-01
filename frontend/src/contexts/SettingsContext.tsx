@@ -14,6 +14,7 @@ interface SettingsContextValue {
   toggleFavourite: (actionId: number) => Promise<void>;
   unlockedChaptersSet: Set<number>;
   unlockChapter: (chapter: number, explorationName: string) => Promise<{ success: boolean; message: string }>;
+  refetchSettings: () => Promise<void>;
 }
 
 const SettingsContext = createContext<SettingsContextValue | null>(null);
@@ -127,8 +128,14 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     return { success: result.success, message: result.message };
   }, [api]);
 
+  const refetchSettings = useCallback(async () => {
+    if (!user) return;
+    const data = await api.getSettings();
+    setSettingsState({ settings: data, loadedForUserId: user.id });
+  }, [user, api]);
+
   return (
-    <SettingsContext.Provider value={{ settings, loading, updateSettings, favouriteActionsSet, toggleFavourite, unlockedChaptersSet, unlockChapter }}>
+    <SettingsContext.Provider value={{ settings, loading, updateSettings, favouriteActionsSet, toggleFavourite, unlockedChaptersSet, unlockChapter, refetchSettings }}>
       {children}
     </SettingsContext.Provider>
   );
