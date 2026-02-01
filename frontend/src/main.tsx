@@ -20,6 +20,7 @@ import TermsPage from './pages/TermsPage.tsx'
 import { AuthAwareShareRoute } from './components/AuthAwareShareRoute.tsx'
 import { AuthAwareFolderShareRoute } from './components/AuthAwareFolderShareRoute.tsx'
 import { DeleteAccountPage } from './pages/DeleteAccountPage.tsx'
+import { MigratePage } from './pages/MigratePage.tsx'
 import { createGuestApi } from './services/guestApi.ts'
 import type { ReactNode } from 'react'
 
@@ -156,6 +157,11 @@ createRoot(document.getElementById('root')!).render(
                     <Route path="/delete-account" element={
                       <ProtectedRoute>
                         <DeleteAccountPage />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/migrate" element={
+                      <ProtectedRoute>
+                        <MigratePage />
                       </ProtectedRoute>
                     } />
                     {/* Guest routes */}

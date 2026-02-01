@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../services/api';
+import { hasGuestData } from '../services/guestMigration';
 import './AuthPages.css';
 
 export function LoginPage() {
@@ -16,7 +17,7 @@ export function LoginPage() {
   // Redirect if already logged in
   useEffect(() => {
     if (user && !loading) {
-      navigate('/loadouts');
+      navigate(hasGuestData() ? '/migrate' : '/loadouts');
     }
   }, [user, loading, navigate]);
 
@@ -49,7 +50,7 @@ export function LoginPage() {
     try {
       await api.devLogin(devUsername.trim());
       await refreshUser();
-      navigate('/loadouts');
+      navigate(hasGuestData() ? '/migrate' : '/loadouts');
     } catch (err) {
       setDevError(err instanceof Error ? err.message : 'Dev login failed');
     } finally {

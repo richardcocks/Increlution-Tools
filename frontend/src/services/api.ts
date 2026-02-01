@@ -108,7 +108,7 @@ export const api = {
     return response.json();
   },
 
-  async createFolder(name: string, parentId: number): Promise<void> {
+  async createFolder(name: string, parentId: number): Promise<{ id: number }> {
     const response = await fetch(`${API_BASE}/folders`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -118,6 +118,7 @@ export const api = {
     if (!response.ok) {
       throw new Error(`Failed to create folder: ${response.statusText}`);
     }
+    return response.json();
   },
 
   async renameFolder(id: number, name: string): Promise<void> {

@@ -5,9 +5,11 @@ import { ActionType } from '../types/models';
 import type { UserSettings } from '../types/settings';
 import { defaultSettings, makeSkillActionKey } from '../types/settings';
 
-const STORAGE_KEY = 'guest_data';
+export const GUEST_STORAGE_KEY = 'guest_data';
 
-interface GuestData {
+const STORAGE_KEY = GUEST_STORAGE_KEY;
+
+export interface GuestData {
   folderTree: FolderTreeNode;
   loadouts: Record<number, Loadout>;
   settings: UserSettings;
@@ -282,6 +284,7 @@ export function createGuestApi(): ApiType {
         loadouts: []
       });
       save();
+      return { id };
     },
 
     async renameFolder(id: number, name: string) {
