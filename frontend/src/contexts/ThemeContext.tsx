@@ -1,7 +1,8 @@
 /* eslint-disable react-refresh/only-export-components */
-import { createContext, useContext, useEffect, useMemo, useCallback } from 'react';
+import { createContext, useContext, useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import type { ReactNode } from 'react';
 import { useSettings } from './SettingsContext';
+import { useAuth } from './AuthContext';
 import type { ThemePreference } from '../types/settings';
 
 type EffectiveTheme = 'dark' | 'light';
@@ -9,11 +10,19 @@ type EffectiveTheme = 'dark' | 'light';
 interface ThemeContextValue {
   themePreference: ThemePreference;
   effectiveTheme: EffectiveTheme;
-  setThemePreference: (preference: ThemePreference) => Promise<void>;
-  cycleTheme: () => Promise<void>;
+  setThemePreference: (preference: ThemePreference) => void;
+  cycleTheme: () => void;
 }
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
+
+const THEME_STORAGE_KEY = 'theme-preference';
+
+function readStoredPreference(): ThemePreference {
+  const stored = localStorage.getItem(THEME_STORAGE_KEY);
+  if (stored === 'dark' || stored === 'light') return stored;
+  return 'system';
+}
 
 // Get system preference
 function getSystemPreference(): EffectiveTheme {
@@ -33,18 +42,37 @@ function computeEffectiveTheme(preference: ThemePreference): EffectiveTheme {
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const { settings, updateSettings } = useSettings();
-  const themePreference = settings.themePreference ?? 'system';
+  const { user } = useAuth();
+  const [themePreference, setThemePreferenceState] = useState<ThemePreference>(readStoredPreference);
+
+  // Track whether the user has explicitly changed theme in THIS provider instance
+  // so we don't overwrite their choice when server settings load
+  const hasUserChangedTheme = useRef(false);
+
+  // Sync with localStorage changes from other ThemeProvider instances (same window)
+  // We use a custom event since 'storage' only fires for other windows
+  useEffect(() => {
+    const handleThemeSync = (e: Event) => {
+      const newPref = (e as CustomEvent<ThemePreference>).detail;
+      if (newPref !== themePreference) {
+        setThemePreferenceState(newPref);
+      }
+    };
+    window.addEventListener('theme-preference-changed', handleThemeSync);
+    return () => window.removeEventListener('theme-preference-changed', handleThemeSync);
+  }, [themePreference]);
 
   // Compute effective theme
   const effectiveTheme = useMemo(() => {
     return computeEffectiveTheme(themePreference);
   }, [themePreference]);
 
-  // Apply theme to document
+  // Apply theme to document + sync to localStorage + notify other providers
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', effectiveTheme);
-    // Sync to localStorage for FOUC prevention
-    localStorage.setItem('theme-preference', themePreference);
+    localStorage.setItem(THEME_STORAGE_KEY, themePreference);
+    // Notify other ThemeProvider instances in the same window
+    window.dispatchEvent(new CustomEvent('theme-preference-changed', { detail: themePreference }));
   }, [effectiveTheme, themePreference]);
 
   // Listen for system preference changes when preference is 'system'
@@ -61,16 +89,39 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     return () => mediaQuery.removeEventListener('change', handleChange);
   }, [themePreference]);
 
-  const setThemePreference = useCallback(async (preference: ThemePreference) => {
-    await updateSettings({ themePreference: preference });
-  }, [updateSettings]);
+  // When server settings load with a non-default theme, adopt it
+  // (only if the user hasn't explicitly changed theme locally)
+  useEffect(() => {
+    const serverPref = settings.themePreference;
+    if (!serverPref || serverPref === 'system') return;
+    if (hasUserChangedTheme.current) return;
+    if (themePreference !== 'system') return;
+    setThemePreferenceState(serverPref);
+  }, [settings.themePreference]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const cycleTheme = useCallback(async () => {
+  // Sync theme to server when it changes and user is logged in
+  const prevThemeRef = useRef(themePreference);
+  useEffect(() => {
+    if (prevThemeRef.current === themePreference) return;
+    prevThemeRef.current = themePreference;
+    if (!user || user.id === -1) return; // not logged in or guest
+    // Fire-and-forget sync to server
+    updateSettings({ themePreference }).catch(() => {
+      // Silently ignore - localStorage is the source of truth
+    });
+  }, [themePreference, user, updateSettings]);
+
+  const setThemePreference = useCallback((preference: ThemePreference) => {
+    hasUserChangedTheme.current = true;
+    setThemePreferenceState(preference);
+  }, []);
+
+  const cycleTheme = useCallback(() => {
     // Cycle: system -> dark -> light -> system
     const nextPreference: ThemePreference =
       themePreference === 'system' ? 'dark' :
       themePreference === 'dark' ? 'light' : 'system';
-    await setThemePreference(nextPreference);
+    setThemePreference(nextPreference);
   }, [themePreference, setThemePreference]);
 
   return (

@@ -62,7 +62,6 @@ export function hasGuestSettings(data: GuestData): boolean {
     s.overwriteWhenNull ||
     s.disableWheelAnimation ||
     s.colorMode !== 'full' ||
-    s.themePreference !== 'system' ||
     (s.unlockedChapters?.length ?? 0) > 1 ||
     (s.favouriteActions?.length ?? 0) > 0 ||
     Object.keys(s.defaultSkillPriorities).length > 0
@@ -156,7 +155,6 @@ export async function migrateSettings(
   if (guest.applyDefaultsOnImport && !serverSettings.applyDefaultsOnImport) merged.applyDefaultsOnImport = true;
   if (guest.overwriteWhenNull && !serverSettings.overwriteWhenNull) merged.overwriteWhenNull = true;
   if (guest.disableWheelAnimation && !serverSettings.disableWheelAnimation) merged.disableWheelAnimation = true;
-  if (guest.themePreference !== 'system') merged.themePreference = guest.themePreference;
   if (guest.colorMode !== 'full') merged.colorMode = guest.colorMode;
 
   await api.updateSettings(merged);
