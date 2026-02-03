@@ -80,6 +80,44 @@ export function normalizeLoadoutData(data: LoadoutData): LoadoutData {
   };
 }
 
+/**
+ * Compare two LoadoutData objects and count how many actions have changed.
+ * An action is considered "changed" if its automation level differs between old and new.
+ * Handles undefined (not set) vs null (locked) vs number (automation level).
+ */
+export function countLoadoutChanges(oldData: LoadoutData | undefined, newData: LoadoutData): number {
+  let changeCount = 0;
+
+  // Collect all action keys from both old and new data
+  const actionTypes = [0, 1, 2] as const;
+
+  for (const actionType of actionTypes) {
+    const oldTypeData = oldData?.[actionType] ?? {};
+    const newTypeData = newData[actionType] ?? {};
+
+    // Get all unique action IDs from both
+    const allActionIds = new Set([
+      ...Object.keys(oldTypeData).map(Number),
+      ...Object.keys(newTypeData).map(Number),
+    ]);
+
+    for (const actionId of allActionIds) {
+      const oldValue = oldTypeData[actionId];
+      const newValue = newTypeData[actionId];
+
+      // Compare values - undefined and missing are equivalent
+      // Both undefined/missing -> no change
+      // Both same value -> no change
+      // Different values -> change
+      if (oldValue !== newValue) {
+        changeCount++;
+      }
+    }
+  }
+
+  return changeCount;
+}
+
 export function filterLoadoutByChapters(
   data: LoadoutData,
   actions: IncrelutionAction[],
