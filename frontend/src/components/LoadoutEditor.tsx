@@ -7,7 +7,7 @@ import { useToast } from './Toast';
 import { useSettings } from '../contexts/SettingsContext';
 import { useGameData } from '../contexts/GameDataContext';
 import { makeSkillActionKey } from '../types/settings';
-import { parseLoadoutJson, LoadoutParseError, filterLoadoutByChapters } from '../utils/loadoutData';
+import { parseLoadoutJson, LoadoutParseError, filterLoadoutByChapters, countLoadoutChanges } from '../utils/loadoutData';
 import LoadoutHeader from './LoadoutHeader';
 import type { LoadoutHeaderHandle } from './LoadoutHeader';
 import ChapterGroup from './ChapterGroup';
@@ -212,13 +212,22 @@ const LoadoutEditor = forwardRef<LoadoutEditorHandle, LoadoutEditorProps>(({ loa
       const data = parseLoadoutJson(text);
       const mergedData = mergeWithExisting(data, loadout.data);
       const dataWithDefaults = applyDefaultsToImport(mergedData);
+
+      // Count changes before applying
+      const changeCount = countLoadoutChanges(loadout.data, dataWithDefaults);
+
       await api.importLoadout(loadoutId, dataWithDefaults);
 
       // Refresh loadout data
       const loadoutData = await api.getLoadout(loadoutId);
       setLoadout(loadoutData);
 
-      showToast('Loadout imported successfully!', 'success');
+      const message = changeCount === 0
+        ? 'Loadout imported (no changes)'
+        : changeCount === 1
+          ? 'Loadout imported: 1 automation changed'
+          : `Loadout imported: ${changeCount} automations changed`;
+      showToast(message, 'success');
     } catch (err) {
       console.error('Error importing from paste:', err);
       if (err instanceof LoadoutParseError) {
@@ -544,13 +553,22 @@ const LoadoutEditor = forwardRef<LoadoutEditorHandle, LoadoutEditorProps>(({ loa
     try {
       const mergedData = mergeWithExisting(data, loadout.data);
       const dataWithDefaults = applyDefaultsToImport(mergedData);
+
+      // Count changes before applying
+      const changeCount = countLoadoutChanges(loadout.data, dataWithDefaults);
+
       await api.importLoadout(loadoutId, dataWithDefaults);
 
       // Refresh loadout data
       const loadoutData = await api.getLoadout(loadoutId);
       setLoadout(loadoutData);
 
-      showToast('Loadout imported successfully!', 'success');
+      const message = changeCount === 0
+        ? 'Loadout imported (no changes)'
+        : changeCount === 1
+          ? 'Loadout imported: 1 automation changed'
+          : `Loadout imported: ${changeCount} automations changed`;
+      showToast(message, 'success');
     } catch (err) {
       console.error('Error importing loadout:', err);
       showToast('Failed to import loadout', 'error');

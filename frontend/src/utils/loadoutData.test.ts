@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseLoadoutData, parseLoadoutJson, LoadoutParseError } from './loadoutData';
+import { parseLoadoutData, parseLoadoutJson, LoadoutParseError, countLoadoutChanges } from './loadoutData';
 
 // Example data inline to avoid fs/path dependencies
 const exampleAutomationExport = {
@@ -158,5 +158,86 @@ describe('parseLoadoutData', () => {
       expect(() => parseLoadoutJson('not json')).toThrow(/Invalid JSON/);
       expect(() => parseLoadoutJson('{invalid}')).toThrow(/Invalid JSON/);
     });
+  });
+});
+
+describe('countLoadoutChanges', () => {
+  it('should return 0 when old and new are identical', () => {
+    const data = { 0: { 0: 3, 1: 2 }, 1: { 0: 1 }, 2: { 0: 4 } };
+    expect(countLoadoutChanges(data, data)).toBe(0);
+  });
+
+  it('should return 0 when both are empty', () => {
+    expect(countLoadoutChanges({}, {})).toBe(0);
+  });
+
+  it('should return 0 when old is undefined and new is empty', () => {
+    expect(countLoadoutChanges(undefined, {})).toBe(0);
+  });
+
+  it('should count new actions as changes', () => {
+    const oldData = { 0: { 0: 3 }, 1: {}, 2: {} };
+    const newData = { 0: { 0: 3, 1: 2 }, 1: {}, 2: {} };
+    expect(countLoadoutChanges(oldData, newData)).toBe(1);
+  });
+
+  it('should count removed actions as changes', () => {
+    const oldData = { 0: { 0: 3, 1: 2 }, 1: {}, 2: {} };
+    const newData = { 0: { 0: 3 }, 1: {}, 2: {} };
+    expect(countLoadoutChanges(oldData, newData)).toBe(1);
+  });
+
+  it('should count modified actions as changes', () => {
+    const oldData = { 0: { 0: 3 }, 1: {}, 2: {} };
+    const newData = { 0: { 0: 4 }, 1: {}, 2: {} };
+    expect(countLoadoutChanges(oldData, newData)).toBe(1);
+  });
+
+  it('should count null to number as change', () => {
+    const oldData = { 0: { 0: null }, 1: {}, 2: {} };
+    const newData = { 0: { 0: 3 }, 1: {}, 2: {} };
+    expect(countLoadoutChanges(oldData, newData)).toBe(1);
+  });
+
+  it('should count number to null as change', () => {
+    const oldData = { 0: { 0: 3 }, 1: {}, 2: {} };
+    const newData = { 0: { 0: null }, 1: {}, 2: {} };
+    expect(countLoadoutChanges(oldData, newData)).toBe(1);
+  });
+
+  it('should not count null to null as change', () => {
+    const oldData = { 0: { 0: null }, 1: {}, 2: {} };
+    const newData = { 0: { 0: null }, 1: {}, 2: {} };
+    expect(countLoadoutChanges(oldData, newData)).toBe(0);
+  });
+
+  it('should handle undefined old data correctly', () => {
+    const newData = { 0: { 0: 3, 1: 2 }, 1: { 0: 1 }, 2: {} };
+    expect(countLoadoutChanges(undefined, newData)).toBe(3);
+  });
+
+  it('should count changes across all action types', () => {
+    const oldData = { 0: { 0: 3 }, 1: { 0: 1 }, 2: { 0: 4 } };
+    const newData = { 0: { 0: 4 }, 1: { 0: 2 }, 2: { 0: 3 } };
+    expect(countLoadoutChanges(oldData, newData)).toBe(3);
+  });
+
+  it('should count multiple changes correctly', () => {
+    const oldData = { 0: { 0: 3, 1: 2, 2: 1 }, 1: {}, 2: {} };
+    const newData = { 0: { 0: 4, 1: 2, 3: 3 }, 1: {}, 2: {} };
+    // Changes: action 0 (3->4), action 2 removed, action 3 added
+    expect(countLoadoutChanges(oldData, newData)).toBe(3);
+  });
+
+  it('should handle missing action type keys in old data', () => {
+    const oldData = { 0: { 0: 3 } };
+    const newData = { 0: { 0: 3 }, 1: { 0: 1 }, 2: {} };
+    expect(countLoadoutChanges(oldData, newData)).toBe(1);
+  });
+
+  it('should handle missing action type keys in new data', () => {
+    const oldData = { 0: { 0: 3 }, 1: { 0: 1 }, 2: {} };
+    const newData = { 0: { 0: 3 } };
+    expect(countLoadoutChanges(oldData, newData)).toBe(1);
   });
 });
