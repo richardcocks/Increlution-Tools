@@ -17,6 +17,7 @@ interface FolderViewProps {
   onDeleteFolder: () => void;
   onShareFolder: () => void;
   onToggleReadOnly: () => void;
+  hideShare?: boolean;
 }
 
 export function FolderView({
@@ -32,6 +33,7 @@ export function FolderView({
   onDeleteFolder,
   onShareFolder,
   onToggleReadOnly,
+  hideShare,
   startEditing: startEditingProp,
   onStartEditingConsumed
 }: FolderViewProps) {
@@ -140,10 +142,12 @@ export function FolderView({
         </button>
         {!isRootFolder && (
           <>
-            <button className="folder-view-action-btn secondary" onClick={onShareFolder}>
-              <i className="fas fa-share-alt" />
-              Share
-            </button>
+            {!hideShare && (
+              <button className="folder-view-action-btn secondary" onClick={onShareFolder}>
+                <i className="fas fa-share-alt" />
+                Share
+              </button>
+            )}
             <button className="folder-view-action-btn secondary" onClick={onDuplicateFolder} disabled={isEffectivelyReadOnly}>
               <i className="fas fa-copy" />
               Duplicate

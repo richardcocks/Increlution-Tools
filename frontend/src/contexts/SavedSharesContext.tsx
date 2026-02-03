@@ -1,7 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import type { ReactNode } from 'react';
-import { api } from '../services/api';
+import { useApi } from './ApiContext';
 import type { SavedShareUnified } from '../types/models';
 import { useAuth } from './AuthContext';
 
@@ -17,6 +17,7 @@ interface SavedSharesContextValue {
 const SavedSharesContext = createContext<SavedSharesContextValue | null>(null);
 
 export function SavedSharesProvider({ children }: { children: ReactNode }) {
+  const { api } = useApi();
   const { user } = useAuth();
   const [savedShares, setSavedShares] = useState<SavedShareUnified[]>([]);
   const [loading, setLoading] = useState(false);
@@ -36,7 +37,7 @@ export function SavedSharesProvider({ children }: { children: ReactNode }) {
     } finally {
       setLoading(false);
     }
-  }, [user]);
+  }, [user, api]);
 
   useEffect(() => {
     fetchSavedShares();
@@ -55,17 +56,17 @@ export function SavedSharesProvider({ children }: { children: ReactNode }) {
       folderTree: null
     };
     setSavedShares(prev => [...prev, unified]);
-  }, []);
+  }, [api]);
 
   const saveFolderShare = useCallback(async (token: string): Promise<void> => {
     const saved = await api.saveFolderShare(token);
     setSavedShares(prev => [...prev, saved]);
-  }, []);
+  }, [api]);
 
   const removeSavedShare = useCallback(async (id: number): Promise<void> => {
     await api.removeSavedShare(id);
     setSavedShares(prev => prev.filter(s => s.id !== id));
-  }, []);
+  }, [api]);
 
   const refreshSavedShares = useCallback(async (): Promise<void> => {
     await fetchSavedShares();

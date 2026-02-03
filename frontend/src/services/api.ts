@@ -5,6 +5,9 @@ import { defaultSettings } from '../types/settings';
 
 const API_BASE = import.meta.env.VITE_API_BASE ?? '/api';
 
+let cachedActions: IncrelutionAction[] | null = null;
+let cachedSkills: Record<number, Skill> | null = null;
+
 export const api = {
   // Auth endpoints
 
@@ -60,23 +63,29 @@ export const api = {
 
   // Game data endpoints
   async getActions(): Promise<IncrelutionAction[]> {
+    if (cachedActions) return cachedActions;
     const response = await fetch(`${API_BASE}/actions`, {
       credentials: 'include'
     });
     if (!response.ok) {
       throw new Error(`Failed to fetch actions: ${response.statusText}`);
     }
-    return response.json();
+    const actions: IncrelutionAction[] = await response.json();
+    cachedActions = actions;
+    return actions;
   },
 
   async getSkills(): Promise<Record<number, Skill>> {
+    if (cachedSkills) return cachedSkills;
     const response = await fetch(`${API_BASE}/skills`, {
       credentials: 'include'
     });
     if (!response.ok) {
       throw new Error(`Failed to fetch skills: ${response.statusText}`);
     }
-    return response.json();
+    const skills: Record<number, Skill> = await response.json();
+    cachedSkills = skills;
+    return skills;
   },
 
   async getFolderTree(): Promise<FolderTreeNode> {
@@ -99,7 +108,7 @@ export const api = {
     return response.json();
   },
 
-  async createFolder(name: string, parentId: number): Promise<void> {
+  async createFolder(name: string, parentId: number): Promise<{ id: number }> {
     const response = await fetch(`${API_BASE}/folders`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -109,6 +118,7 @@ export const api = {
     if (!response.ok) {
       throw new Error(`Failed to create folder: ${response.statusText}`);
     }
+    return response.json();
   },
 
   async renameFolder(id: number, name: string): Promise<void> {

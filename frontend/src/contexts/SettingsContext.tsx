@@ -1,7 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import type { ReactNode } from 'react';
-import { api } from '../services/api';
+import { useApi } from './ApiContext';
 import type { UserSettings } from '../types/settings';
 import { defaultSettings } from '../types/settings';
 import { useAuth } from './AuthContext';
@@ -14,11 +14,13 @@ interface SettingsContextValue {
   toggleFavourite: (actionId: number) => Promise<void>;
   unlockedChaptersSet: Set<number>;
   unlockChapter: (chapter: number, explorationName: string) => Promise<{ success: boolean; message: string }>;
+  refetchSettings: () => Promise<void>;
 }
 
 const SettingsContext = createContext<SettingsContextValue | null>(null);
 
 export function SettingsProvider({ children }: { children: ReactNode }) {
+  const { api } = useApi();
   const [settingsState, setSettingsState] = useState<{
     settings: UserSettings;
     loadedForUserId: number | null;
@@ -63,7 +65,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       });
 
     return () => { cancelled = true; };
-  }, [user]);
+  }, [user, api]);
 
   const updateSettings = useCallback(async (partial: Partial<UserSettings>) => {
     // Get current settings from ref (always up to date)
@@ -80,7 +82,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       setSettingsState(prev => ({ ...prev, settings: currentSettings }));
       throw err;
     }
-  }, []);
+  }, [api]);
 
   const favouriteActionsSet = useMemo(() =>
     new Set(settingsState.settings.favouriteActions ?? []),
@@ -112,7 +114,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       setSettingsState(prev => ({ ...prev, settings: currentSettings }));
       throw err;
     }
-  }, []);
+  }, [api]);
 
   const unlockChapter = useCallback(async (chapter: number, explorationName: string) => {
     const result = await api.unlockChapter(chapter, explorationName);
@@ -124,10 +126,16 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       }));
     }
     return { success: result.success, message: result.message };
-  }, []);
+  }, [api]);
+
+  const refetchSettings = useCallback(async () => {
+    if (!user) return;
+    const data = await api.getSettings();
+    setSettingsState({ settings: data, loadedForUserId: user.id });
+  }, [user, api]);
 
   return (
-    <SettingsContext.Provider value={{ settings, loading, updateSettings, favouriteActionsSet, toggleFavourite, unlockedChaptersSet, unlockChapter }}>
+    <SettingsContext.Provider value={{ settings, loading, updateSettings, favouriteActionsSet, toggleFavourite, unlockedChaptersSet, unlockChapter, refetchSettings }}>
       {children}
     </SettingsContext.Provider>
   );

@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 import { api } from '../services/api';
+import { hasGuestData } from '../services/guestMigration';
 import './AuthPages.css';
 
 export function LoginPage() {
   const { loginWithDiscord, user, loading, refreshUser } = useAuth();
+  const { themePreference, effectiveTheme, cycleTheme } = useTheme();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const error = searchParams.get('error');
@@ -16,7 +19,7 @@ export function LoginPage() {
   // Redirect if already logged in
   useEffect(() => {
     if (user && !loading) {
-      navigate('/loadouts');
+      navigate(hasGuestData() ? '/migrate' : '/loadouts');
     }
   }, [user, loading, navigate]);
 
@@ -49,7 +52,7 @@ export function LoginPage() {
     try {
       await api.devLogin(devUsername.trim());
       await refreshUser();
-      navigate('/loadouts');
+      navigate(hasGuestData() ? '/migrate' : '/loadouts');
     } catch (err) {
       setDevError(err instanceof Error ? err.message : 'Dev login failed');
     } finally {
@@ -59,9 +62,27 @@ export function LoginPage() {
 
   return (
     <div className="auth-page">
+      <div className="auth-page-header">
+        <Link to="/" className="auth-page-header-title">Loadout Manager for Increlution</Link>
+        <button
+          className="theme-toggle-button"
+          onClick={cycleTheme}
+          title={`Theme: ${themePreference} (currently ${effectiveTheme})`}
+        >
+          {themePreference === 'system' ? (
+            <span className="theme-icon-system">
+              <i className="fas fa-sun" />
+              <i className="fas fa-moon" />
+            </span>
+          ) : (
+            <i className={`fas ${effectiveTheme === 'dark' ? 'fa-moon' : 'fa-sun'}`} />
+          )}
+        </button>
+      </div>
+      <div className="auth-page-body">
       <div className="auth-container login-container">
         <div className="login-header">
-          <h1>Loadout Manager for Increlution</h1>
+          <h1>Sign In</h1>
           <p className="login-subtitle">
             Create and manage your automation loadouts
           </p>
@@ -82,6 +103,18 @@ export function LoginPage() {
           <i className="fas fa-shield-alt" />
           <span>We only access your Discord username. No email or personal data is stored.</span>
         </div>
+
+        <div className="login-or-divider">
+          <span>or</span>
+        </div>
+
+        <Link to="/guest" className="guest-login-button">
+          <i className="fas fa-user" />
+          Continue as Guest
+        </Link>
+        <p className="guest-login-note">
+          Data saved to this browser only. No account required.
+        </p>
 
         <div className="login-footer">
           <Link to="/">Back to home</Link>
@@ -114,6 +147,7 @@ export function LoginPage() {
             {devError && <div className="dev-login-error">{devError}</div>}
           </div>
         )}
+      </div>
       </div>
     </div>
   );

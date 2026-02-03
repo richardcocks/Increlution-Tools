@@ -14,29 +14,39 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<UserInfo | null>(null);
-  const [loading, setLoading] = useState(true);
+interface AuthProviderProps {
+  children: ReactNode;
+  guestMode?: boolean;
+}
+
+export function AuthProvider({ children, guestMode }: AuthProviderProps) {
+  const [user, setUser] = useState<UserInfo | null>(
+    guestMode ? { id: -1, username: 'Guest' } : null
+  );
+  const [loading, setLoading] = useState(!guestMode);
 
   useEffect(() => {
+    if (guestMode) return;
     api.getCurrentUser()
       .then(setUser)
       .finally(() => setLoading(false));
-  }, []);
+  }, [guestMode]);
 
   const loginWithDiscord = useCallback(() => {
     window.location.href = api.getDiscordLoginUrl();
   }, []);
 
   const logout = useCallback(async () => {
+    if (guestMode) return;
     await api.logout();
     setUser(null);
-  }, []);
+  }, [guestMode]);
 
   const refreshUser = useCallback(async () => {
+    if (guestMode) return;
     const currentUser = await api.getCurrentUser();
     setUser(currentUser);
-  }, []);
+  }, [guestMode]);
 
   return (
     <AuthContext.Provider value={{ user, loading, loginWithDiscord, logout, refreshUser }}>

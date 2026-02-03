@@ -6,6 +6,7 @@ import { Sidebar } from './components/Sidebar'
 import { useToast } from './components/Toast'
 import { DeleteConfirmation } from './components/DeleteConfirmation'
 import { EmbeddedSharedLoadout } from './components/EmbeddedSharedLoadout'
+import { EmbeddedSharedFolder } from './components/EmbeddedSharedFolder'
 import { EmbeddedSharedFolderLoadout } from './components/EmbeddedSharedFolderLoadout'
 import { TextInputModal } from './components/TextInputModal'
 import { FolderView } from './components/FolderView'
@@ -15,9 +16,10 @@ import { useSettings } from './contexts/SettingsContext'
 import { useTheme } from './contexts/ThemeContext'
 import { useGameData } from './contexts/GameDataContext'
 import { SidebarActionsProvider } from './contexts/SidebarActionsContext'
-import { useSavedShares } from './contexts/SavedSharesContext'
-import { api } from './services/api'
-import type { FolderTreeNode, SharedFolderNode } from './types/models'
+import { useApi } from './contexts/ApiContext'
+import type { FolderTreeNode } from './types/models'
+import { ActionType } from './types/models'
+import { makeSkillActionKey } from './types/settings'
 import { filterLoadoutByChapters, normalizeLoadoutData } from './utils/loadoutData'
 import { buildEffectiveReadOnlyMap } from './utils/folderUtils'
 import { SettingsPage } from './pages/SettingsPage'
@@ -58,11 +60,11 @@ function App() {
   const [folderModal, setFolderModal] = useState<FolderModal>(null)
   const [shareModalState, setShareModalState] = useState<ShareModalState>(null)
   const { showToast } = useToast()
+  const { api, isGuest } = useApi()
   const { user, logout } = useAuth()
-  const { unlockedChaptersSet } = useSettings()
+  const { unlockedChaptersSet, settings, updateSettings, loading: settingsLoading } = useSettings()
   const { themePreference, effectiveTheme, cycleTheme } = useTheme()
-  const { actions } = useGameData()
-  const { savedShares } = useSavedShares()
+  const { actions, skills, loading: gameDataLoading } = useGameData()
   const navigate = useNavigate()
   const location = useLocation()
   const params = useParams<{
@@ -71,6 +73,7 @@ function App() {
     loadoutId?: string
     folderToken?: string
   }>()
+  const prefix = isGuest ? '/guest' : '/loadouts'
   const loadoutEditorRef = useRef<LoadoutEditorHandle>(null)
 
   // Poll to trigger rename after loadout editor finishes loading
@@ -85,11 +88,32 @@ function App() {
     return () => clearInterval(interval)
   }, [selectedLoadoutId])
 
+  // Initialize default skill priorities on startup if not yet initialized
+  useEffect(() => {
+    if (gameDataLoading || settingsLoading) return
+    const skillIds = Object.keys(skills)
+    if (skillIds.length === 0) return
+
+    const existingKeys = Object.keys(settings.defaultSkillPriorities)
+    const hasOldFormat = existingKeys.length > 0 && existingKeys.some(key => !key.includes('-'))
+
+    if (hasOldFormat || !settings.skillPrioritiesInitialized) {
+      const defaultPriorities: Record<string, number> = {}
+      const actionTypes = [ActionType.Jobs, ActionType.Construction, ActionType.Exploration]
+      skillIds.forEach(id => {
+        actionTypes.forEach(type => {
+          defaultPriorities[makeSkillActionKey(Number(id), type)] = 2
+        })
+      })
+      updateSettings({ defaultSkillPriorities: defaultPriorities, skillPrioritiesInitialized: true })
+    }
+  }, [skills, gameDataLoading, settingsLoading, settings.skillPrioritiesInitialized, settings.defaultSkillPriorities, updateSettings])
+
   // Derive page state from URL
-  const showSettings = location.pathname === '/settings'
-  const showFavourites = location.pathname === '/favourites'
+  const showSettings = location.pathname === '/settings' || location.pathname === '/guest/settings'
+  const showFavourites = location.pathname === '/favourites' || location.pathname === '/guest/favourites'
   const showShares = location.pathname === '/shares'
-  const showHelp = location.pathname === '/help'
+  const showHelp = location.pathname === '/help' || location.pathname === '/guest/help'
 
   const fetchFolderTree = async () => {
     try {
@@ -125,7 +149,7 @@ function App() {
 
     // Handle NaN for numeric params
     if ((params.folderId && isNaN(urlFolderId!)) || (params.loadoutId && isNaN(urlLoadoutId!))) {
-      navigate('/loadouts', { replace: true })
+      navigate(prefix, { replace: true })
       return
     }
 
@@ -172,7 +196,7 @@ function App() {
         }
       } else {
         showToast('Loadout not found', 'error')
-        navigate('/loadouts', { replace: true })
+        navigate(prefix, { replace: true })
       }
       return
     }
@@ -187,7 +211,7 @@ function App() {
         }
       } else {
         showToast('Folder not found', 'error')
-        navigate('/loadouts', { replace: true })
+        navigate(prefix, { replace: true })
       }
       return
     }
@@ -267,9 +291,9 @@ function App() {
       // Navigate to parent folder after deletion
       if (selectedFolderId === folderId) {
         if (parentId && folderTree && parentId !== folderTree.id) {
-          navigate(`/loadouts/folder/${parentId}`)
+          navigate(`${prefix}/folder/${parentId}`)
         } else {
-          navigate('/loadouts')
+          navigate(prefix)
         }
       }
       await fetchFolderTree()
@@ -506,7 +530,7 @@ function App() {
         isProtected: loadout.isProtected
       }) : prev)
       // Navigate to the new loadout
-      navigate(`/loadouts/loadout/${loadout.id}`)
+      navigate(`${prefix}/loadout/${loadout.id}`)
       // Refresh tree in background to sync with server
       fetchFolderTree()
     } catch (err) {
@@ -525,9 +549,9 @@ function App() {
       // Navigate to parent folder after deletion
       if (selectedLoadoutId === loadoutId) {
         if (selectedFolderId && folderTree && selectedFolderId !== folderTree.id) {
-          navigate(`/loadouts/folder/${selectedFolderId}`)
+          navigate(`${prefix}/folder/${selectedFolderId}`)
         } else {
-          navigate('/loadouts')
+          navigate(prefix)
         }
       }
       await fetchFolderTree()
@@ -553,9 +577,9 @@ function App() {
     setPendingDelete(null)
     // Navigate to URL - state will sync from URL sync effect
     if (folderTree && folderId === folderTree.id) {
-      navigate('/loadouts')
+      navigate(prefix)
     } else {
-      navigate(`/loadouts/folder/${folderId}`)
+      navigate(`${prefix}/folder/${folderId}`)
     }
   }
 
@@ -563,27 +587,27 @@ function App() {
   const handleLoadoutSelect = (loadoutId: number, _folderId: number) => {
     setPendingDelete(null)
     // Navigate to URL - state will sync from URL sync effect
-    navigate(`/loadouts/loadout/${loadoutId}`)
+    navigate(`${prefix}/loadout/${loadoutId}`)
   }
 
   const handleViewShare = (token: string, shareType: 'loadout' | 'folder' = 'loadout') => {
     setPendingDelete(null)
     // Navigate to URL - state will sync from URL sync effect
     if (shareType === 'folder') {
-      navigate(`/loadouts/shared/folder/${token}`)
+      navigate(`${prefix}/shared/folder/${token}`)
     } else {
-      navigate(`/loadouts/shared/${token}`)
+      navigate(`${prefix}/shared/${token}`)
     }
   }
 
   const handleViewSharedFolderLoadout = (folderToken: string, loadoutId: number) => {
     setPendingDelete(null)
     // Navigate to URL - state will sync from URL sync effect
-    navigate(`/loadouts/shared/folder/${folderToken}/${loadoutId}`)
+    navigate(`${prefix}/shared/folder/${folderToken}/${loadoutId}`)
   }
 
   const handleCloseShare = () => {
-    navigate('/loadouts')
+    navigate(prefix)
   }
 
   const handleLoadoutNameChange = (loadoutId: number, name: string) => {
@@ -657,7 +681,7 @@ function App() {
         isProtected: result.isProtected
       }) : prev)
       // Navigate to the new duplicate
-      navigate(`/loadouts/loadout/${result.id}`)
+      navigate(`${prefix}/loadout/${result.id}`)
       showToast('Loadout duplicated', 'success')
     } catch (err) {
       console.error('Error duplicating loadout:', err)
@@ -671,7 +695,7 @@ function App() {
       // Refresh tree to get the new folder structure
       await fetchFolderTree()
       // Navigate to the new duplicate
-      navigate(`/loadouts/folder/${result.id}`)
+      navigate(`${prefix}/folder/${result.id}`)
       showToast(`Duplicated ${result.totalFoldersCopied} folder${result.totalFoldersCopied !== 1 ? 's' : ''} and ${result.totalLoadoutsCopied} loadout${result.totalLoadoutsCopied !== 1 ? 's' : ''}`, 'success')
     } catch (err) {
       console.error('Error duplicating folder:', err)
@@ -761,7 +785,8 @@ function App() {
         await fetchFolderTree();
       }
     }
-  }, [folderTree, selectedLoadoutId, showToast]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [folderTree, selectedLoadoutId, showToast, api]);
 
   // Quick export loadout to clipboard (middle-click on sidebar)
   const handleQuickExport = useCallback(async (loadoutId: number) => {
@@ -775,7 +800,7 @@ function App() {
       console.error('Error exporting to clipboard:', err)
       showToast('Failed to copy to clipboard', 'error')
     }
-  }, [actions, unlockedChaptersSet, showToast])
+  }, [actions, unlockedChaptersSet, showToast, api])
 
   // Quick export shared loadout to clipboard (middle-click on sidebar)
   const handleQuickExportShare = useCallback(async (token: string) => {
@@ -788,7 +813,7 @@ function App() {
       console.error('Error exporting to clipboard:', err)
       showToast('Failed to copy to clipboard', 'error')
     }
-  }, [showToast])
+  }, [showToast, api])
 
   // Quick export shared folder loadout to clipboard (middle-click on sidebar)
   const handleQuickExportSharedFolderLoadout = useCallback(async (folderToken: string, loadoutId: number) => {
@@ -801,7 +826,7 @@ function App() {
       console.error('Error exporting to clipboard:', err)
       showToast('Failed to copy to clipboard', 'error')
     }
-  }, [showToast])
+  }, [showToast, api])
 
   // Compute breadcrumb for current selected folder
   const folderBreadcrumb = selectedFolderId && folderTree
@@ -828,70 +853,15 @@ function App() {
           <EmbeddedSharedFolderLoadout
             folderToken={viewingSharedFolder.token}
             loadoutId={viewingSharedFolder.loadoutId}
-            onClose={() => navigate(`/loadouts/shared/folder/${viewingSharedFolder.token}`)}
+            onClose={() => navigate(`${prefix}/shared/folder/${viewingSharedFolder.token}`)}
           />
         );
       } else {
-        // Folder selected but no loadout - show the folder contents
-        const sharedFolderData = savedShares.find(s => s.shareToken === viewingSharedFolder.token && s.shareType === 'folder');
-
-        // Helper to collect all loadouts from folder tree
-        const collectLoadouts = (node: SharedFolderNode | undefined, path: string[] = []): Array<{ id: number; name: string; path: string[] }> => {
-          if (!node) return [];
-          const results: Array<{ id: number; name: string; path: string[] }> = [];
-          const currentPath = [...path, node.name];
-
-          for (const loadout of node.loadouts) {
-            results.push({ id: loadout.id, name: loadout.name, path: currentPath });
-          }
-          for (const subFolder of node.subFolders) {
-            results.push(...collectLoadouts(subFolder, currentPath));
-          }
-          return results;
-        };
-
-        const allLoadouts = sharedFolderData?.folderTree ? collectLoadouts(sharedFolderData.folderTree) : [];
-
         return (
-          <div className="shared-folder-content-view">
-            <div className="shared-folder-content-header">
-              <i className="fas fa-folder-open" />
-              <div className="shared-folder-content-title">
-                <h1>{sharedFolderData?.itemName ?? 'Shared Folder'}</h1>
-                {sharedFolderData?.ownerName && (
-                  <span className="shared-folder-owner">Shared by {sharedFolderData.ownerName}</span>
-                )}
-              </div>
-            </div>
-
-            {allLoadouts.length === 0 ? (
-              <div className="shared-folder-empty">
-                <p>This folder is empty.</p>
-              </div>
-            ) : (
-              <div className="shared-folder-loadout-list">
-                <h2>Loadouts ({allLoadouts.length})</h2>
-                <div className="shared-folder-loadouts">
-                  {allLoadouts.map(loadout => (
-                    <div
-                      key={loadout.id}
-                      className="shared-folder-loadout-item"
-                      onClick={() => handleViewSharedFolderLoadout(viewingSharedFolder.token, loadout.id)}
-                    >
-                      <i className="fas fa-file-alt" />
-                      <div className="shared-folder-loadout-info">
-                        <span className="shared-folder-loadout-name">{loadout.name}</span>
-                        {loadout.path.length > 1 && (
-                          <span className="shared-folder-loadout-path">{loadout.path.slice(1).join(' / ')}</span>
-                        )}
-                      </div>
-                      <i className="fas fa-chevron-right" />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
+          <EmbeddedSharedFolder
+            token={viewingSharedFolder.token}
+            onClose={handleCloseShare}
+          />
         );
       }
     }
@@ -940,6 +910,7 @@ function App() {
             onDeleteFolder={() => handleDeleteFolder(selectedFolderId)}
             onShareFolder={() => setShareModalState({ type: 'folder', folderId: selectedFolderId, folderName: currentFolder.name })}
             onToggleReadOnly={() => handleToggleFolderReadOnly(selectedFolderId)}
+            hideShare={isGuest}
           />
         );
       }
@@ -956,6 +927,7 @@ function App() {
         onCreateLoadout={() => handleCreateLoadout(selectedFolderId ?? folderTree?.id ?? 0)}
         onDuplicate={() => selectedLoadoutId && handleDuplicateLoadout(selectedLoadoutId)}
         onDelete={() => selectedLoadoutId && handleDeleteLoadout(selectedLoadoutId)}
+        hideShare={isGuest}
       />
     );
   };
@@ -963,19 +935,21 @@ function App() {
   return (
     <div className="app">
       <div className="app-header">
-        <Link to="/loadouts" className="app-title">Loadout Manager for Increlution</Link>
+        <Link to={prefix} className="app-title">Loadout Manager for Increlution</Link>
         <div className="user-info">
-          <span className="user-email">{user?.username}</span>
-          <button className="help-button" onClick={() => { setPendingDelete(null); navigate('/help'); }} title="Help">
+          {!isGuest && <span className="user-email">{user?.username}</span>}
+          <button className="help-button" onClick={() => { setPendingDelete(null); navigate(isGuest ? '/guest/help' : '/help'); }} title="Help">
             <i className="fas fa-question-circle" />
           </button>
-          <button className="favourites-button" onClick={() => { setPendingDelete(null); navigate('/favourites'); }} title="Favourites">
+          <button className="favourites-button" onClick={() => { setPendingDelete(null); navigate(isGuest ? '/guest/favourites' : '/favourites'); }} title="Favourites">
             <i className="fas fa-star" />
           </button>
-          <button className="shares-button" onClick={() => { setPendingDelete(null); navigate('/shares'); }} title="Manage Shares">
-            <i className="fas fa-share-alt" />
-          </button>
-          <button className="settings-button" onClick={() => { setPendingDelete(null); navigate('/settings'); }} title="Settings">
+          {!isGuest && (
+            <button className="shares-button" onClick={() => { setPendingDelete(null); navigate('/shares'); }} title="Manage Shares">
+              <i className="fas fa-share-alt" />
+            </button>
+          )}
+          <button className="settings-button" onClick={() => { setPendingDelete(null); navigate(isGuest ? '/guest/settings' : '/settings'); }} title="Settings">
             <i className="fas fa-cog" />
           </button>
           <button
@@ -992,27 +966,40 @@ function App() {
               <i className={`fas ${effectiveTheme === 'dark' ? 'fa-moon' : 'fa-sun'}`} />
             )}
           </button>
-          <button className="logout-button" onClick={handleLogout}>
-            <i className="fas fa-sign-out-alt" />
-            Logout
-          </button>
+          {isGuest ? (
+            <Link to="/login" className="logout-button">
+              <i className="fas fa-sign-in-alt" />
+              Sign In
+            </Link>
+          ) : (
+            <button className="logout-button" onClick={handleLogout}>
+              <i className="fas fa-sign-out-alt" />
+              Logout
+            </button>
+          )}
         </div>
       </div>
+      {isGuest && (
+        <div className="guest-banner">
+          Editing as guest -- data saved to this browser only.{' '}
+          <Link to="/login">Sign in with Discord</Link> to sync across devices.
+        </div>
+      )}
       {showSettings ? (
         <div className="app-body">
-          <SettingsPage onClose={() => navigate('/loadouts')} />
+          <SettingsPage onClose={() => navigate(prefix)} />
         </div>
       ) : showFavourites ? (
         <div className="app-body">
-          <FavouritesPage onClose={() => navigate('/loadouts')} />
+          <FavouritesPage onClose={() => navigate(prefix)} />
         </div>
       ) : showShares ? (
         <div className="app-body">
-          <ManageSharesPage onClose={() => navigate('/loadouts')} />
+          <ManageSharesPage onClose={() => navigate(prefix)} />
         </div>
       ) : showHelp ? (
         <div className="app-body">
-          <HelpPage onClose={() => navigate('/loadouts')} />
+          <HelpPage onClose={() => navigate(prefix)} />
         </div>
       ) : (
         <SidebarActionsProvider

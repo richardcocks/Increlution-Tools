@@ -1,3 +1,5 @@
+using System.Security.Cryptography;
+using System.Text;
 using System.Text.Json;
 using IncrelutionAutomationEditor.Api.Models;
 
@@ -9,9 +11,21 @@ public class GameDataService
     private readonly Dictionary<int, Skill> _skills = new();
     private readonly Dictionary<int, Dictionary<string, int>> _thresholds = new();
 
+    public string ETag { get; }
+
     public GameDataService()
     {
         LoadData();
+        ETag = ComputeETag();
+    }
+
+    private string ComputeETag()
+    {
+        var actions = GetAllActions();
+        var skills = GetAllSkills();
+        var json = JsonSerializer.Serialize(new { actions, skills });
+        var hash = SHA256.HashData(Encoding.UTF8.GetBytes(json));
+        return $"\"{Convert.ToHexStringLower(hash[..16])}\"";
     }
 
     private void LoadData()

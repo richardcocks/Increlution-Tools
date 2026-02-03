@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { api } from '../services/api';
+import { useApi } from '../contexts/ApiContext';
 import type { SharedFolderLoadout, IncrelutionAction, AutomationLevel } from '../types/models';
 import { ActionType } from '../types/models';
 import { normalizeLoadoutData } from '../utils/loadoutData';
@@ -17,6 +17,7 @@ interface EmbeddedSharedFolderLoadoutProps {
 }
 
 export function EmbeddedSharedFolderLoadout({ folderToken, loadoutId, onClose }: EmbeddedSharedFolderLoadoutProps) {
+  const { api, isGuest } = useApi();
   const { showToast } = useToast();
   const navigate = useNavigate();
   const { actions, skills, loading: gameDataLoading } = useGameData();
@@ -43,7 +44,7 @@ export function EmbeddedSharedFolderLoadout({ folderToken, loadoutId, onClose }:
     };
 
     fetchLoadout();
-  }, [folderToken, loadoutId]);
+  }, [folderToken, loadoutId, api]);
 
   const handleExportClipboard = useCallback(async () => {
     if (!loadout) return;
@@ -261,7 +262,7 @@ export function EmbeddedSharedFolderLoadout({ folderToken, loadoutId, onClose }:
                   disabled={isChapterLocked}
                 />
                 {isChapterLocked && (
-                  <div className="frosted-glass-overlay" onClick={() => navigate('/settings#chapters')}>
+                  <div className="frosted-glass-overlay" onClick={() => navigate(isGuest ? '/guest/settings#chapters' : '/settings#chapters')}>
                     <i className="fas fa-lock" />
                     <span>Unlock chapter in settings</span>
                   </div>

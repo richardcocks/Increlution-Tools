@@ -29,10 +29,16 @@ export function LandingPage() {
               Go to Editor
             </Link>
           ) : (
-            <Link to="/login" className="landing-button primary">
-              <i className="fab fa-discord" />
-              Sign In with Discord
-            </Link>
+            <>
+              <Link to="/login" className="landing-button primary">
+                <i className="fab fa-discord" />
+                Sign In with Discord
+              </Link>
+              <Link to="/guest" className="landing-button secondary">
+                <i className="fas fa-play" />
+                Try as Guest
+              </Link>
+            </>
           )}
         </div>
       </div>

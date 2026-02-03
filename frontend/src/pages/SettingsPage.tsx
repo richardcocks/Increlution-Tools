@@ -1,14 +1,16 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useCallback, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useSettings } from '../contexts/SettingsContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { useGameData } from '../contexts/GameDataContext';
 import type { ThemePreference, ColorMode } from '../types/settings';
 import { useToast } from '../components/Toast';
+import { useApi } from '../contexts/ApiContext';
 import type { AutomationLevel } from '../types/models';
 import { ActionType } from '../types/models';
 import { makeSkillActionKey } from '../types/settings';
 import AutomationWheel from '../components/AutomationWheel';
+import '../components/DeleteConfirmation.css';
 import './SettingsPage.css';
 
 const ACTION_TYPES = [
@@ -23,6 +25,15 @@ export function SettingsPage({ onClose }: { onClose: () => void }) {
   const { themePreference, setThemePreference } = useTheme();
   const { skills, loading: skillsLoading } = useGameData();
   const { showToast } = useToast();
+  const { isGuest } = useApi();
+
+  // Guest clear data confirmation
+  const [showClearDataConfirm, setShowClearDataConfirm] = useState(false);
+  const clearDataRef = useRef<HTMLDivElement>(null);
+  const handleClearGuestData = useCallback(() => {
+    localStorage.removeItem('guest_data');
+    window.location.href = '/guest';
+  }, []);
 
   // Chapter unlock form state
   const [selectedChapter, setSelectedChapter] = useState<number | null>(null);
@@ -52,6 +63,13 @@ export function SettingsPage({ onClose }: { onClose: () => void }) {
       }
     }
   }, [location.hash]);
+
+  // Scroll to clear data confirmation when shown
+  useEffect(() => {
+    if (showClearDataConfirm && clearDataRef.current) {
+      clearDataRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [showClearDataConfirm]);
 
   // Auto-select first locked chapter if none selected
   useEffect(() => {
@@ -85,30 +103,6 @@ export function SettingsPage({ onClose }: { onClose: () => void }) {
       setIsUnlocking(false);
     }
   };
-
-  // Migrate old format settings (numeric keys) to new format (skillId-actionType keys)
-  // and initialize defaults for new users
-  useEffect(() => {
-    if (skillsLoading || settingsLoading) return;
-
-    const skillIds = Object.keys(skills);
-    if (skillIds.length === 0) return;
-
-    // Check if we have old-format settings (keys without "-" are old numeric format)
-    const existingKeys = Object.keys(settings.defaultSkillPriorities);
-    const hasOldFormat = existingKeys.length > 0 && existingKeys.some(key => !key.includes('-'));
-
-    if (hasOldFormat || !settings.skillPrioritiesInitialized) {
-      // Clear old format and initialize with new format
-      const defaultPriorities: Record<string, number> = {};
-      skillIds.forEach(id => {
-        ACTION_TYPES.forEach(({ type }) => {
-          defaultPriorities[makeSkillActionKey(Number(id), type)] = 2;
-        });
-      });
-      updateSettings({ defaultSkillPriorities: defaultPriorities, skillPrioritiesInitialized: true });
-    }
-  }, [skills, skillsLoading, settingsLoading, settings.skillPrioritiesInitialized, settings.defaultSkillPriorities, updateSettings]);
 
   const handleInvertMouseChange = async (value: boolean) => {
     try {
@@ -437,21 +431,51 @@ export function SettingsPage({ onClose }: { onClose: () => void }) {
           <h3>Danger Zone</h3>
           <div className="danger-zone-content">
             <div className="danger-zone-info">
-              <p className="danger-zone-title">Delete Account</p>
+              <p className="danger-zone-title">{isGuest ? 'Clear Data' : 'Delete Account'}</p>
               <p className="danger-zone-description">
-                Permanently delete your account and all associated data.
-                This action cannot be undone.
+                {isGuest
+                  ? 'Clear all guest data stored in this browser. This action cannot be undone.'
+                  : 'Permanently delete your account and all associated data. This action cannot be undone.'}
               </p>
             </div>
             <button
               className="delete-account-button"
-              onClick={() => navigate('/delete-account')}
+              onClick={() => {
+                if (isGuest) {
+                  setShowClearDataConfirm(true);
+                } else {
+                  navigate('/delete-account');
+                }
+              }}
             >
-              Delete Account
+              {isGuest ? 'Clear Data' : 'Delete Account'}
             </button>
           </div>
         </section>
       </div>
+
+      {showClearDataConfirm && (
+        <div className="delete-confirmation" ref={clearDataRef}>
+          <div className="delete-confirmation-content">
+            <h1>Clear Guest Data</h1>
+            <div className="delete-warning">
+              <i className="fas fa-exclamation-triangle" />
+              <div>
+                <p><strong>This will delete all guest data stored in this browser.</strong></p>
+                <p>All loadouts, folders, and settings will be permanently removed. This action cannot be undone.</p>
+              </div>
+            </div>
+            <div className="delete-actions">
+              <button className="delete-cancel-button" onClick={() => setShowClearDataConfirm(false)}>
+                Cancel
+              </button>
+              <button className="delete-confirm-button" onClick={handleClearGuestData}>
+                Clear All Data
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,6 +1,6 @@
-import { StrictMode } from 'react'
+import { StrictMode, useMemo } from 'react'
 import { createRoot } from 'react-dom/client'
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom'
 import '@fortawesome/fontawesome-free/css/all.min.css'
 import './index.css'
 import App from './App.tsx'
@@ -11,6 +11,7 @@ import { GameDataProvider } from './contexts/GameDataContext.tsx'
 import { SettingsProvider } from './contexts/SettingsContext.tsx'
 import { ThemeProvider } from './contexts/ThemeContext.tsx'
 import { SavedSharesProvider } from './contexts/SavedSharesContext.tsx'
+import { ServerApiProvider, GuestApiProvider } from './contexts/ApiContext.tsx'
 import { ProtectedRoute } from './components/ProtectedRoute.tsx'
 import { LoginPage } from './pages/LoginPage.tsx'
 import { LandingPage } from './pages/LandingPage.tsx'
@@ -19,11 +20,36 @@ import TermsPage from './pages/TermsPage.tsx'
 import { AuthAwareShareRoute } from './components/AuthAwareShareRoute.tsx'
 import { AuthAwareFolderShareRoute } from './components/AuthAwareFolderShareRoute.tsx'
 import { DeleteAccountPage } from './pages/DeleteAccountPage.tsx'
+import { MigratePage } from './pages/MigratePage.tsx'
+import { createGuestApi } from './services/guestApi.ts'
+
+/* eslint-disable react-refresh/only-export-components */
+function GuestLayout() {
+  const guestApi = useMemo(() => createGuestApi(), [])
+  return (
+    <GuestApiProvider guestApi={guestApi}>
+      <AuthProvider guestMode>
+        <SettingsProvider>
+          <ThemeProvider>
+            <SavedSharesProvider>
+              <ToastProvider>
+                <GameDataProvider>
+                  <Outlet />
+                </GameDataProvider>
+              </ToastProvider>
+            </SavedSharesProvider>
+          </ThemeProvider>
+        </SettingsProvider>
+      </AuthProvider>
+    </GuestApiProvider>
+  )
+}
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>
       <AuthProvider>
+        <ServerApiProvider>
         <SettingsProvider>
           <ThemeProvider>
           <SavedSharesProvider>
@@ -124,6 +150,23 @@ createRoot(document.getElementById('root')!).render(
                         <DeleteAccountPage />
                       </ProtectedRoute>
                     } />
+                    <Route path="/migrate" element={
+                      <ProtectedRoute>
+                        <MigratePage />
+                      </ProtectedRoute>
+                    } />
+                    {/* Guest routes */}
+                    <Route path="/guest" element={<GuestLayout />}>
+                      <Route index element={<App />} />
+                      <Route path="folder/:folderId" element={<App />} />
+                      <Route path="loadout/:loadoutId" element={<App />} />
+                      <Route path="shared/:token" element={<App />} />
+                      <Route path="shared/folder/:folderToken" element={<App />} />
+                      <Route path="shared/folder/:folderToken/:loadoutId" element={<App />} />
+                      <Route path="settings" element={<App />} />
+                      <Route path="favourites" element={<App />} />
+                      <Route path="help" element={<App />} />
+                    </Route>
                   </Routes>
                 </div>
                 <Footer />
@@ -132,6 +175,7 @@ createRoot(document.getElementById('root')!).render(
           </SavedSharesProvider>
           </ThemeProvider>
         </SettingsProvider>
+        </ServerApiProvider>
       </AuthProvider>
     </BrowserRouter>
   </StrictMode>,

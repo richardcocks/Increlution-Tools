@@ -1,7 +1,6 @@
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, Navigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
-import { SharedFolderView } from './SharedFolderView';
 import { EmbeddedSharedFolder } from './EmbeddedSharedFolder';
 import './AuthAwareFolderShareRoute.css';
 
@@ -63,6 +62,6 @@ export function AuthAwareFolderShareRoute() {
     );
   }
 
-  // If not logged in, show the standalone SharedFolderView
-  return <SharedFolderView />;
+  // Redirect guests to the guest embedded view
+  return <Navigate to={`/guest/shared/folder/${token}`} replace />;
 }
