@@ -96,6 +96,8 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     if (!serverPref || serverPref === 'system') return;
     if (hasUserChangedTheme.current) return;
     if (themePreference !== 'system') return;
+    // Intentional: syncing server preference to local state on initial load
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setThemePreferenceState(serverPref);
   }, [settings.themePreference]); // eslint-disable-line react-hooks/exhaustive-deps
 

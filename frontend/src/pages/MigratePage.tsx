@@ -35,6 +35,8 @@ export function MigratePage() {
       navigate('/loadouts', { replace: true });
       return;
     }
+    // Intentional: loading localStorage data into state on mount
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setGuestData(data);
   }, [navigate]);
 

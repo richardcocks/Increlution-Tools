@@ -43,12 +43,14 @@ export function FolderView({
 
   useEffect(() => {
     if (startEditingProp) {
+      // Intentional: syncing prop signal to local editing state
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setEditedName(folder.name);
       setIsEditing(true);
       editStartedAtRef.current = Date.now();
       onStartEditingConsumed?.();
     }
-  }, [startEditingProp, onStartEditingConsumed]);
+  }, [startEditingProp, onStartEditingConsumed, folder.name]);
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
