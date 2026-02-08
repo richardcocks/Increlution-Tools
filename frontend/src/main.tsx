@@ -109,6 +109,14 @@ createRoot(document.getElementById('root')!).render(
                         </GameDataProvider>
                       </ProtectedRoute>
                     } />
+                    {/* Compare loadouts view */}
+                    <Route path="/loadouts/compare" element={
+                      <ProtectedRoute>
+                        <GameDataProvider>
+                          <App />
+                        </GameDataProvider>
+                      </ProtectedRoute>
+                    } />
                     {/* Root loadouts view */}
                     <Route path="/loadouts" element={
                       <ProtectedRoute>
@@ -160,6 +168,7 @@ createRoot(document.getElementById('root')!).render(
                       <Route index element={<App />} />
                       <Route path="folder/:folderId" element={<App />} />
                       <Route path="loadout/:loadoutId" element={<App />} />
+                      <Route path="compare" element={<App />} />
                       <Route path="shared/:token" element={<App />} />
                       <Route path="shared/folder/:folderToken" element={<App />} />
                       <Route path="shared/folder/:folderToken/:loadoutId" element={<App />} />

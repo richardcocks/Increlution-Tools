@@ -26,6 +26,8 @@ import { SettingsPage } from './pages/SettingsPage'
 import { FavouritesPage } from './pages/FavouritesPage'
 import { ManageSharesPage } from './pages/ManageSharesPage'
 import { HelpPage } from './pages/HelpPage'
+import { CompareLoadoutsPage } from './pages/CompareLoadoutsPage'
+import { COMPARE_COLORS } from './utils/compareLoadouts'
 import './App.css'
 
 type PendingDelete =
@@ -59,6 +61,7 @@ function App() {
   const pendingRenameLoadoutRef = useRef(false)
   const [folderModal, setFolderModal] = useState<FolderModal>(null)
   const [shareModalState, setShareModalState] = useState<ShareModalState>(null)
+  const [compareBucket, setCompareBucket] = useState<Array<{ id: number; name: string }>>([])
   const { showToast } = useToast()
   const { api, isGuest } = useApi()
   const { user, logout } = useAuth()
@@ -114,6 +117,7 @@ function App() {
   const showFavourites = location.pathname === '/favourites' || location.pathname === '/guest/favourites'
   const showShares = location.pathname === '/shares'
   const showHelp = location.pathname === '/help' || location.pathname === '/guest/help'
+  const showCompare = location.pathname === '/loadouts/compare' || location.pathname === '/guest/compare'
 
   const fetchFolderTree = async () => {
     try {
@@ -828,6 +832,37 @@ function App() {
     }
   }, [showToast, api])
 
+  // Handle compare loadouts bucket
+  const handleAddToCompare = useCallback(() => {
+    if (!selectedLoadoutId || !folderTree) return
+    const { loadout } = findLoadoutInTree(folderTree, selectedLoadoutId)
+    if (!loadout) return
+
+    setCompareBucket(prev => {
+      // If already in bucket, remove it
+      if (prev.some(item => item.id === loadout.id)) {
+        return prev.filter(item => item.id !== loadout.id)
+      }
+      // If bucket is full, replace the second item
+      if (prev.length >= 2) {
+        return [prev[0], { id: loadout.id, name: loadout.name }]
+      }
+      // Add to bucket
+      return [...prev, { id: loadout.id, name: loadout.name }]
+    })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedLoadoutId, folderTree])
+
+  const handleCompareNow = useCallback(() => {
+    if (compareBucket.length === 2) {
+      navigate(`${prefix}/compare?ids=${compareBucket[0].id},${compareBucket[1].id}`)
+    }
+  }, [compareBucket, navigate, prefix])
+
+  const handleClearCompare = useCallback(() => {
+    setCompareBucket([])
+  }, [])
+
   // Compute breadcrumb for current selected folder
   const folderBreadcrumb = selectedFolderId && folderTree
     ? getFolderPath(folderTree, selectedFolderId)
@@ -928,6 +963,8 @@ function App() {
         onDuplicate={() => selectedLoadoutId && handleDuplicateLoadout(selectedLoadoutId)}
         onDelete={() => selectedLoadoutId && handleDeleteLoadout(selectedLoadoutId)}
         hideShare={isGuest}
+        onAddToCompare={handleAddToCompare}
+        isInCompareBucket={compareBucket.some(item => item.id === selectedLoadoutId)}
       />
     );
   };
@@ -1001,6 +1038,10 @@ function App() {
         <div className="app-body">
           <HelpPage onClose={() => navigate(prefix)} />
         </div>
+      ) : showCompare ? (
+        <div className="app-body">
+          <CompareLoadoutsPage onClose={() => navigate(prefix)} />
+        </div>
       ) : (
         <SidebarActionsProvider
           selectedLoadoutId={selectedLoadoutId}
@@ -1067,6 +1108,41 @@ function App() {
           itemName={shareModalState.folderName}
           onClose={() => setShareModalState(null)}
         />
+      )}
+      {compareBucket.length > 0 && (
+        <div className="compare-bar">
+          <div className="compare-bar-items">
+            {compareBucket.map((item, index) => (
+              <div key={item.id} className="compare-bar-item">
+                <div
+                  className="compare-bar-color"
+                  style={{ backgroundColor: index === 0 ? COMPARE_COLORS.left : COMPARE_COLORS.right }}
+                />
+                <span className="compare-bar-name">{item.name}</span>
+                <button
+                  className="compare-bar-remove"
+                  onClick={() => setCompareBucket(prev => prev.filter(i => i.id !== item.id))}
+                  title="Remove"
+                >
+                  <i className="fas fa-times" />
+                </button>
+              </div>
+            ))}
+            {compareBucket.length === 1 && (
+              <span className="compare-bar-hint">Select another loadout to compare</span>
+            )}
+          </div>
+          <div className="compare-bar-actions">
+            {compareBucket.length === 2 && (
+              <button className="compare-bar-go" onClick={handleCompareNow}>
+                <i className="fas fa-columns" /> Compare
+              </button>
+            )}
+            <button className="compare-bar-clear" onClick={handleClearCompare}>
+              Clear
+            </button>
+          </div>
+        </div>
       )}
     </div>
   )

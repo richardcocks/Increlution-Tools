@@ -23,13 +23,15 @@ interface LoadoutEditorProps {
   onDuplicate?: () => void;
   onDelete?: () => void;
   hideShare?: boolean;
+  onAddToCompare?: () => void;
+  isInCompareBucket?: boolean;
 }
 
 export interface LoadoutEditorHandle {
   startEditingName: () => boolean;
 }
 
-const LoadoutEditor = forwardRef<LoadoutEditorHandle, LoadoutEditorProps>(({ loadoutId, folderBreadcrumb, isFolderReadOnly = false, onNameChange, onProtectionChange, onCreateLoadout, onDuplicate, onDelete, hideShare }, ref) => {
+const LoadoutEditor = forwardRef<LoadoutEditorHandle, LoadoutEditorProps>(({ loadoutId, folderBreadcrumb, isFolderReadOnly = false, onNameChange, onProtectionChange, onCreateLoadout, onDuplicate, onDelete, hideShare, onAddToCompare, isInCompareBucket }, ref) => {
   const { api, isGuest } = useApi();
   const { actions, skills, loading: gameDataLoading, error: gameDataError } = useGameData();
   const [loadout, setLoadout] = useState<Loadout | null>(null);
@@ -683,6 +685,8 @@ const LoadoutEditor = forwardRef<LoadoutEditorHandle, LoadoutEditorProps>(({ loa
         onDuplicate={onDuplicate ?? (() => {})}
         onDelete={onDelete ?? (() => {})}
         hideShare={hideShare}
+        onAddToCompare={onAddToCompare}
+        isInCompareBucket={isInCompareBucket}
       />
 
       {/* Search Bar */}

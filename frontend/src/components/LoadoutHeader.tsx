@@ -16,13 +16,15 @@ interface LoadoutHeaderProps {
   onDuplicate: () => void;
   onDelete: () => void;
   hideShare?: boolean;
+  onAddToCompare?: () => void;
+  isInCompareBucket?: boolean;
 }
 
 export interface LoadoutHeaderHandle {
   startEditing: () => void;
 }
 
-const LoadoutHeader = forwardRef<LoadoutHeaderHandle, LoadoutHeaderProps>(({ loadout, folderBreadcrumb, isFolderReadOnly = false, onNameChange, onImport, onExportClipboard, onToggleProtection, onDuplicate, onDelete, hideShare }, ref) => {
+const LoadoutHeader = forwardRef<LoadoutHeaderHandle, LoadoutHeaderProps>(({ loadout, folderBreadcrumb, isFolderReadOnly = false, onNameChange, onImport, onExportClipboard, onToggleProtection, onDuplicate, onDelete, hideShare, onAddToCompare, isInCompareBucket }, ref) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedName, setEditedName] = useState('');
   const [isPasteMode, setIsPasteMode] = useState(false);
@@ -173,6 +175,16 @@ const LoadoutHeader = forwardRef<LoadoutHeaderHandle, LoadoutHeaderProps>(({ loa
             title="Share this loadout"
           >
             <i className="fas fa-share-alt"></i> Share
+          </button>
+        )}
+        {onAddToCompare && (
+          <button
+            onClick={onAddToCompare}
+            className={`loadout-button ${isInCompareBucket ? 'loadout-button-active' : ''}`}
+            title={isInCompareBucket ? 'Remove from comparison' : 'Add to comparison'}
+          >
+            <i className="fas fa-columns"></i>
+            {isInCompareBucket ? ' In Compare' : ' Compare'}
           </button>
         )}
         <button

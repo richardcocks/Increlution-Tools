@@ -138,3 +138,16 @@
   --wheel-track: #4b5563;
   --wheel-tick: #ffffff;
 }
+
+/* Read-only mode for compare view */
+.automation-wheel.read-only {
+  cursor: default;
+}
+
+.automation-wheel.read-only:hover {
+  transform: none;
+}
+
+.automation-wheel.read-only:active {
+  transform: none;
+}
