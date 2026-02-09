@@ -281,3 +281,119 @@
 .guest-banner a:hover {
   color: var(--color-banner-link-hover);
 }
+
+/* Comparison bar */
+.compare-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 20px;
+  background: #373737;
+  border-top: 2px solid #525252;
+  color: #e3e3e3;
+  z-index: 900;
+  gap: 16px;
+}
+
+[data-theme="dark"] .compare-bar {
+  background: #1e1e2e;
+  border-top-color: #444;
+}
+
+.compare-bar-items {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.compare-bar-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  max-width: 200px;
+}
+
+.compare-bar-color {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.compare-bar-name {
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.compare-bar-remove {
+  background: none;
+  border: none;
+  color: #999;
+  cursor: pointer;
+  padding: 2px;
+  font-size: 11px;
+  flex-shrink: 0;
+}
+
+.compare-bar-remove:hover {
+  color: #ef4444;
+}
+
+.compare-bar-hint {
+  font-size: 13px;
+  color: #999;
+  font-style: italic;
+}
+
+.compare-bar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.compare-bar-go {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: #2196f3;
+  border: 1px solid #2196f3;
+  border-radius: 4px;
+  color: white;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+
+.compare-bar-go:hover {
+  background: #1976d2;
+}
+
+.compare-bar-clear {
+  padding: 6px 12px;
+  background: transparent;
+  border: 1px solid #666;
+  border-radius: 4px;
+  color: #ccc;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.2s;
+}
+
+.compare-bar-clear:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: #999;
+}

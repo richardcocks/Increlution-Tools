@@ -6,7 +6,9 @@ import './AutomationWheel.css';
 
 interface AutomationWheelProps {
   level: AutomationLevel;
-  onChange: (level: AutomationLevel) => void;
+  onChange?: (level: AutomationLevel) => void;
+  readOnly?: boolean;
+  loadoutName?: string;  // For enhanced tooltip in compare mode
 }
 
 const LEVELS = [
@@ -17,7 +19,7 @@ const LEVELS = [
   { value: AutomationLevelConst.Top, label: 'Top', angle: 90 },
 ];
 
-const AutomationWheel = memo(function AutomationWheel({ level, onChange }: AutomationWheelProps) {
+const AutomationWheel = memo(function AutomationWheel({ level, onChange, readOnly, loadoutName }: AutomationWheelProps) {
   const { settings } = useSettings();
   const effectiveValue = level ?? 0;
   const currentLevel = LEVELS.find(l => l.value === effectiveValue) ?? LEVELS[0];
@@ -27,6 +29,8 @@ const AutomationWheel = memo(function AutomationWheel({ level, onChange }: Autom
   const handleClick = useCallback((e: React.MouseEvent) => {
     // Stop propagation so row doesn't handle Ctrl+click for lock toggle
     e.stopPropagation();
+
+    if (readOnly || !onChange) return;
 
     if (e.ctrlKey) {
       // Ctrl+click = max (Top), Ctrl+right-click = min (Off)
@@ -38,12 +42,14 @@ const AutomationWheel = memo(function AutomationWheel({ level, onChange }: Autom
         : (effectiveIndex + 1) % LEVELS.length;
       onChange(LEVELS[nextIndex].value);
     }
-  }, [effectiveIndex, onChange, settings.invertMouse]);
+  }, [effectiveIndex, onChange, settings.invertMouse, readOnly]);
 
   const handleContextMenu = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     // Stop propagation so row doesn't handle this
     e.stopPropagation();
+
+    if (readOnly || !onChange) return;
 
     if (e.ctrlKey) {
       // Ctrl+right-click = min (Off)
@@ -55,14 +61,27 @@ const AutomationWheel = memo(function AutomationWheel({ level, onChange }: Autom
         : (effectiveIndex - 1 + LEVELS.length) % LEVELS.length;
       onChange(LEVELS[nextIndex].value);
     }
-  }, [effectiveIndex, onChange, settings.invertMouse]);
+  }, [effectiveIndex, onChange, settings.invertMouse, readOnly]);
+
+  // Build tooltip text
+  const tooltipText = loadoutName
+    ? `${loadoutName}: ${currentLevel.label}`
+    : `${currentLevel.label} (click/right-click to cycle, Ctrl+click for max/min)`;
+
+  const classNames = [
+    'automation-wheel',
+    `level-${currentLevel.value}`,
+    settings.disableWheelAnimation ? 'no-animation' : '',
+    settings.colorMode === 'greyscale' ? 'greyscale' : settings.colorMode === 'blackAndWhite' ? 'black-and-white' : '',
+    readOnly ? 'read-only' : ''
+  ].filter(Boolean).join(' ');
 
   return (
     <div
-      className={`automation-wheel level-${currentLevel.value}${settings.disableWheelAnimation ? ' no-animation' : ''}${settings.colorMode === 'greyscale' ? ' greyscale' : settings.colorMode === 'blackAndWhite' ? ' black-and-white' : ''}`}
+      className={classNames}
       onClick={handleClick}
       onContextMenu={handleContextMenu}
-      title={`${currentLevel.label} (click/right-click to cycle, Ctrl+click for max/min)`}
+      title={tooltipText}
     >
       <svg viewBox="0 0 40 24" className="wheel-svg">
         {/* Gauge arc background */}
@@ -75,8 +94,8 @@ const AutomationWheel = memo(function AutomationWheel({ level, onChange }: Autom
         />
 
         {/* Tick marks */}
-        {LEVELS.map((level, i) => {
-          const radians = (level.angle - 90) * (Math.PI / 180);
+        {LEVELS.map((lvl, i) => {
+          const radians = (lvl.angle - 90) * (Math.PI / 180);
           const innerR = 12;
           const outerR = 16;
           const cx = 20;
