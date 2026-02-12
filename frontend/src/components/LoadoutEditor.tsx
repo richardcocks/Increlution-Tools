@@ -635,6 +635,35 @@ const LoadoutEditor = forwardRef<LoadoutEditorHandle, LoadoutEditorProps>(({ loa
     return () => document.removeEventListener('keydown', handleUndoRedo);
   }, [loadoutId, undo, redo]);
 
+  // Ctrl+1-0 and Ctrl+- for chapter switching
+  useEffect(() => {
+    const handleChapterHotkey = (e: KeyboardEvent) => {
+      if (!(e.ctrlKey || e.metaKey)) return;
+
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return;
+
+      let chapter: number | undefined;
+      if (e.key >= '1' && e.key <= '9') {
+        chapter = parseInt(e.key) - 1;
+      } else if (e.key === '0') {
+        chapter = 9;
+      } else if (e.key === '-') {
+        chapter = 10;
+      }
+
+      if (chapter === undefined) return;
+
+      if (actionsByChapterAndType.has(chapter)) {
+        e.preventDefault();
+        setActiveChapter(chapter);
+      }
+    };
+
+    document.addEventListener('keydown', handleChapterHotkey);
+    return () => document.removeEventListener('keydown', handleChapterHotkey);
+  }, [actionsByChapterAndType]);
+
   if (!loadoutId) {
     return (
       <div className="loadout-editor-placeholder">
