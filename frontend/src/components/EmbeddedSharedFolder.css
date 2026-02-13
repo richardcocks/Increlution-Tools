@@ -231,16 +231,3 @@
 .embedded-loadout-updated i {
   margin-right: 4px;
 }
-
-.embedded-loadout-content {
-  /* Uses existing LoadoutEditor styles for type-headers, chapter-section, etc. */
-}
-
-/* Reuse styles from EmbeddedSharedLoadout */
-.embedded-shared-folder .embedded-shared-back,
-.embedded-shared-folder .embedded-shared-badge,
-.embedded-shared-folder .embedded-shared-owner,
-.embedded-shared-folder .embedded-shared-actions,
-.embedded-shared-folder .embedded-action-button {
-  /* These are inherited from EmbeddedSharedLoadout.css */
-}

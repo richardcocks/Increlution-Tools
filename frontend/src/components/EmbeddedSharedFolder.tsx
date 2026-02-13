@@ -1,39 +1,36 @@
-import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { api } from '../services/api';
-import type { SharedFolder, SharedFolderNode, SharedFolderLoadout, IncrelutionAction, AutomationLevel } from '../types/models';
-import { ActionType } from '../types/models';
+import { useApi } from '../contexts/ApiContext';
+import type { SharedFolder, SharedFolderNode, SharedFolderLoadout } from '../types/models';
 import { normalizeLoadoutData } from '../utils/loadoutData';
 import { useSavedShares } from '../contexts/SavedSharesContext';
 import { useGameData } from '../contexts/GameDataContext';
-import { useSettings } from '../contexts/SettingsContext';
 import { useToast } from './Toast';
-import ChapterGroup from './ChapterGroup';
+import { ReadOnlyLoadoutDisplay } from './ReadOnlyLoadoutDisplay';
 import './EmbeddedSharedLoadout.css';
 import './EmbeddedSharedFolder.css';
 
 interface EmbeddedSharedFolderProps {
   token: string;
+  selectedLoadoutId?: number | null;
   onClose: () => void;
 }
 
-export function EmbeddedSharedFolder({ token, onClose }: EmbeddedSharedFolderProps) {
+export function EmbeddedSharedFolder({ token, selectedLoadoutId, onClose }: EmbeddedSharedFolderProps) {
+  const { api, isGuest } = useApi();
   const { saveFolderShare, savedShares } = useSavedShares();
   const { showToast } = useToast();
   const navigate = useNavigate();
-  const { actions, skills, loading: gameDataLoading } = useGameData();
-  const { unlockedChaptersSet } = useSettings();
+  const { loading: gameDataLoading } = useGameData();
+  const prefix = isGuest ? '/guest' : '/loadouts';
 
   const [sharedFolder, setSharedFolder] = useState<SharedFolder | null>(null);
   const [selectedLoadout, setSelectedLoadout] = useState<SharedFolderLoadout | null>(null);
-  const [selectedLoadoutId, setSelectedLoadoutId] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadoutLoading, setLoadoutLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [expandedFolders, setExpandedFolders] = useState<Set<number>>(new Set());
-  const [searchFilter, setSearchFilter] = useState('');
-  const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const fetchSharedFolder = async () => {
@@ -42,7 +39,6 @@ export function EmbeddedSharedFolder({ token, onClose }: EmbeddedSharedFolderPro
       try {
         const data = await api.getSharedFolder(token);
         setSharedFolder(data);
-        // Expand root folder by default
         setExpandedFolders(new Set([data.folderTree.id]));
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load shared folder');
@@ -52,20 +48,50 @@ export function EmbeddedSharedFolder({ token, onClose }: EmbeddedSharedFolderPro
     };
 
     fetchSharedFolder();
-  }, [token]);
+  }, [token, api]);
 
-  const fetchLoadout = useCallback(async (loadoutId: number) => {
-    setLoadoutLoading(true);
-    try {
-      const data = await api.getSharedFolderLoadout(token, loadoutId);
-      setSelectedLoadout(data);
-      setSelectedLoadoutId(loadoutId);
-    } catch (err) {
-      showToast(err instanceof Error ? err.message : 'Failed to load loadout', 'error');
-    } finally {
-      setLoadoutLoading(false);
+  // Expand the tree to reveal the selected loadout (and collapse unrelated branches)
+  useEffect(() => {
+    if (!sharedFolder) return;
+    const root = sharedFolder.folderTree;
+    if (!selectedLoadoutId) {
+      setExpandedFolders(new Set([root.id]));
+      return;
     }
-  }, [token, showToast]);
+    const findAncestors = (node: SharedFolderNode, path: number[]): number[] | null => {
+      if (node.loadouts.some(l => l.id === selectedLoadoutId)) return [...path, node.id];
+      for (const sub of node.subFolders) {
+        const result = findAncestors(sub, [...path, node.id]);
+        if (result) return result;
+      }
+      return null;
+    };
+    const ancestors = findAncestors(root, []);
+    setExpandedFolders(new Set(ancestors ?? [root.id]));
+  }, [selectedLoadoutId, sharedFolder]);
+
+  // Fetch the selected loadout when selectedLoadoutId changes
+  useEffect(() => {
+    if (!selectedLoadoutId) {
+      setSelectedLoadout(null);
+      return;
+    }
+
+    const fetchLoadout = async () => {
+      setLoadoutLoading(true);
+      try {
+        const data = await api.getSharedFolderLoadout(token, selectedLoadoutId);
+        setSelectedLoadout(data);
+      } catch (err) {
+        showToast(err instanceof Error ? err.message : 'Failed to load loadout', 'error');
+        setSelectedLoadout(null);
+      } finally {
+        setLoadoutLoading(false);
+      }
+    };
+
+    fetchLoadout();
+  }, [token, selectedLoadoutId, api, showToast]);
 
   const isSaved = useMemo(() => {
     return savedShares.some(s => s.shareToken === token && s.shareType === 'folder');
@@ -83,6 +109,10 @@ export function EmbeddedSharedFolder({ token, onClose }: EmbeddedSharedFolderPro
     }
   };
 
+  const handleLoadoutClick = (loadoutId: number) => {
+    navigate(`${prefix}/shared/folder/${token}/${loadoutId}`);
+  };
+
   const handleExportClipboard = useCallback(async () => {
     if (!selectedLoadout) return;
     try {
@@ -93,24 +123,6 @@ export function EmbeddedSharedFolder({ token, onClose }: EmbeddedSharedFolderPro
       showToast('Failed to copy to clipboard', 'error');
     }
   }, [selectedLoadout, showToast]);
-
-  useEffect(() => {
-    const handleCopy = (e: KeyboardEvent) => {
-      if (!(e.ctrlKey || e.metaKey) || e.key !== 'c') return;
-
-      const target = e.target as HTMLElement;
-      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return;
-
-      const selection = window.getSelection();
-      if (selection && selection.toString().length > 0) return;
-
-      e.preventDefault();
-      handleExportClipboard();
-    };
-
-    document.addEventListener('keydown', handleCopy);
-    return () => document.removeEventListener('keydown', handleCopy);
-  }, [handleExportClipboard]);
 
   const toggleFolder = (folderId: number) => {
     setExpandedFolders(prev => {
@@ -124,50 +136,6 @@ export function EmbeddedSharedFolder({ token, onClose }: EmbeddedSharedFolderPro
     });
   };
 
-  const matchingActionIds = useMemo(() => {
-    const normalizedFilter = searchFilter.toLowerCase().trim();
-    if (!normalizedFilter) return null;
-
-    const matchingIds = new Set<number>();
-    actions.forEach(action => {
-      if (action.name.toLowerCase().includes(normalizedFilter)) {
-        matchingIds.add(action.id);
-      }
-    });
-    return matchingIds;
-  }, [actions, searchFilter]);
-
-  // Group actions by chapter, then by type
-  const actionsByChapterAndType = useMemo(() => {
-    const grouped = new Map<number, Map<number, IncrelutionAction[]>>();
-
-    actions.forEach(action => {
-      if (!grouped.has(action.chapter)) {
-        grouped.set(action.chapter, new Map());
-      }
-      const chapterMap = grouped.get(action.chapter)!;
-      if (!chapterMap.has(action.type)) {
-        chapterMap.set(action.type, []);
-      }
-      chapterMap.get(action.type)!.push(action);
-    });
-
-    return grouped;
-  }, [actions]);
-
-  const getAutomationLevel = useCallback((action: IncrelutionAction): AutomationLevel => {
-    if (!selectedLoadout?.data) return null;
-    const typeData = selectedLoadout.data[action.type];
-    if (!typeData) return null;
-    const level = typeData[action.originalId];
-    return level !== undefined ? (level as AutomationLevel) : null;
-  }, [selectedLoadout?.data]);
-
-  // No-op handlers for read-only view
-  const noopChange = useCallback(() => {}, []);
-  const noopToggle = useCallback(() => {}, []);
-
-  // Recursive folder tree node component
   const renderFolderTree = (node: SharedFolderNode, level: number) => {
     const isExpanded = expandedFolders.has(node.id);
     const hasChildren = node.subFolders.length > 0 || node.loadouts.length > 0;
@@ -196,7 +164,7 @@ export function EmbeddedSharedFolder({ token, onClose }: EmbeddedSharedFolderPro
                 key={loadout.id}
                 className={`embedded-folder-loadout-item ${selectedLoadoutId === loadout.id ? 'selected' : ''}`}
                 style={{ paddingLeft: `${(level + 1) * 16 + 24}px` }}
-                onClick={() => fetchLoadout(loadout.id)}
+                onClick={() => handleLoadoutClick(loadout.id)}
               >
                 <i className="fas fa-file-alt loadout-icon" />
                 <span className="loadout-name">{loadout.name}</span>
@@ -244,9 +212,6 @@ export function EmbeddedSharedFolder({ token, onClose }: EmbeddedSharedFolderPro
       </div>
     );
   }
-
-  const sortedChapters = Array.from(actionsByChapterAndType.keys())
-    .sort((a, b) => a - b);
 
   return (
     <div className="embedded-shared-folder">
@@ -300,9 +265,8 @@ export function EmbeddedSharedFolder({ token, onClose }: EmbeddedSharedFolderPro
         </div>
       </div>
 
-      {/* Main content area with sidebar */}
+      {/* Body: folder tree sidebar + content area */}
       <div className="embedded-folder-body">
-        {/* Folder tree sidebar */}
         <div className="embedded-folder-sidebar">
           <div className="embedded-folder-sidebar-title">Contents</div>
           <div className="embedded-folder-tree">
@@ -310,7 +274,6 @@ export function EmbeddedSharedFolder({ token, onClose }: EmbeddedSharedFolderPro
           </div>
         </div>
 
-        {/* Loadout content */}
         <div className="embedded-folder-content">
           {!selectedLoadout && !loadoutLoading && (
             <div className="embedded-folder-empty">
@@ -347,90 +310,10 @@ export function EmbeddedSharedFolder({ token, onClose }: EmbeddedSharedFolderPro
                 </button>
               </div>
 
-              <div className="embedded-loadout-content">
-                <div className="search-bar">
-                  <i className="fas fa-search search-icon" />
-                  <input
-                    ref={searchInputRef}
-                    type="text"
-                    className="search-input"
-                    placeholder="Filter actions..."
-                    value={searchFilter}
-                    onChange={(e) => setSearchFilter(e.target.value)}
-                  />
-                  {searchFilter && (
-                    <button
-                      className="search-clear"
-                      onClick={() => {
-                        setSearchFilter('');
-                        searchInputRef.current?.focus();
-                      }}
-                    >
-                      <i className="fas fa-times" />
-                    </button>
-                  )}
-                </div>
-
-                {/* Type headers */}
-                <div className="type-headers">
-                  <h2 className="type-heading">Jobs</h2>
-                  <h2 className="type-heading">Construction</h2>
-                  <h2 className="type-heading">Exploration</h2>
-                </div>
-
-                {/* All Chapters */}
-                {sortedChapters.map(chapterNumber => {
-                  const chapterData = actionsByChapterAndType.get(chapterNumber);
-                  if (!chapterData) return null;
-                  const isChapterLocked = !unlockedChaptersSet.has(chapterNumber);
-
-                  return (
-                    <div key={chapterNumber} className={`chapter-section ${isChapterLocked ? 'chapter-section-locked' : ''}`}>
-                      <div className="chapter-separator">
-                        <span className="chapter-separator-label">Chapter {chapterNumber + 1}</span>
-                      </div>
-                      <div className={`chapter-content embedded-readonly ${isChapterLocked ? 'chapter-content-locked' : ''}`}>
-                        <ChapterGroup
-                          actions={chapterData.get(ActionType.Jobs) || []}
-                          skills={skills}
-                          getAutomationLevel={getAutomationLevel}
-                          onAutomationChange={noopChange}
-                          onToggleLock={noopToggle}
-                          matchingActionIds={matchingActionIds}
-                          hideNonMatching={!isChapterLocked && !!matchingActionIds}
-                          disabled={isChapterLocked}
-                        />
-                        <ChapterGroup
-                          actions={chapterData.get(ActionType.Construction) || []}
-                          skills={skills}
-                          getAutomationLevel={getAutomationLevel}
-                          onAutomationChange={noopChange}
-                          onToggleLock={noopToggle}
-                          matchingActionIds={matchingActionIds}
-                          hideNonMatching={!isChapterLocked && !!matchingActionIds}
-                          disabled={isChapterLocked}
-                        />
-                        <ChapterGroup
-                          actions={chapterData.get(ActionType.Exploration) || []}
-                          skills={skills}
-                          getAutomationLevel={getAutomationLevel}
-                          onAutomationChange={noopChange}
-                          onToggleLock={noopToggle}
-                          matchingActionIds={matchingActionIds}
-                          hideNonMatching={!isChapterLocked && !!matchingActionIds}
-                          disabled={isChapterLocked}
-                        />
-                        {isChapterLocked && (
-                          <div className="frosted-glass-overlay" onClick={() => navigate('/settings#chapters')}>
-                            <i className="fas fa-lock" />
-                            <span>Unlock chapter in settings</span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+              <ReadOnlyLoadoutDisplay
+                loadoutData={selectedLoadout.data}
+                onExportClipboard={handleExportClipboard}
+              />
             </>
           )}
         </div>

@@ -67,6 +67,11 @@ createRoot(document.getElementById('root')!).render(
                         <AuthAwareShareRoute />
                       </GameDataProvider>
                     } />
+                    <Route path="/share/folder/:token/:loadoutId" element={
+                      <GameDataProvider>
+                        <AuthAwareFolderShareRoute />
+                      </GameDataProvider>
+                    } />
                     <Route path="/share/folder/:token" element={
                       <GameDataProvider>
                         <AuthAwareFolderShareRoute />

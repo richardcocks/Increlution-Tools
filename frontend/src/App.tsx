@@ -7,7 +7,6 @@ import { useToast } from './components/Toast'
 import { DeleteConfirmation } from './components/DeleteConfirmation'
 import { EmbeddedSharedLoadout } from './components/EmbeddedSharedLoadout'
 import { EmbeddedSharedFolder } from './components/EmbeddedSharedFolder'
-import { EmbeddedSharedFolderLoadout } from './components/EmbeddedSharedFolderLoadout'
 import { TextInputModal } from './components/TextInputModal'
 import { FolderView } from './components/FolderView'
 import { ShareModal } from './components/ShareModal'
@@ -883,22 +882,13 @@ function App() {
     }
 
     if (viewingSharedFolder) {
-      if (viewingSharedFolder.loadoutId) {
-        return (
-          <EmbeddedSharedFolderLoadout
-            folderToken={viewingSharedFolder.token}
-            loadoutId={viewingSharedFolder.loadoutId}
-            onClose={() => navigate(`${prefix}/shared/folder/${viewingSharedFolder.token}`)}
-          />
-        );
-      } else {
-        return (
-          <EmbeddedSharedFolder
-            token={viewingSharedFolder.token}
-            onClose={handleCloseShare}
-          />
-        );
-      }
+      return (
+        <EmbeddedSharedFolder
+          token={viewingSharedFolder.token}
+          selectedLoadoutId={viewingSharedFolder.loadoutId}
+          onClose={handleCloseShare}
+        />
+      );
     }
 
     if (pendingDelete && folderTree) {
