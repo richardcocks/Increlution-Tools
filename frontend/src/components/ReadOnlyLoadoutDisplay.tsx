@@ -19,6 +19,7 @@ export function ReadOnlyLoadoutDisplay({ loadoutData, onExportClipboard }: ReadO
   const { unlockedChaptersSet } = useSettings();
 
   const [searchFilter, setSearchFilter] = useState('');
+  const [showConfiguredOnly, setShowConfiguredOnly] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -38,19 +39,6 @@ export function ReadOnlyLoadoutDisplay({ loadoutData, onExportClipboard }: ReadO
     document.addEventListener('keydown', handleCopy);
     return () => document.removeEventListener('keydown', handleCopy);
   }, [onExportClipboard]);
-
-  const matchingActionIds = useMemo(() => {
-    const normalizedFilter = searchFilter.toLowerCase().trim();
-    if (!normalizedFilter) return null;
-
-    const matchingIds = new Set<number>();
-    actions.forEach(action => {
-      if (action.name.toLowerCase().includes(normalizedFilter)) {
-        matchingIds.add(action.id);
-      }
-    });
-    return matchingIds;
-  }, [actions, searchFilter]);
 
   const actionsByChapterAndType = useMemo(() => {
     const grouped = new Map<number, Map<number, IncrelutionAction[]>>();
@@ -75,6 +63,27 @@ export function ReadOnlyLoadoutDisplay({ loadoutData, onExportClipboard }: ReadO
     const level = typeData[action.originalId];
     return level !== undefined ? (level as AutomationLevel) : null;
   }, [loadoutData]);
+
+  const { matchingActionIds, chaptersToShow } = useMemo(() => {
+    const normalizedFilter = searchFilter.toLowerCase().trim();
+
+    if (!normalizedFilter && !showConfiguredOnly) {
+      return { matchingActionIds: null, chaptersToShow: null };
+    }
+
+    const matchingIds = new Set<number>();
+    const chapters = new Set<number>();
+    actions.forEach(action => {
+      const matchesSearch = !normalizedFilter || action.name.toLowerCase().includes(normalizedFilter);
+      const matchesConfigured = !showConfiguredOnly || getAutomationLevel(action) !== null;
+
+      if (matchesSearch && matchesConfigured) {
+        matchingIds.add(action.id);
+        chapters.add(action.chapter);
+      }
+    });
+    return { matchingActionIds: matchingIds, chaptersToShow: chapters };
+  }, [actions, searchFilter, showConfiguredOnly, getAutomationLevel]);
 
   const noopChange = useCallback(() => {}, []);
   const noopToggle = useCallback(() => {}, []);
@@ -106,6 +115,13 @@ export function ReadOnlyLoadoutDisplay({ loadoutData, onExportClipboard }: ReadO
           </button>
         )}
       </div>
+      <button
+        className={`configured-only-toggle ${showConfiguredOnly ? 'configured-only-toggle-active' : ''}`}
+        onClick={() => setShowConfiguredOnly(prev => !prev)}
+      >
+        <i className="fas fa-eye" />
+        <span>{showConfiguredOnly ? 'Showing configured only' : 'Show configured only'}</span>
+      </button>
 
       <div className="type-headers">
         <h2 className="type-heading">Jobs</h2>
@@ -117,6 +133,8 @@ export function ReadOnlyLoadoutDisplay({ loadoutData, onExportClipboard }: ReadO
         const chapterData = actionsByChapterAndType.get(chapterNumber);
         if (!chapterData) return null;
         const isChapterLocked = !unlockedChaptersSet.has(chapterNumber);
+
+        if (!isChapterLocked && chaptersToShow && !chaptersToShow.has(chapterNumber)) return null;
 
         return (
           <div key={chapterNumber} className={`chapter-section ${isChapterLocked ? 'chapter-section-locked' : ''}`}>
@@ -164,6 +182,12 @@ export function ReadOnlyLoadoutDisplay({ loadoutData, onExportClipboard }: ReadO
           </div>
         );
       })}
+
+      {showConfiguredOnly && chaptersToShow && chaptersToShow.size === 0 && (
+        <div className="empty-filter-state">
+          <p>No configured actions found{searchFilter ? ' matching your search' : ''}.</p>
+        </div>
+      )}
     </div>
   );
 }
