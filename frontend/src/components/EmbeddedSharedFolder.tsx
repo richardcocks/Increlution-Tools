@@ -50,6 +50,26 @@ export function EmbeddedSharedFolder({ token, selectedLoadoutId, onClose }: Embe
     fetchSharedFolder();
   }, [token, api]);
 
+  // Expand the tree to reveal the selected loadout (and collapse unrelated branches)
+  useEffect(() => {
+    if (!sharedFolder) return;
+    const root = sharedFolder.folderTree;
+    if (!selectedLoadoutId) {
+      setExpandedFolders(new Set([root.id]));
+      return;
+    }
+    const findAncestors = (node: SharedFolderNode, path: number[]): number[] | null => {
+      if (node.loadouts.some(l => l.id === selectedLoadoutId)) return [...path, node.id];
+      for (const sub of node.subFolders) {
+        const result = findAncestors(sub, [...path, node.id]);
+        if (result) return result;
+      }
+      return null;
+    };
+    const ancestors = findAncestors(root, []);
+    setExpandedFolders(new Set(ancestors ?? [root.id]));
+  }, [selectedLoadoutId, sharedFolder]);
+
   // Fetch the selected loadout when selectedLoadoutId changes
   useEffect(() => {
     if (!selectedLoadoutId) {
