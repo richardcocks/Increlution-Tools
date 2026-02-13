@@ -8,12 +8,8 @@ import { useToast } from './Toast';
 import { ReadOnlyLoadoutDisplay } from './ReadOnlyLoadoutDisplay';
 import './EmbeddedSharedLoadout.css';
 
-type SharedLoadoutSource =
-  | { type: 'loadout-share'; token: string }
-  | { type: 'folder-share'; folderToken: string; loadoutId: number };
-
 interface EmbeddedSharedLoadoutProps {
-  source: SharedLoadoutSource;
+  token: string;
   onClose: () => void;
 }
 
@@ -24,7 +20,7 @@ interface LoadoutInfo {
   ownerName?: string | null;
 }
 
-export function EmbeddedSharedLoadout({ source, onClose }: EmbeddedSharedLoadoutProps) {
+export function EmbeddedSharedLoadout({ token, onClose }: EmbeddedSharedLoadoutProps) {
   const { api } = useApi();
   const { saveLoadoutShare, savedShares } = useSavedShares();
   const { showToast } = useToast();
@@ -35,22 +31,13 @@ export function EmbeddedSharedLoadout({ source, onClose }: EmbeddedSharedLoadout
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
-  const sourceKey = source.type === 'loadout-share'
-    ? source.token
-    : `${source.folderToken}/${source.loadoutId}`;
-
   useEffect(() => {
     const fetchLoadout = async () => {
       setLoading(true);
       setError(null);
       try {
-        if (source.type === 'loadout-share') {
-          const data = await api.getSharedLoadout(source.token);
-          setLoadout(data);
-        } else {
-          const data = await api.getSharedFolderLoadout(source.folderToken, source.loadoutId);
-          setLoadout(data);
-        }
+        const data = await api.getSharedLoadout(token);
+        setLoadout(data);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load shared loadout');
       } finally {
@@ -59,20 +46,16 @@ export function EmbeddedSharedLoadout({ source, onClose }: EmbeddedSharedLoadout
     };
 
     fetchLoadout();
-  }, [sourceKey, api]);
-
-  const isLoadoutShare = source.type === 'loadout-share';
+  }, [token, api]);
 
   const isSaved = useMemo(() => {
-    if (!isLoadoutShare) return false;
-    return savedShares.some(s => s.shareToken === source.token);
-  }, [savedShares, source, isLoadoutShare]);
+    return savedShares.some(s => s.shareToken === token);
+  }, [savedShares, token]);
 
   const handleSave = async () => {
-    if (!isLoadoutShare) return;
     setSaving(true);
     try {
-      await saveLoadoutShare(source.token);
+      await saveLoadoutShare(token);
       showToast('Saved to your collection!', 'success');
     } catch (err) {
       showToast(err instanceof Error ? err.message : 'Failed to save', 'error');
@@ -154,30 +137,28 @@ export function EmbeddedSharedLoadout({ source, onClose }: EmbeddedSharedLoadout
           </span>
         </div>
         <div className="embedded-shared-actions">
-          {isLoadoutShare && (
-            <button
-              className="embedded-action-button primary"
-              onClick={handleSave}
-              disabled={saving || isSaved}
-            >
-              {saving ? (
-                <>
-                  <i className="fas fa-spinner fa-spin" />
-                  Saving...
-                </>
-              ) : isSaved ? (
-                <>
-                  <i className="fas fa-check" />
-                  Saved
-                </>
-              ) : (
-                <>
-                  <i className="fas fa-bookmark" />
-                  Save to Collection
-                </>
-              )}
-            </button>
-          )}
+          <button
+            className="embedded-action-button primary"
+            onClick={handleSave}
+            disabled={saving || isSaved}
+          >
+            {saving ? (
+              <>
+                <i className="fas fa-spinner fa-spin" />
+                Saving...
+              </>
+            ) : isSaved ? (
+              <>
+                <i className="fas fa-check" />
+                Saved
+              </>
+            ) : (
+              <>
+                <i className="fas fa-bookmark" />
+                Save to Collection
+              </>
+            )}
+          </button>
           <button
             className="embedded-action-button secondary"
             onClick={handleExportClipboard}

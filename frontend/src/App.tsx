@@ -875,28 +875,20 @@ function App() {
     if (viewingShareToken) {
       return (
         <EmbeddedSharedLoadout
-          source={{ type: 'loadout-share', token: viewingShareToken }}
+          token={viewingShareToken}
           onClose={handleCloseShare}
         />
       );
     }
 
     if (viewingSharedFolder) {
-      if (viewingSharedFolder.loadoutId) {
-        return (
-          <EmbeddedSharedLoadout
-            source={{ type: 'folder-share', folderToken: viewingSharedFolder.token, loadoutId: viewingSharedFolder.loadoutId }}
-            onClose={() => navigate(`${prefix}/shared/folder/${viewingSharedFolder.token}`)}
-          />
-        );
-      } else {
-        return (
-          <EmbeddedSharedFolder
-            token={viewingSharedFolder.token}
-            onClose={handleCloseShare}
-          />
-        );
-      }
+      return (
+        <EmbeddedSharedFolder
+          token={viewingSharedFolder.token}
+          selectedLoadoutId={viewingSharedFolder.loadoutId}
+          onClose={handleCloseShare}
+        />
+      );
     }
 
     if (pendingDelete && folderTree) {
