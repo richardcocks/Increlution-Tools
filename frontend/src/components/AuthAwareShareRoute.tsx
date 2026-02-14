@@ -1,6 +1,7 @@
-import { useParams, Navigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import App from '../App';
+import { AnonymousSharedLoadout } from './AnonymousSharedLoadout';
 
 export function AuthAwareShareRoute() {
   const { user, loading } = useAuth();
@@ -10,11 +11,15 @@ export function AuthAwareShareRoute() {
     return <div className="app-loading">Loading...</div>;
   }
 
+  if (!token) {
+    return <div className="app-loading">Invalid share link</div>;
+  }
+
   // If user is logged in, show App (which will handle the share token via useParams)
   if (user) {
     return <App />;
   }
 
-  // Redirect guests to the guest embedded view
-  return <Navigate to={`/guest/shared/${token}`} replace />;
+  // Anonymous viewer: lightweight read-only view (no guest profile creation)
+  return <AnonymousSharedLoadout token={token} />;
 }

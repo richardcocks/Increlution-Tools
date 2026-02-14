@@ -1,5 +1,6 @@
 import { useParams, Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { AnonymousSharedFolder } from './AnonymousSharedFolder';
 
 export function AuthAwareFolderShareRoute() {
   const { user, loading } = useAuth();
@@ -19,5 +20,7 @@ export function AuthAwareFolderShareRoute() {
     return <Navigate to={`/loadouts/shared/folder/${token}${suffix}`} replace />;
   }
 
-  return <Navigate to={`/guest/shared/folder/${token}${suffix}`} replace />;
+  // Anonymous viewer: lightweight read-only view (no guest profile creation)
+  const parsedLoadoutId = loadoutId ? parseInt(loadoutId, 10) : undefined;
+  return <AnonymousSharedFolder token={token} selectedLoadoutId={parsedLoadoutId} />;
 }

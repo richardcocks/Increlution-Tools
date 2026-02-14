@@ -1,12 +1,12 @@
 import { StrictMode, useMemo } from 'react'
 import { createRoot } from 'react-dom/client'
-import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, Outlet, useLocation } from 'react-router-dom'
 import '@fortawesome/fontawesome-free/css/all.min.css'
 import './index.css'
 import App from './App.tsx'
 import { ToastProvider } from './components/Toast.tsx'
 import { Footer } from './components/Footer.tsx'
-import { AuthProvider } from './contexts/AuthContext.tsx'
+import { AuthProvider, useAuth } from './contexts/AuthContext.tsx'
 import { GameDataProvider } from './contexts/GameDataContext.tsx'
 import { SettingsProvider } from './contexts/SettingsContext.tsx'
 import { ThemeProvider } from './contexts/ThemeContext.tsx'
@@ -24,6 +24,23 @@ import { MigratePage } from './pages/MigratePage.tsx'
 import { createGuestApi } from './services/guestApi.ts'
 
 /* eslint-disable react-refresh/only-export-components */
+function GuestGuard() {
+  const { user, loading } = useAuth()
+  const location = useLocation()
+
+  if (loading) {
+    return <div className="app-loading">Loading...</div>
+  }
+
+  // Authenticated users should not be in guest mode — redirect to equivalent /loadouts route
+  if (user) {
+    const redirectPath = location.pathname.replace(/^\/guest/, '/loadouts') || '/loadouts'
+    return <Navigate to={redirectPath} replace />
+  }
+
+  return <GuestLayout />
+}
+
 function GuestLayout() {
   const guestApi = useMemo(() => createGuestApi(), [])
   return (
@@ -168,8 +185,8 @@ createRoot(document.getElementById('root')!).render(
                         <MigratePage />
                       </ProtectedRoute>
                     } />
-                    {/* Guest routes */}
-                    <Route path="/guest" element={<GuestLayout />}>
+                    {/* Guest routes — GuestGuard redirects authenticated users to /loadouts */}
+                    <Route path="/guest" element={<GuestGuard />}>
                       <Route index element={<App />} />
                       <Route path="folder/:folderId" element={<App />} />
                       <Route path="loadout/:loadoutId" element={<App />} />
