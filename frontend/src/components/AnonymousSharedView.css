@@ -1,0 +1,73 @@
+.anonymous-shared-view {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+.anonymous-shared-header-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background: var(--color-bg-elevated);
+  color: var(--color-text-primary);
+  border-bottom: 1px solid var(--color-border-default);
+  flex-shrink: 0;
+}
+
+.anonymous-shared-home-link {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--color-text-primary);
+  text-decoration: none;
+}
+
+.anonymous-shared-home-link:hover {
+  text-decoration: none;
+}
+
+.anonymous-shared-auth-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.anonymous-auth-button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.2s, opacity 0.2s;
+}
+
+.anonymous-auth-button.discord {
+  background: #5865f2;
+  color: white;
+}
+
+.anonymous-auth-button.discord:hover {
+  background: #4752c4;
+  color: white;
+}
+
+.anonymous-auth-button.guest {
+  background: var(--color-bg-subtle);
+  color: var(--color-text-primary);
+}
+
+.anonymous-auth-button.guest:hover {
+  background: var(--color-border-default);
+  color: var(--color-text-primary);
+}
+
+/* Override embedded-shared-loadout to fill the anonymous view */
+.anonymous-shared-view .embedded-shared-loadout,
+.anonymous-shared-view .embedded-shared-folder {
+  flex: 1;
+}

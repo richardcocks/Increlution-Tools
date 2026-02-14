@@ -1,23 +1,26 @@
-import { useParams, Navigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import App from '../App';
+import { AnonymousSharedFolder } from './AnonymousSharedFolder';
 
 export function AuthAwareFolderShareRoute() {
   const { user, loading } = useAuth();
-  const { token, loadoutId } = useParams<{ token: string; loadoutId?: string }>();
+  const { folderToken, loadoutId } = useParams<{ folderToken: string; loadoutId?: string }>();
 
   if (loading) {
     return <div className="app-loading">Loading...</div>;
   }
 
-  if (!token) {
+  if (!folderToken) {
     return <div className="app-loading">Invalid share link</div>;
   }
 
-  const suffix = loadoutId ? `/${loadoutId}` : '';
-
+  // Authenticated user: render App inline (handles shared folder via useParams)
   if (user) {
-    return <Navigate to={`/loadouts/shared/folder/${token}${suffix}`} replace />;
+    return <App />;
   }
 
-  return <Navigate to={`/guest/shared/folder/${token}${suffix}`} replace />;
+  // Anonymous viewer: lightweight read-only view (no guest profile creation)
+  const parsedLoadoutId = loadoutId ? parseInt(loadoutId, 10) : undefined;
+  return <AnonymousSharedFolder token={folderToken} selectedLoadoutId={parsedLoadoutId} />;
 }

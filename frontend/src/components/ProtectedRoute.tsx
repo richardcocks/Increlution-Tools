@@ -19,6 +19,14 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     return <Navigate to="/login" replace />;
   }
 
+  // Check for share return URL (from anonymous share view → login flow).
+  // This takes priority over migration to avoid interrupting the share experience.
+  const shareReturnUrl = sessionStorage.getItem('share_return_url');
+  if (shareReturnUrl && location.pathname !== shareReturnUrl) {
+    sessionStorage.removeItem('share_return_url');
+    return <Navigate to={shareReturnUrl} replace />;
+  }
+
   // Redirect to migration page if guest data exists (e.g. after Discord OAuth callback)
   if (location.pathname !== '/migrate' && hasGuestData()) {
     return <Navigate to="/migrate" replace />;

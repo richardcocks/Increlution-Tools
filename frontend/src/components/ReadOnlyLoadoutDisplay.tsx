@@ -10,13 +10,15 @@ import ChapterGroup from './ChapterGroup';
 interface ReadOnlyLoadoutDisplayProps {
   loadoutData: LoadoutData;
   onExportClipboard: () => void;
+  unlockedChaptersOverride?: Set<number>;
 }
 
-export function ReadOnlyLoadoutDisplay({ loadoutData, onExportClipboard }: ReadOnlyLoadoutDisplayProps) {
+export function ReadOnlyLoadoutDisplay({ loadoutData, onExportClipboard, unlockedChaptersOverride }: ReadOnlyLoadoutDisplayProps) {
   const { isGuest } = useApi();
   const navigate = useNavigate();
   const { actions, skills } = useGameData();
-  const { unlockedChaptersSet } = useSettings();
+  const { unlockedChaptersSet: settingsUnlockedChapters } = useSettings();
+  const unlockedChaptersSet = unlockedChaptersOverride ?? settingsUnlockedChapters;
 
   const [searchFilter, setSearchFilter] = useState('');
   const [showConfiguredOnly, setShowConfiguredOnly] = useState(false);
