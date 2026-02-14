@@ -32,13 +32,23 @@ function GuestGuard() {
     return <div className="app-loading">Loading...</div>
   }
 
-  // Authenticated users should not be in guest mode — redirect to equivalent /loadouts route
+  // Authenticated users should not be in guest mode
   if (user) {
-    const redirectPath = location.pathname.replace(/^\/guest/, '/loadouts') || '/loadouts'
+    // Redirect shared content to canonical /share/ URLs
+    const sharedMatch = location.pathname.match(/^\/guest\/shared\/(.+)/)
+    const redirectPath = sharedMatch
+      ? `/share/${sharedMatch[1]}`
+      : location.pathname.replace(/^\/guest/, '/loadouts') || '/loadouts'
     return <Navigate to={redirectPath} replace />
   }
 
   return <GuestLayout />
+}
+
+function SharedContentRedirect() {
+  const location = useLocation()
+  const newPath = location.pathname.replace(/^\/loadouts\/shared/, '/share')
+  return <Navigate to={newPath} replace />
 }
 
 function GuestLayout() {
@@ -84,12 +94,12 @@ createRoot(document.getElementById('root')!).render(
                         <AuthAwareShareRoute />
                       </GameDataProvider>
                     } />
-                    <Route path="/share/folder/:token/:loadoutId" element={
+                    <Route path="/share/folder/:folderToken/:loadoutId" element={
                       <GameDataProvider>
                         <AuthAwareFolderShareRoute />
                       </GameDataProvider>
                     } />
-                    <Route path="/share/folder/:token" element={
+                    <Route path="/share/folder/:folderToken" element={
                       <GameDataProvider>
                         <AuthAwareFolderShareRoute />
                       </GameDataProvider>
@@ -109,28 +119,10 @@ createRoot(document.getElementById('root')!).render(
                         </GameDataProvider>
                       </ProtectedRoute>
                     } />
-                    {/* Saved shared content (embedded view for logged-in users) */}
-                    <Route path="/loadouts/shared/:token" element={
-                      <ProtectedRoute>
-                        <GameDataProvider>
-                          <App />
-                        </GameDataProvider>
-                      </ProtectedRoute>
-                    } />
-                    <Route path="/loadouts/shared/folder/:folderToken/:loadoutId" element={
-                      <ProtectedRoute>
-                        <GameDataProvider>
-                          <App />
-                        </GameDataProvider>
-                      </ProtectedRoute>
-                    } />
-                    <Route path="/loadouts/shared/folder/:folderToken" element={
-                      <ProtectedRoute>
-                        <GameDataProvider>
-                          <App />
-                        </GameDataProvider>
-                      </ProtectedRoute>
-                    } />
+                    {/* Legacy shared content routes — redirect to canonical /share/ URLs */}
+                    <Route path="/loadouts/shared/:token" element={<SharedContentRedirect />} />
+                    <Route path="/loadouts/shared/folder/:folderToken/:loadoutId" element={<SharedContentRedirect />} />
+                    <Route path="/loadouts/shared/folder/:folderToken" element={<SharedContentRedirect />} />
                     {/* Compare loadouts view */}
                     <Route path="/loadouts/compare" element={
                       <ProtectedRoute>

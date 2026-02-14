@@ -595,18 +595,18 @@ function App() {
 
   const handleViewShare = (token: string, shareType: 'loadout' | 'folder' = 'loadout') => {
     setPendingDelete(null)
-    // Navigate to URL - state will sync from URL sync effect
+    // Navigate to canonical /share/ URLs (guest mode uses its own prefix)
     if (shareType === 'folder') {
-      navigate(`${prefix}/shared/folder/${token}`)
+      navigate(isGuest ? `${prefix}/shared/folder/${token}` : `/share/folder/${token}`)
     } else {
-      navigate(`${prefix}/shared/${token}`)
+      navigate(isGuest ? `${prefix}/shared/${token}` : `/share/${token}`)
     }
   }
 
   const handleViewSharedFolderLoadout = (folderToken: string, loadoutId: number) => {
     setPendingDelete(null)
-    // Navigate to URL - state will sync from URL sync effect
-    navigate(`${prefix}/shared/folder/${folderToken}/${loadoutId}`)
+    // Navigate to canonical /share/ URLs (guest mode uses its own prefix)
+    navigate(isGuest ? `${prefix}/shared/folder/${folderToken}/${loadoutId}` : `/share/folder/${folderToken}/${loadoutId}`)
   }
 
   const handleCloseShare = () => {

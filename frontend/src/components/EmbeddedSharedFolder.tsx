@@ -110,7 +110,8 @@ export function EmbeddedSharedFolder({ token, selectedLoadoutId, onClose }: Embe
   };
 
   const handleLoadoutClick = (loadoutId: number) => {
-    navigate(`${prefix}/shared/folder/${token}/${loadoutId}`);
+    // Navigate to canonical /share/ URLs (guest mode uses its own prefix)
+    navigate(isGuest ? `${prefix}/shared/folder/${token}/${loadoutId}` : `/share/folder/${token}/${loadoutId}`);
   };
 
   const handleExportClipboard = useCallback(async () => {
