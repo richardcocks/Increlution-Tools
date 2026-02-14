@@ -8,6 +8,7 @@ import { useSettings } from '../contexts/SettingsContext';
 import { useGameData } from '../contexts/GameDataContext';
 import { makeSkillActionKey } from '../types/settings';
 import { parseLoadoutJson, LoadoutParseError, filterLoadoutByChapters, countLoadoutChanges } from '../utils/loadoutData';
+import { useLoadoutHistory } from '../hooks/useLoadoutHistory';
 import LoadoutHeader from './LoadoutHeader';
 import type { LoadoutHeaderHandle } from './LoadoutHeader';
 import ChapterGroup from './ChapterGroup';
@@ -50,11 +51,8 @@ const LoadoutEditor = forwardRef<LoadoutEditorHandle, LoadoutEditorProps>(({ loa
   // Track pending API calls per action to prevent race conditions
   // Key: "type:originalId", Value: AbortController
   const pendingUpdatesRef = useRef<Map<string, AbortController>>(new Map());
-  // Undo/redo history stacks for loadout data
-  const undoStackRef = useRef<LoadoutData[]>([]);
-  const redoStackRef = useRef<LoadoutData[]>([]);
-  const isUndoRedoRef = useRef(false);
-  const MAX_UNDO_HISTORY = 50;
+  // Undo/redo history
+  const { pushUndo, undo, redo } = useLoadoutHistory({ loadout, loadoutId, setLoadout, showToast, api });
 
   useImperativeHandle(ref, () => ({
     startEditingName: () => {
@@ -157,51 +155,8 @@ const LoadoutEditor = forwardRef<LoadoutEditorHandle, LoadoutEditorProps>(({ loa
       }
     };
 
-    // Clear undo/redo history when switching loadouts
-    undoStackRef.current = [];
-    redoStackRef.current = [];
-
     fetchLoadout();
   }, [loadoutId, api]);
-
-  // Push current loadout data onto the undo stack
-  const pushUndo = useCallback((currentData: LoadoutData) => {
-    if (isUndoRedoRef.current) return;
-    undoStackRef.current = [...undoStackRef.current.slice(-MAX_UNDO_HISTORY + 1), currentData];
-    redoStackRef.current = [];
-  }, []);
-
-  const applyUndoRedo = useCallback(async (
-    fromStack: LoadoutData[],
-    toStack: LoadoutData[],
-    label: string
-  ) => {
-    if (!loadout || !loadoutId || fromStack.length === 0) return;
-
-    const targetData = fromStack.pop()!;
-    toStack.push(loadout.data);
-
-    isUndoRedoRef.current = true;
-    setLoadout(prev => prev ? { ...prev, data: targetData, updatedAt: new Date().toISOString() } : prev);
-    isUndoRedoRef.current = false;
-
-    try {
-      await api.importLoadout(loadoutId, targetData);
-      showToast(label, 'success');
-    } catch {
-      showToast(`Failed to ${label.toLowerCase()}`, 'error');
-      const loadoutData = await api.getLoadout(loadoutId);
-      setLoadout(loadoutData);
-    }
-  }, [loadout, loadoutId, showToast, api]);
-
-  const undo = useCallback(() => {
-    applyUndoRedo(undoStackRef.current, redoStackRef.current, 'Undo');
-  }, [applyUndoRedo]);
-
-  const redo = useCallback(() => {
-    applyUndoRedo(redoStackRef.current, undoStackRef.current, 'Redo');
-  }, [applyUndoRedo]);
 
   // Handle global paste for import
   const handlePasteImport = useCallback(async (text: string) => {

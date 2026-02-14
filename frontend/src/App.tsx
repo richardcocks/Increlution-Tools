@@ -5,8 +5,8 @@ import type { LoadoutEditorHandle } from './components/LoadoutEditor'
 import { Sidebar } from './components/Sidebar'
 import { useToast } from './components/Toast'
 import { DeleteConfirmation } from './components/DeleteConfirmation'
-import { EmbeddedSharedLoadout } from './components/EmbeddedSharedLoadout'
-import { EmbeddedSharedFolder } from './components/EmbeddedSharedFolder'
+import { SharedLoadoutView } from './components/SharedLoadoutView'
+import { SharedFolderView } from './components/SharedFolderView'
 import { TextInputModal } from './components/TextInputModal'
 import { FolderView } from './components/FolderView'
 import { ShareModal } from './components/ShareModal'
@@ -118,7 +118,7 @@ function App() {
   const showHelp = location.pathname === '/help' || location.pathname === '/guest/help'
   const showCompare = location.pathname === '/loadouts/compare' || location.pathname === '/guest/compare'
 
-  const fetchFolderTree = async () => {
+  const fetchFolderTree = useCallback(async () => {
     try {
       const tree = await api.getFolderTree()
       setFolderTree(tree)
@@ -129,7 +129,7 @@ function App() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [api])
 
   // Compute effective read-only map from folder tree
   const effectiveReadOnlyMap = useMemo(() => buildEffectiveReadOnlyMap(folderTree), [folderTree])
@@ -137,7 +137,7 @@ function App() {
   // Initial fetch of folder tree
   useEffect(() => {
     fetchFolderTree()
-  }, [])
+  }, [fetchFolderTree])
 
   // Sync URL params to state (handles initial load, back/forward, and direct URL access)
   // Note: We intentionally omit state variables from deps to prevent infinite loops.
@@ -874,8 +874,9 @@ function App() {
   const renderMainContent = () => {
     if (viewingShareToken) {
       return (
-        <EmbeddedSharedLoadout
+        <SharedLoadoutView
           token={viewingShareToken}
+          mode="embedded"
           onClose={handleCloseShare}
         />
       );
@@ -883,8 +884,9 @@ function App() {
 
     if (viewingSharedFolder) {
       return (
-        <EmbeddedSharedFolder
+        <SharedFolderView
           token={viewingSharedFolder.token}
+          mode="embedded"
           selectedLoadoutId={viewingSharedFolder.loadoutId}
           onClose={handleCloseShare}
         />

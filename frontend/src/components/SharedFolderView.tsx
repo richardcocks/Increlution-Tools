@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useApi } from '../contexts/ApiContext';
 import type { SharedFolder, SharedFolderNode, SharedFolderLoadout } from '../types/models';
 import { normalizeLoadoutData } from '../utils/loadoutData';
@@ -7,22 +7,24 @@ import { useSavedShares } from '../contexts/SavedSharesContext';
 import { useGameData } from '../contexts/GameDataContext';
 import { useToast } from './Toast';
 import { ReadOnlyLoadoutDisplay } from './ReadOnlyLoadoutDisplay';
+import { hasGuestData } from '../services/guestMigration';
 import './EmbeddedSharedLoadout.css';
 import './EmbeddedSharedFolder.css';
+import './AnonymousSharedView.css';
 
-interface EmbeddedSharedFolderProps {
+interface SharedFolderViewProps {
   token: string;
+  mode: 'embedded' | 'anonymous';
   selectedLoadoutId?: number | null;
-  onClose: () => void;
+  onClose?: () => void;
 }
 
-export function EmbeddedSharedFolder({ token, selectedLoadoutId, onClose }: EmbeddedSharedFolderProps) {
+export function SharedFolderView({ token, mode, selectedLoadoutId, onClose }: SharedFolderViewProps) {
   const { api, isGuest } = useApi();
   const { saveFolderShare, savedShares } = useSavedShares();
   const { showToast } = useToast();
   const navigate = useNavigate();
-  const { loading: gameDataLoading } = useGameData();
-  const prefix = isGuest ? '/guest' : '/loadouts';
+  const { actions, loading: gameDataLoading } = useGameData();
 
   const [sharedFolder, setSharedFolder] = useState<SharedFolder | null>(null);
   const [selectedLoadout, setSelectedLoadout] = useState<SharedFolderLoadout | null>(null);
@@ -97,6 +99,10 @@ export function EmbeddedSharedFolder({ token, selectedLoadoutId, onClose }: Embe
     return savedShares.some(s => s.shareToken === token && s.shareType === 'folder');
   }, [savedShares, token]);
 
+  const allChapters = useMemo(() => {
+    return new Set(actions.map(a => a.chapter));
+  }, [actions]);
+
   const handleSave = async () => {
     setSaving(true);
     try {
@@ -110,8 +116,12 @@ export function EmbeddedSharedFolder({ token, selectedLoadoutId, onClose }: Embe
   };
 
   const handleLoadoutClick = (loadoutId: number) => {
-    // Navigate to canonical /share/ URLs (guest mode uses its own prefix)
-    navigate(isGuest ? `${prefix}/shared/folder/${token}/${loadoutId}` : `/share/folder/${token}/${loadoutId}`);
+    if (mode === 'embedded') {
+      const prefix = isGuest ? '/guest' : '/loadouts';
+      navigate(isGuest ? `${prefix}/shared/folder/${token}/${loadoutId}` : `/share/folder/${token}/${loadoutId}`);
+    } else {
+      navigate(`/share/folder/${token}/${loadoutId}`);
+    }
   };
 
   const handleExportClipboard = useCallback(async () => {
@@ -136,6 +146,15 @@ export function EmbeddedSharedFolder({ token, selectedLoadoutId, onClose }: Embe
       return next;
     });
   };
+
+  const handleSignIn = () => {
+    sessionStorage.setItem('share_return_url', window.location.pathname);
+  };
+
+  const isGuestUser = hasGuestData();
+  const guestShareUrl = selectedLoadoutId
+    ? `/guest/shared/folder/${token}/${selectedLoadoutId}`
+    : `/guest/shared/folder/${token}`;
 
   const renderFolderTree = (node: SharedFolderNode, level: number) => {
     const isExpanded = expandedFolders.has(node.id);
@@ -177,51 +196,83 @@ export function EmbeddedSharedFolder({ token, selectedLoadoutId, onClose }: Embe
     );
   };
 
+  // Loading state
   if (loading || gameDataLoading) {
-    return (
+    const loadingContent = (
       <div className="embedded-shared-loading">
         <i className="fas fa-spinner fa-spin" />
         <p>Loading shared folder...</p>
       </div>
     );
+    if (mode === 'anonymous') {
+      return <div className="anonymous-shared-view">{loadingContent}</div>;
+    }
+    return loadingContent;
   }
 
+  // Error state
   if (error) {
-    return (
+    const errorContent = (
       <div className="embedded-shared-error">
         <i className="fas fa-exclamation-circle" />
         <h2>Unable to Load</h2>
         <p>{error}</p>
-        <button className="embedded-shared-back" onClick={onClose}>
-          <i className="fas fa-arrow-left" />
-          Go Back
-        </button>
+        {mode === 'embedded' ? (
+          <button className="embedded-shared-back" onClick={onClose}>
+            <i className="fas fa-arrow-left" />
+            Go Back
+          </button>
+        ) : (
+          <Link to="/" className="embedded-shared-back">
+            <i className="fas fa-home" />
+            Go Home
+          </Link>
+        )}
       </div>
     );
+    if (mode === 'anonymous') {
+      return <div className="anonymous-shared-view">{errorContent}</div>;
+    }
+    return errorContent;
   }
 
+  // Not found state
   if (!sharedFolder) {
-    return (
+    const notFoundContent = (
       <div className="embedded-shared-error">
         <i className="fas fa-question-circle" />
         <h2>Not Found</h2>
         <p>This share link doesn't exist or has been removed.</p>
-        <button className="embedded-shared-back" onClick={onClose}>
-          <i className="fas fa-arrow-left" />
-          Go Back
-        </button>
+        {mode === 'embedded' ? (
+          <button className="embedded-shared-back" onClick={onClose}>
+            <i className="fas fa-arrow-left" />
+            Go Back
+          </button>
+        ) : (
+          <Link to="/" className="embedded-shared-back">
+            <i className="fas fa-home" />
+            Go Home
+          </Link>
+        )}
       </div>
     );
+    if (mode === 'anonymous') {
+      return <div className="anonymous-shared-view">{notFoundContent}</div>;
+    }
+    return notFoundContent;
   }
 
-  return (
+  // Main content
+  const content = (
     <div className="embedded-shared-folder">
       {/* Header */}
       <div className="embedded-folder-header">
         <div className="embedded-folder-title-row">
-          <button className="embedded-shared-back" onClick={onClose}>
-            <i className="fas fa-arrow-left" />
-          </button>
+          {mode === 'embedded' && (
+            <button className="embedded-shared-back" onClick={onClose}>
+              <i className="fas fa-arrow-left" />
+            </button>
+          )}
           <div className="embedded-folder-title">
             <i className="fas fa-folder" />
             <h1>{sharedFolder.folderName}</h1>
@@ -240,30 +291,32 @@ export function EmbeddedSharedFolder({ token, selectedLoadoutId, onClose }: Embe
             Updated {new Date(sharedFolder.updatedAt).toLocaleDateString()}
           </span>
         </div>
-        <div className="embedded-shared-actions">
-          <button
-            className="embedded-action-button primary"
-            onClick={handleSave}
-            disabled={saving || isSaved}
-          >
-            {saving ? (
-              <>
-                <i className="fas fa-spinner fa-spin" />
-                Saving...
-              </>
-            ) : isSaved ? (
-              <>
-                <i className="fas fa-check" />
-                Saved
-              </>
-            ) : (
-              <>
-                <i className="fas fa-bookmark" />
-                Save to Collection
-              </>
-            )}
-          </button>
-        </div>
+        {mode === 'embedded' && (
+          <div className="embedded-shared-actions">
+            <button
+              className="embedded-action-button primary"
+              onClick={handleSave}
+              disabled={saving || isSaved}
+            >
+              {saving ? (
+                <>
+                  <i className="fas fa-spinner fa-spin" />
+                  Saving...
+                </>
+              ) : isSaved ? (
+                <>
+                  <i className="fas fa-check" />
+                  Saved
+                </>
+              ) : (
+                <>
+                  <i className="fas fa-bookmark" />
+                  Save to Collection
+                </>
+              )}
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Body: folder tree sidebar + content area */}
@@ -314,6 +367,7 @@ export function EmbeddedSharedFolder({ token, selectedLoadoutId, onClose }: Embe
               <ReadOnlyLoadoutDisplay
                 loadoutData={selectedLoadout.data}
                 onExportClipboard={handleExportClipboard}
+                {...(mode === 'anonymous' ? { unlockedChaptersOverride: allChapters } : {})}
               />
             </>
           )}
@@ -321,4 +375,36 @@ export function EmbeddedSharedFolder({ token, selectedLoadoutId, onClose }: Embe
       </div>
     </div>
   );
+
+  if (mode === 'anonymous') {
+    return (
+      <div className="anonymous-shared-view">
+        <div className="anonymous-shared-header-bar">
+          <Link to="/" className="anonymous-shared-home-link">
+            Loadout Manager for Increlution
+          </Link>
+          <div className="anonymous-shared-auth-actions">
+            <Link
+              to={guestShareUrl}
+              className="anonymous-auth-button guest"
+            >
+              <i className="fas fa-user" />
+              {isGuestUser ? 'Continue as Guest' : 'Try as Guest'}
+            </Link>
+            <Link
+              to="/login"
+              className="anonymous-auth-button discord"
+              onClick={handleSignIn}
+            >
+              <i className="fab fa-discord" />
+              Sign In
+            </Link>
+          </div>
+        </div>
+        {content}
+      </div>
+    );
+  }
+
+  return content;
 }
