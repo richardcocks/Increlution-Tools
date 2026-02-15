@@ -1,7 +1,7 @@
 import { useParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import App from '../App';
-import { AnonymousSharedLoadout } from './AnonymousSharedLoadout';
+import { SharedLoadoutView } from './SharedLoadoutView';
 
 export function AuthAwareShareRoute() {
   const { user, loading } = useAuth();
@@ -21,5 +21,5 @@ export function AuthAwareShareRoute() {
   }
 
   // Anonymous viewer: lightweight read-only view (no guest profile creation)
-  return <AnonymousSharedLoadout token={token} />;
+  return <SharedLoadoutView token={token} mode="anonymous" />;
 }
