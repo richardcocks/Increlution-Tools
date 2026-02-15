@@ -129,18 +129,22 @@ To prevent spoilers, chapters 2-11 are locked by default. Unlock them in Setting
 IncrelutionAutomationEditor/
 ├── backend/                 # ASP.NET Core API
 │   ├── Data/               # Entity Framework contexts
+│   ├── DTOs/               # Data transfer objects and request/response records
+│   ├── Endpoints/          # Minimal API endpoint groups (Auth, Folders, Loadouts, Settings, Shares, GameData)
 │   ├── Models/             # Entity models (Folder, Loadout, LoadoutShare, FolderShare, etc.)
 │   ├── Migrations/         # EF Core migrations
-│   ├── Services/           # Business logic (GameDataService)
+│   ├── Services/           # Business logic (GameData, Folder, Loadout, Settings, Share)
 │   └── GameData/           # Static JSON game data files
+├── backend.Tests/           # xUnit backend tests
 ├── frontend/               # React + TypeScript
 │   ├── src/
-│   │   ├── components/     # React components (Sidebar, LoadoutEditor, ShareModal, etc.)
+│   │   ├── components/     # React components (Sidebar, TreeNode, LoadoutEditor, ShareModal, etc.)
 │   │   ├── contexts/       # React contexts (Auth, Settings, SavedShares, GameData)
+│   │   ├── hooks/          # Custom hooks (useLoadoutHistory, useSidebarResize)
 │   │   ├── pages/          # Full-page components (Login, Settings, Favourites, ManageShares)
 │   │   ├── services/       # API client
 │   │   ├── types/          # TypeScript types
-│   │   └── utils/          # Utilities (validation, filtering)
+│   │   └── utils/          # Utilities (validation, filtering, folder tree helpers)
 │   └── package.json
 ├── examples/               # Example loadout files
 ├── CLAUDE.md              # Development documentation
@@ -152,9 +156,14 @@ IncrelutionAutomationEditor/
 ### Running Tests
 
 ```bash
+# Frontend tests
 cd frontend
 npm run test        # Single run
 npm run test:ui     # With Vitest UI
+
+# Backend tests
+cd backend.Tests
+dotnet test
 ```
 
 ### Building for Production
