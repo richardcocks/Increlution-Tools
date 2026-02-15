@@ -17,6 +17,10 @@ export function ManageSharesPage({ onClose }: ManageSharesPageProps) {
   const [loading, setLoading] = useState(true);
   const [pendingRevokeId, setPendingRevokeId] = useState<number | null>(null);
   const [pendingRevokeType, setPendingRevokeType] = useState<'loadout' | 'folder' | null>(null);
+  const [editingTokenId, setEditingTokenId] = useState<number | null>(null);
+  const [editTokenValue, setEditTokenValue] = useState('');
+  const [editTokenError, setEditTokenError] = useState<string | null>(null);
+  const [editTokenLoading, setEditTokenLoading] = useState(false);
   const { showToast } = useToast();
 
   useEffect(() => {
@@ -74,6 +78,49 @@ export function ManageSharesPage({ onClose }: ManageSharesPageProps) {
     } catch (err) {
       console.error('Error revoking share:', err);
       showToast('Failed to revoke share', 'error');
+    }
+  };
+
+  const handleStartEditToken = (share: UserFolderShare) => {
+    setEditingTokenId(share.id);
+    setEditTokenValue(share.shareToken);
+    setEditTokenError(null);
+  };
+
+  const handleCancelEditToken = () => {
+    setEditingTokenId(null);
+    setEditTokenValue('');
+    setEditTokenError(null);
+  };
+
+  const handleSaveToken = async (shareId: number) => {
+    setEditTokenLoading(true);
+    setEditTokenError(null);
+    try {
+      const updated = await api.updateFolderShareToken(shareId, editTokenValue);
+      setFolderShares(prev => prev.map(s => s.id === shareId ? { ...s, shareToken: updated.shareToken } : s));
+      setEditingTokenId(null);
+      setEditTokenValue('');
+      showToast('Share token updated', 'success');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to update token';
+      setEditTokenError(message);
+    } finally {
+      setEditTokenLoading(false);
+    }
+  };
+
+  const handleRegenerateToken = async (shareId: number) => {
+    setEditTokenLoading(true);
+    try {
+      const updated = await api.regenerateFolderShareToken(shareId);
+      setFolderShares(prev => prev.map(s => s.id === shareId ? { ...s, shareToken: updated.shareToken } : s));
+      showToast('Token reverted to random', 'success');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to regenerate token';
+      showToast(message, 'error');
+    } finally {
+      setEditTokenLoading(false);
     }
   };
 
@@ -256,9 +303,10 @@ export function ManageSharesPage({ onClose }: ManageSharesPageProps) {
             </div>
           ) : (
             <div className="shares-list">
-              <div className="shares-table">
+              <div className="shares-table shares-table-folders">
                 <div className="shares-table-header">
                   <div className="share-col-loadout">Folder</div>
+                  <div className="share-col-token">Token</div>
                   <div className="share-col-created">Created</div>
                   <div className="share-col-expires">Expires</div>
                   <div className="share-col-attribution">Attribution</div>
@@ -295,6 +343,67 @@ export function ManageSharesPage({ onClose }: ManageSharesPageProps) {
                         <div className="share-col-loadout">
                           <i className="fas fa-folder share-loadout-icon folder-icon" />
                           <span className="share-loadout-name">{share.folderName}</span>
+                        </div>
+                        <div className="share-col-token">
+                          {editingTokenId === share.id ? (
+                            <div className="token-edit-inline">
+                              <input
+                                type="text"
+                                className="token-edit-input"
+                                value={editTokenValue}
+                                onChange={e => {
+                                  setEditTokenValue(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''));
+                                  setEditTokenError(null);
+                                }}
+                                maxLength={32}
+                                autoFocus
+                                onKeyDown={e => {
+                                  if (e.key === 'Enter') handleSaveToken(share.id);
+                                  if (e.key === 'Escape') handleCancelEditToken();
+                                }}
+                              />
+                              <div className="token-edit-buttons">
+                                <button
+                                  className="token-edit-save"
+                                  onClick={() => handleSaveToken(share.id)}
+                                  disabled={editTokenLoading || editTokenValue === share.shareToken}
+                                  title="Save"
+                                >
+                                  <i className={`fas ${editTokenLoading ? 'fa-spinner fa-spin' : 'fa-check'}`} />
+                                </button>
+                                <button
+                                  className="token-edit-cancel"
+                                  onClick={handleCancelEditToken}
+                                  disabled={editTokenLoading}
+                                  title="Cancel"
+                                >
+                                  <i className="fas fa-times" />
+                                </button>
+                              </div>
+                              {editTokenError && (
+                                <div className="token-edit-error">{editTokenError}</div>
+                              )}
+                            </div>
+                          ) : (
+                            <div className="token-display">
+                              <span className="token-value">{share.shareToken}</span>
+                              <button
+                                className="token-edit-btn"
+                                onClick={() => handleStartEditToken(share)}
+                                title="Edit token"
+                              >
+                                <i className="fas fa-pen" />
+                              </button>
+                              <button
+                                className="token-revert-btn"
+                                onClick={() => handleRegenerateToken(share.id)}
+                                disabled={editTokenLoading}
+                                title="Revert to random token"
+                              >
+                                <i className={`fas ${editTokenLoading ? 'fa-spinner fa-spin' : 'fa-random'}`} />
+                              </button>
+                            </div>
+                          )}
                         </div>
                         <div className="share-col-created">
                           {formatDate(share.createdAt)}

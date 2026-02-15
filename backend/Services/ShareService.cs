@@ -23,6 +23,30 @@ public class ShareService
     }
 
     /// <summary>
+    /// Validates a custom share token. Returns an error message, or null if valid.
+    /// Rules: 3-32 chars, lowercase alphanumeric + hyphens, no leading/trailing/consecutive hyphens.
+    /// </summary>
+    public string? ValidateCustomToken(string token)
+    {
+        if (token.Length < 3 || token.Length > 32)
+            return "Token must be between 3 and 32 characters";
+
+        if (token.StartsWith('-') || token.EndsWith('-'))
+            return "Token cannot start or end with a hyphen";
+
+        if (token.Contains("--"))
+            return "Token cannot contain consecutive hyphens";
+
+        foreach (var c in token)
+        {
+            if (!char.IsAsciiLetterLower(c) && !char.IsAsciiDigit(c) && c != '-')
+                return "Token can only contain lowercase letters, numbers, and hyphens";
+        }
+
+        return null;
+    }
+
+    /// <summary>
     /// Checks whether a share has expired.
     /// </summary>
     public bool IsShareExpired(DateTime? expiresAt)

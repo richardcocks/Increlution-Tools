@@ -180,4 +180,116 @@ public class ShareServiceTests
     }
 
     #endregion
+
+    #region ValidateCustomToken
+
+    [Fact]
+    public void ValidateCustomToken_ReturnsNull_ForValidToken()
+    {
+        Assert.Null(_sut.ValidateCustomToken("my-loadouts"));
+    }
+
+    [Fact]
+    public void ValidateCustomToken_ReturnsNull_ForMinLength()
+    {
+        Assert.Null(_sut.ValidateCustomToken("abc"));
+    }
+
+    [Fact]
+    public void ValidateCustomToken_ReturnsNull_ForMaxLength()
+    {
+        Assert.Null(_sut.ValidateCustomToken("abcdefghijklmnopqrstuvwxyz012345"));
+    }
+
+    [Fact]
+    public void ValidateCustomToken_ReturnsNull_ForNumbersOnly()
+    {
+        Assert.Null(_sut.ValidateCustomToken("12345"));
+    }
+
+    [Fact]
+    public void ValidateCustomToken_ReturnsNull_ForLettersOnly()
+    {
+        Assert.Null(_sut.ValidateCustomToken("myloadouts"));
+    }
+
+    [Fact]
+    public void ValidateCustomToken_ReturnsError_WhenTooShort()
+    {
+        var result = _sut.ValidateCustomToken("ab");
+        Assert.NotNull(result);
+        Assert.Contains("3 and 32", result);
+    }
+
+    [Fact]
+    public void ValidateCustomToken_ReturnsError_WhenTooLong()
+    {
+        var result = _sut.ValidateCustomToken("abcdefghijklmnopqrstuvwxyz0123456");
+        Assert.NotNull(result);
+        Assert.Contains("3 and 32", result);
+    }
+
+    [Fact]
+    public void ValidateCustomToken_ReturnsError_WhenEmpty()
+    {
+        var result = _sut.ValidateCustomToken("");
+        Assert.NotNull(result);
+    }
+
+    [Fact]
+    public void ValidateCustomToken_ReturnsError_WhenStartsWithHyphen()
+    {
+        var result = _sut.ValidateCustomToken("-my-token");
+        Assert.NotNull(result);
+        Assert.Contains("start or end", result);
+    }
+
+    [Fact]
+    public void ValidateCustomToken_ReturnsError_WhenEndsWithHyphen()
+    {
+        var result = _sut.ValidateCustomToken("my-token-");
+        Assert.NotNull(result);
+        Assert.Contains("start or end", result);
+    }
+
+    [Fact]
+    public void ValidateCustomToken_ReturnsError_WhenConsecutiveHyphens()
+    {
+        var result = _sut.ValidateCustomToken("my--token");
+        Assert.NotNull(result);
+        Assert.Contains("consecutive", result);
+    }
+
+    [Fact]
+    public void ValidateCustomToken_ReturnsError_WhenUppercase()
+    {
+        var result = _sut.ValidateCustomToken("MyToken");
+        Assert.NotNull(result);
+        Assert.Contains("lowercase", result);
+    }
+
+    [Fact]
+    public void ValidateCustomToken_ReturnsError_WhenContainsSpaces()
+    {
+        var result = _sut.ValidateCustomToken("my token");
+        Assert.NotNull(result);
+        Assert.Contains("lowercase", result);
+    }
+
+    [Fact]
+    public void ValidateCustomToken_ReturnsError_WhenContainsSpecialChars()
+    {
+        var result = _sut.ValidateCustomToken("my_token");
+        Assert.NotNull(result);
+        Assert.Contains("lowercase", result);
+    }
+
+    [Fact]
+    public void ValidateCustomToken_ReturnsError_WhenContainsSlash()
+    {
+        var result = _sut.ValidateCustomToken("my/token");
+        Assert.NotNull(result);
+    }
+
+    #endregion
 }
