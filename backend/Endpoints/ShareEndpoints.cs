@@ -328,7 +328,7 @@ public static class ShareEndpoints
         // POST /api/folders/{id}/share - Create folder share link
         app.MapPost("/api/folders/{id}/share", async (
             int id,
-            CreateShareRequest request,
+            CreateFolderShareRequest request,
             ClaimsPrincipal user,
             AppDbContext db,
             IdentityAppDbContext identityDb,
@@ -358,13 +358,29 @@ public static class ShareEndpoints
             // Get user's unlocked chapters
             var unlockedChapters = await settingsService.GetUnlockedChaptersAsync(userId, identityDb);
 
-            // Generate unique token (retry on collision)
             string token;
-            do
+            if (!string.IsNullOrWhiteSpace(request.CustomToken))
             {
-                token = shareService.GenerateShareToken();
-            } while (await db.FolderShares.AnyAsync(s => s.ShareToken == token) ||
-                     await db.LoadoutShares.AnyAsync(s => s.ShareToken == token));
+                // Validate and use custom token
+                token = request.CustomToken.Trim().ToLowerInvariant();
+                var validationError = shareService.ValidateCustomToken(token);
+                if (validationError != null)
+                    return Results.BadRequest(validationError);
+
+                // Check uniqueness across both tables
+                if (await db.FolderShares.AnyAsync(s => s.ShareToken == token) ||
+                    await db.LoadoutShares.AnyAsync(s => s.ShareToken == token))
+                    return Results.Conflict("This token is already in use");
+            }
+            else
+            {
+                // Generate unique token (retry on collision)
+                do
+                {
+                    token = shareService.GenerateShareToken();
+                } while (await db.FolderShares.AnyAsync(s => s.ShareToken == token) ||
+                         await db.LoadoutShares.AnyAsync(s => s.ShareToken == token));
+            }
 
             var share = new FolderShare
             {
@@ -456,6 +472,76 @@ public static class ShareEndpoints
         })
         .RequireAuthorization()
         .WithName("RevokeFolderShare");
+
+        // PUT /api/folder-shares/{shareId}/token - Update folder share token
+        app.MapPut("/api/folder-shares/{shareId}/token", async (
+            int shareId,
+            UpdateFolderShareTokenRequest request,
+            ClaimsPrincipal user,
+            AppDbContext db,
+            ShareService shareService) =>
+        {
+            var userId = GetUserId(user);
+            var share = await db.FolderShares.FirstOrDefaultAsync(s => s.Id == shareId && s.OwnerUserId == userId);
+            if (share == null)
+                return Results.NotFound("Share not found");
+
+            var token = request.Token.Trim().ToLowerInvariant();
+            var validationError = shareService.ValidateCustomToken(token);
+            if (validationError != null)
+                return Results.BadRequest(validationError);
+
+            // Check uniqueness across both tables, excluding the current share
+            if (await db.FolderShares.AnyAsync(s => s.ShareToken == token && s.Id != shareId) ||
+                await db.LoadoutShares.AnyAsync(s => s.ShareToken == token))
+                return Results.Conflict("This token is already in use");
+
+            share.ShareToken = token;
+            await db.SaveChangesAsync();
+
+            return Results.Ok(new FolderShareResponse(
+                share.Id,
+                share.ShareToken,
+                share.CreatedAt,
+                share.ExpiresAt,
+                share.ShowAttribution
+            ));
+        })
+        .RequireAuthorization()
+        .WithName("UpdateFolderShareToken");
+
+        // POST /api/folder-shares/{shareId}/regenerate-token - Regenerate random token
+        app.MapPost("/api/folder-shares/{shareId}/regenerate-token", async (
+            int shareId,
+            ClaimsPrincipal user,
+            AppDbContext db,
+            ShareService shareService) =>
+        {
+            var userId = GetUserId(user);
+            var share = await db.FolderShares.FirstOrDefaultAsync(s => s.Id == shareId && s.OwnerUserId == userId);
+            if (share == null)
+                return Results.NotFound("Share not found");
+
+            string token;
+            do
+            {
+                token = shareService.GenerateShareToken();
+            } while (await db.FolderShares.AnyAsync(s => s.ShareToken == token) ||
+                     await db.LoadoutShares.AnyAsync(s => s.ShareToken == token));
+
+            share.ShareToken = token;
+            await db.SaveChangesAsync();
+
+            return Results.Ok(new FolderShareResponse(
+                share.Id,
+                share.ShareToken,
+                share.CreatedAt,
+                share.ExpiresAt,
+                share.ShowAttribution
+            ));
+        })
+        .RequireAuthorization()
+        .WithName("RegenerateFolderShareToken");
 
         // GET /api/share/folder/{token} - View shared folder (public, cached)
         app.MapGet("/api/share/folder/{token}", async (

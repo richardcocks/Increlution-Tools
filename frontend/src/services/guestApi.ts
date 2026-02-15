@@ -595,6 +595,12 @@ export function createGuestApi(): ApiType {
     async revokeFolderShare() {
       throw new Error('Sign in with Discord to manage shares');
     },
+    async updateFolderShareToken() {
+      throw new Error('Sign in with Discord to manage shares');
+    },
+    async regenerateFolderShareToken() {
+      throw new Error('Sign in with Discord to manage shares');
+    },
 
     // Public share viewing - delegate to real API
     async getSharedLoadout(token: string) {

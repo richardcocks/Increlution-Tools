@@ -60,6 +60,20 @@ public record SharedLoadoutErrorResponse(string Error);
 // Loadout share saved response (legacy, kept for backwards compatibility)
 public record SavedShareResponse(int Id, string ShareToken, string LoadoutName, string? OwnerName, DateTime SavedAt);
 
+public record CreateFolderShareRequest(
+    [property: Range(1, 8760, ErrorMessage = "Expiration must be between 1 hour and 1 year")]
+    int? ExpiresInHours,
+
+    bool ShowAttribution = true,
+
+    string? CustomToken = null
+);
+
+public record UpdateFolderShareTokenRequest(
+    [property: Required(ErrorMessage = "Token is required")]
+    string Token
+);
+
 // === Folder Sharing DTOs ===
 
 public record FolderShareResponse(int Id, string ShareToken, DateTime CreatedAt, DateTime? ExpiresAt, bool ShowAttribution);

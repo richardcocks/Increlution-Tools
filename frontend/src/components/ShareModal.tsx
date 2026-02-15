@@ -32,9 +32,16 @@ export function ShareModal({ itemType, itemId, itemName, onClose }: ShareModalPr
   // Create form state
   const [expiresInHours, setExpiresInHours] = useState<number | null>(null); // Default never
   const [showAttribution, setShowAttribution] = useState(false);
+  const [customToken, setCustomToken] = useState('');
   const [generatedLink, setGeneratedLink] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [copiedShareId, setCopiedShareId] = useState<number | null>(null);
+
+  // Manage tab - inline token editing state
+  const [editingShareId, setEditingShareId] = useState<number | null>(null);
+  const [editTokenValue, setEditTokenValue] = useState('');
+  const [editTokenError, setEditTokenError] = useState<string | null>(null);
+  const [editTokenLoading, setEditTokenLoading] = useState(false);
 
   const fetchShares = useCallback(async () => {
     setLoading(true);
@@ -60,19 +67,22 @@ export function ShareModal({ itemType, itemId, itemName, onClose }: ShareModalPr
   const handleCreate = async () => {
     setLoading(true);
     try {
+      const options = { expiresInHours, showAttribution, customToken: customToken || undefined };
       const share = itemType === 'loadout'
         ? await api.createShare(itemId, { expiresInHours, showAttribution })
-        : await api.createFolderShare(itemId, { expiresInHours, showAttribution });
+        : await api.createFolderShare(itemId, options);
 
       const linkPath = itemType === 'loadout'
         ? `/share/${share.shareToken}`
         : `/share/folder/${share.shareToken}`;
       const link = `${window.location.origin}${linkPath}`;
       setGeneratedLink(link);
+      setCustomToken('');
       showToast('Share link created', 'success');
     } catch (err) {
       console.error('Failed to create share:', err);
-      showToast('Failed to create share link', 'error');
+      const message = err instanceof Error ? err.message : 'Failed to create share link';
+      showToast(message, 'error');
     } finally {
       setLoading(false);
     }
@@ -102,6 +112,50 @@ export function ShareModal({ itemType, itemId, itemName, onClose }: ShareModalPr
     } catch (err) {
       console.error('Failed to revoke share:', err);
       showToast('Failed to revoke share link', 'error');
+    }
+  };
+
+  const handleStartEdit = (share: LoadoutShare | FolderShare) => {
+    setEditingShareId(share.id);
+    setEditTokenValue(share.shareToken);
+    setEditTokenError(null);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingShareId(null);
+    setEditTokenValue('');
+    setEditTokenError(null);
+  };
+
+  const handleSaveToken = async () => {
+    if (editingShareId === null) return;
+    setEditTokenLoading(true);
+    setEditTokenError(null);
+    try {
+      const updated = await api.updateFolderShareToken(editingShareId, editTokenValue);
+      setShares(prev => prev.map(s => s.id === editingShareId ? { ...s, shareToken: updated.shareToken } : s));
+      setEditingShareId(null);
+      setEditTokenValue('');
+      showToast('Share token updated', 'success');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to update token';
+      setEditTokenError(message);
+    } finally {
+      setEditTokenLoading(false);
+    }
+  };
+
+  const handleRegenerateToken = async (shareId: number) => {
+    setEditTokenLoading(true);
+    try {
+      const updated = await api.regenerateFolderShareToken(shareId);
+      setShares(prev => prev.map(s => s.id === shareId ? { ...s, shareToken: updated.shareToken } : s));
+      showToast('Token reverted to random', 'success');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to regenerate token';
+      showToast(message, 'error');
+    } finally {
+      setEditTokenLoading(false);
     }
   };
 
@@ -194,6 +248,25 @@ export function ShareModal({ itemType, itemId, itemName, onClose }: ShareModalPr
                 <label htmlFor="showAttribution">Show my username to viewers</label>
               </div>
 
+              {itemType === 'folder' && (
+                <div className="share-form-group">
+                  <label>Custom URL (optional)</label>
+                  <input
+                    type="text"
+                    className="share-custom-token-input"
+                    placeholder="e.g. my-loadouts"
+                    value={customToken}
+                    onChange={e => setCustomToken(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
+                    maxLength={32}
+                  />
+                  <div className="share-custom-token-hint">
+                    {customToken
+                      ? <>{window.location.origin}/share/folder/<strong>{customToken}</strong></>
+                      : 'Leave empty for an auto-generated token. Use lowercase letters, numbers, and hyphens.'}
+                  </div>
+                </div>
+              )}
+
               <button
                 className="share-generate-button"
                 onClick={handleCreate}
@@ -249,8 +322,62 @@ export function ShareModal({ itemType, itemId, itemName, onClose }: ShareModalPr
                 shares.map(share => (
                   <div key={share.id} className="share-item">
                     <div className="share-item-header">
-                      <span className="share-item-token">{share.shareToken}</span>
+                      {editingShareId === share.id ? (
+                        <div className="share-item-edit-token">
+                          <input
+                            type="text"
+                            className="share-edit-token-input"
+                            value={editTokenValue}
+                            onChange={e => {
+                              setEditTokenValue(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''));
+                              setEditTokenError(null);
+                            }}
+                            maxLength={32}
+                            autoFocus
+                            onKeyDown={e => {
+                              if (e.key === 'Enter') handleSaveToken();
+                              if (e.key === 'Escape') handleCancelEdit();
+                            }}
+                          />
+                          <button
+                            className="share-edit-token-save"
+                            onClick={handleSaveToken}
+                            disabled={editTokenLoading || editTokenValue === share.shareToken}
+                          >
+                            <i className={`fas ${editTokenLoading ? 'fa-spinner fa-spin' : 'fa-check'}`} />
+                          </button>
+                          <button
+                            className="share-edit-token-cancel"
+                            onClick={handleCancelEdit}
+                            disabled={editTokenLoading}
+                          >
+                            <i className="fas fa-times" />
+                          </button>
+                        </div>
+                      ) : (
+                        <span className="share-item-token">{share.shareToken}</span>
+                      )}
                       <div className="share-item-actions">
+                        {itemType === 'folder' && editingShareId !== share.id && (
+                          <>
+                            <button
+                              className="share-item-edit"
+                              onClick={() => handleStartEdit(share)}
+                            >
+                              <i className="fas fa-pen" />
+                              Edit
+                            </button>
+                            <button
+                              className="share-item-revert"
+                              onClick={() => handleRegenerateToken(share.id)}
+                              disabled={editTokenLoading}
+                              title="Revert to random token"
+                            >
+                              <i className={`fas ${editTokenLoading ? 'fa-spinner fa-spin' : 'fa-random'}`} />
+                              Revert
+                            </button>
+                          </>
+                        )}
                         <button
                           className={`share-item-copy ${copiedShareId === share.id ? 'copied' : ''}`}
                           onClick={() => handleCopyExisting(share)}
@@ -267,6 +394,9 @@ export function ShareModal({ itemType, itemId, itemName, onClose }: ShareModalPr
                         </button>
                       </div>
                     </div>
+                    {editingShareId === share.id && editTokenError && (
+                      <div className="share-edit-token-error">{editTokenError}</div>
+                    )}
                     <div className="share-item-stats">
                       <span className="share-item-stat">
                         <i className="fas fa-calendar" />

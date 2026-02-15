@@ -445,12 +445,39 @@ export const api = {
       credentials: 'include',
       body: JSON.stringify({
         expiresInHours: options.expiresInHours,
-        showAttribution: options.showAttribution ?? true
+        showAttribution: options.showAttribution ?? true,
+        customToken: options.customToken || null
       })
     });
     if (!response.ok) {
       const text = await response.text();
       throw new Error(text || `Failed to create folder share: ${response.statusText}`);
+    }
+    return response.json();
+  },
+
+  async updateFolderShareToken(shareId: number, token: string): Promise<FolderShare> {
+    const response = await fetch(`${API_BASE}/folder-shares/${shareId}/token`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ token })
+    });
+    if (!response.ok) {
+      const text = await response.text();
+      throw new Error(text || `Failed to update share token: ${response.statusText}`);
+    }
+    return response.json();
+  },
+
+  async regenerateFolderShareToken(shareId: number): Promise<FolderShare> {
+    const response = await fetch(`${API_BASE}/folder-shares/${shareId}/regenerate-token`, {
+      method: 'POST',
+      credentials: 'include'
+    });
+    if (!response.ok) {
+      const text = await response.text();
+      throw new Error(text || `Failed to regenerate share token: ${response.statusText}`);
     }
     return response.json();
   },

@@ -91,6 +91,7 @@ export interface SavedShare {
 export interface CreateShareOptions {
   expiresInHours?: number | null;
   showAttribution?: boolean;
+  customToken?: string;
 }
 
 // User's share with loadout info (for Manage Shares page)
