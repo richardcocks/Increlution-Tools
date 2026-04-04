@@ -51,7 +51,7 @@ function persist(data: GuestData): void {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
   } catch (e) {
     if (e instanceof DOMException && e.name === 'QuotaExceededError') {
-      throw new Error('Browser storage is full. Try deleting some loadouts or folders to free up space.');
+      throw new Error('Browser storage is full. Try deleting some loadouts or folders to free up space.', { cause: e });
     }
     throw e;
   }
