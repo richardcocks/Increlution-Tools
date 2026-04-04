@@ -325,3 +325,99 @@ npm run test:ui     # With Vitest UI
 - Nullable reference types enabled
 - Minimal API pattern for endpoints
 - Use `record` for DTOs
+
+## Deployment
+
+### Hosting
+- **Server**: Linux with Caddy reverse proxy (auto-HTTPS)
+- **Production**: `automations.eterm.uk`
+- **Staging**: `staging.automations.eterm.uk`
+- **Runtime**: .NET (not self-contained), target `linux-x64`
+- **Service user**: `www-data`
+
+### Red/Green Zero-Downtime Architecture
+
+Two identical production environments sharing a database, with Caddy routing to the active one.
+
+| Environment | Port | App Dir | DB Dir | systemd Service |
+|-------------|------|---------|--------|-----------------|
+| Red | 5000 | `/opt/increlution-editor-red/` | `/var/lib/increlution-editor/` (shared) | `increlution-editor-red` |
+| Green | 5002 | `/opt/increlution-editor-green/` | `/var/lib/increlution-editor/` (shared) | `increlution-editor-green` |
+| Staging | 5001 | `/opt/increlution-editor-staging/` | `/var/lib/increlution-editor-staging/` (isolated) | `increlution-editor-staging` |
+
+Active environment tracked in `/var/lib/increlution-editor/active-environment`.
+
+### Build (Windows)
+```powershell
+.\build.ps1                      # Production (default)
+.\build.ps1 -Environment Red     # Red specifically
+.\build.ps1 -Environment Green   # Green specifically
+.\build.ps1 -Environment Staging
+```
+Output: `./publish/`
+
+### Deploy Workflow (code-only, zero downtime)
+```bash
+# 1. Build locally
+.\build.ps1
+
+# 2. Upload ./publish/ folder to server
+
+# 3. On server: deploy to inactive environment
+./deploy.sh inactive
+
+# 4. Verify health
+./status.sh
+
+# 5. Switch traffic
+./switch.sh
+
+# 6. Rollback if needed
+./switch.sh
+```
+
+### Deploy Workflow (with migrations)
+```bash
+# 1. Copy prod DB to staging
+./copy-db-to-staging.sh
+
+# 2. Deploy to staging, test at https://staging.automations.eterm.uk
+
+# 3. If additive migrations: deploy to inactive prod, switch
+./deploy.sh inactive
+./switch.sh
+
+# 4. If breaking migrations: schedule maintenance window
+```
+
+### Deploy Scripts
+
+| Script | Location | Purpose |
+|--------|----------|---------|
+| `build.ps1` | repo root | Build frontend + publish backend |
+| `deploy/redgreen/deploy.sh` | server | Deploy to red/green/inactive |
+| `deploy/redgreen/switch.sh` | server | Switch active environment |
+| `deploy/redgreen/status.sh` | server | Health check all environments |
+| `deploy/redgreen/setup.sh` | server | One-time infrastructure setup |
+| `deploy/redgreen/copy-db-to-staging.sh` | server | Copy prod DB for migration testing |
+| `deploy/redgreen/Caddyfile` | server `/etc/caddy/Caddyfile` | Caddy reverse proxy config |
+
+### Discord OAuth Secret
+Set via systemd override (not in config files):
+```bash
+sudo systemctl edit increlution-editor-red  # also green, staging
+# Add:
+# [Service]
+# Environment=Discord__ClientSecret=your_secret
+```
+
+### Environment Config Files
+- `backend/appsettings.Red.json` / `Green.json` / `Staging.json` - per-environment backend config
+- `frontend/.env.production` / `.env.staging` - per-environment frontend config
+
+### Useful Server Commands
+```bash
+sudo journalctl -u increlution-editor-red -f    # Tail logs
+sudo systemctl status increlution-editor-red     # Service status
+sudo systemctl edit increlution-editor-red       # Set env vars
+```
