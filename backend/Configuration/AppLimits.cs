@@ -8,7 +8,6 @@ public class AppLimits
     public int MaxFoldersPerUser { get; set; } = 100;
     public int MaxLoadoutsPerUser { get; set; } = 500;
     public int MaxSharesPerLoadout { get; set; } = 5;
-    public int MaxSavedSharesPerUser { get; set; } = 50;
 
     // Folder structure limits
     public int MaxFolderDepth { get; set; } = 8;
@@ -16,6 +15,7 @@ public class AppLimits
     // String length limits
     public int MaxFolderNameLength { get; set; } = 100;
     public int MaxLoadoutNameLength { get; set; } = 100;
+    public int MaxFolderReadmeLength { get; set; } = 16384;
     public int MaxEmailLength { get; set; } = 256;
     public int MaxPasswordLength { get; set; } = 128;
     public int MaxExplorationNameLength { get; set; } = 100;

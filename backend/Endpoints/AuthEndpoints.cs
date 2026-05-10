@@ -275,29 +275,21 @@ public static class AuthEndpoints
                 return Results.NotFound("User not found");
 
             // Delete in order to respect foreign key constraints
-            // 1. Delete saved shares (references to other users' shares)
-            var savedShares = await db.SavedShares.Where(s => s.UserId == userId).ToListAsync();
-            db.SavedShares.RemoveRange(savedShares);
-
-            // 2. Delete loadout shares created by user (and cascade deletes others' saved references)
             var shares = await db.LoadoutShares.Where(s => s.OwnerUserId == userId).ToListAsync();
             db.LoadoutShares.RemoveRange(shares);
 
-            // 2b. Delete folder shares created by user
             var folderShares = await db.FolderShares.Where(s => s.OwnerUserId == userId).ToListAsync();
             db.FolderShares.RemoveRange(folderShares);
 
-            // 3. Delete all loadouts
             var loadouts = await db.Loadouts.Where(l => l.UserId == userId).ToListAsync();
             db.Loadouts.RemoveRange(loadouts);
 
-            // 4. Delete all folders
             var folders = await db.Folders.Where(f => f.UserId == userId).ToListAsync();
             db.Folders.RemoveRange(folders);
 
             await db.SaveChangesAsync();
 
-            // 5. Sign out and delete user account
+            // Sign out and delete user account
             await httpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             identityDb.Users.Remove(appUser);
             await identityDb.SaveChangesAsync();

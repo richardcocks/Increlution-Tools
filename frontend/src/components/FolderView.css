@@ -268,3 +268,75 @@
 .folder-view-loadout-card:hover .loadout-card-arrow {
   color: #1976d2;
 }
+
+/* Folder readme block */
+.folder-readme {
+  margin: 0 0 24px;
+  padding: 16px 20px;
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 8px;
+}
+
+.folder-readme-empty {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+.folder-readme-edit-btn {
+  margin-top: 12px;
+}
+
+/* Shared-mode wrapper */
+.folder-view-shared {
+  padding: 0;
+}
+
+.folder-view-shared-header {
+  padding: 20px 24px 12px;
+  border-bottom: 1px solid var(--color-border-default);
+}
+
+.folder-view-shared-header .folder-view-title-row {
+  margin-bottom: 8px;
+}
+
+.folder-view-shared-header .embedded-shared-back {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  font-size: 16px;
+  color: var(--color-text-secondary);
+}
+
+.folder-view-shared-header .embedded-shared-back:hover {
+  color: var(--color-text-primary);
+}
+
+.folder-view-shared-header .embedded-shared-badge {
+  font-size: 11px;
+  padding: 2px 8px;
+  background: var(--color-bg-subtle);
+  border: 1px solid var(--color-border-default);
+  border-radius: 12px;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.folder-view-shared-meta {
+  display: flex;
+  gap: 16px;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.folder-view-shared-meta i {
+  margin-right: 4px;
+}
+
+.folder-view-shared .folder-readme {
+  margin: 16px 24px 0;
+}

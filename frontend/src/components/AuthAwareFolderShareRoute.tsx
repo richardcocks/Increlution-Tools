@@ -1,7 +1,7 @@
 import { useParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import App from '../App';
-import { SharedFolderView } from './SharedFolderView';
+import { FolderView } from './FolderView';
 
 export function AuthAwareFolderShareRoute() {
   const { user, loading } = useAuth();
@@ -20,7 +20,7 @@ export function AuthAwareFolderShareRoute() {
     return <App />;
   }
 
-  // Anonymous viewer: lightweight read-only view (no guest profile creation)
+  // Anonymous viewer: same component, anonymous mode wraps in auth-prompt chrome
   const parsedLoadoutId = loadoutId ? parseInt(loadoutId, 10) : undefined;
-  return <SharedFolderView token={folderToken} mode="anonymous" selectedLoadoutId={parsedLoadoutId} />;
+  return <FolderView mode="anonymous" shareToken={folderToken} selectedLoadoutId={parsedLoadoutId} />;
 }

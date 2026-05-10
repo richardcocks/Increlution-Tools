@@ -118,8 +118,10 @@ public class ShareService
 
     /// <summary>
     /// Builds a recursive tree structure for a shared folder, including loadout summaries.
+    /// Returns the same FolderTreeNode shape used for owner views so a single frontend
+    /// component can render both.
     /// </summary>
-    public SharedFolderNode BuildSharedFolderTree(
+    public FolderTreeNode BuildSharedFolderTree(
         Folder folder,
         List<Folder> allFolders,
         List<Loadout> allLoadouts,
@@ -135,9 +137,9 @@ public class ShareService
         var loadouts = allLoadouts
             .Where(l => l.FolderId == folder.Id)
             .OrderBy(l => l.SortOrder)
-            .Select(l => new SharedLoadoutSummary(l.Id, l.Name, l.UpdatedAt))
+            .Select(l => new LoadoutSummary(l.Id, l.Name, l.UpdatedAt, l.IsProtected))
             .ToList();
 
-        return new SharedFolderNode(folder.Id, folder.Name, subFolders, loadouts);
+        return new FolderTreeNode(folder.Id, folder.Name, folder.ParentId, folder.IsReadOnly, folder.Readme, subFolders, loadouts);
     }
 }

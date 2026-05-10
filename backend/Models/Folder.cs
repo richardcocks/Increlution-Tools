@@ -9,6 +9,7 @@ public class Folder
     public DateTime CreatedAt { get; set; }
     public int SortOrder { get; set; }
     public bool IsReadOnly { get; set; }
+    public string? Readme { get; set; }
 
     // Navigation properties
     public Folder? Parent { get; set; }

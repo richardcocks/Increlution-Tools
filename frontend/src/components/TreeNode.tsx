@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { FolderTreeNode, SharedFolderNode } from '../types/models';
+import type { FolderTreeNode } from '../types/models';
 import { useSidebarActions } from '../contexts/SidebarActionsContext';
 
 export type DragState =
@@ -288,82 +288,3 @@ export function TreeNode({ node, level, effectiveReadOnlyMap, dragState, dropTar
   );
 }
 
-// Shared folder tree node component for displaying saved folder shares
-interface SharedFolderTreeNodeProps {
-  node: SharedFolderNode;
-  level: number;
-  folderToken: string;
-  selectedLoadoutId: number | null;
-  onLoadoutClick: (loadoutId: number) => void;
-  onQuickExportLoadout?: (folderToken: string, loadoutId: number) => void;
-}
-
-export function SharedFolderTreeNode({ node, level, folderToken, selectedLoadoutId, onLoadoutClick, onQuickExportLoadout }: SharedFolderTreeNodeProps) {
-  const [expanded, setExpanded] = useState(true);
-  const hasChildren = node.subFolders.length > 0 || node.loadouts.length > 0;
-
-  return (
-    <div className="shared-folder-tree-node">
-      {level > 0 && (
-        <div
-          className="shared-folder-item"
-          style={{ paddingLeft: `${level * 16}px` }}
-          onClick={() => setExpanded(!expanded)}
-        >
-          {hasChildren && (
-            <button
-              className="expand-button"
-              onClick={(e) => {
-                e.stopPropagation();
-                setExpanded(!expanded);
-              }}
-            >
-              <i className={`fas fa-chevron-${expanded ? 'down' : 'right'}`} />
-            </button>
-          )}
-          {!hasChildren && <span className="expand-placeholder" />}
-          <i className={`fas fa-folder${expanded && hasChildren ? '-open' : ''} folder-icon`} />
-          <span className="folder-name">{node.name}</span>
-        </div>
-      )}
-
-      {expanded && (
-        <div className="shared-folder-contents">
-          {node.subFolders.map((subFolder) => (
-            <SharedFolderTreeNode
-              key={subFolder.id}
-              node={subFolder}
-              level={level + 1}
-              folderToken={folderToken}
-              selectedLoadoutId={selectedLoadoutId}
-              onLoadoutClick={onLoadoutClick}
-              onQuickExportLoadout={onQuickExportLoadout}
-            />
-          ))}
-          {node.loadouts.map((loadout) => (
-            <div
-              key={loadout.id}
-              className={`shared-loadout-item ${selectedLoadoutId === loadout.id ? 'selected' : ''}`}
-              style={{ paddingLeft: `${(level + 1) * 16 + (level === 0 ? 8 : 24)}px` }}
-              onClick={() => onLoadoutClick(loadout.id)}
-              onMouseDown={(e) => {
-                if (e.button === 1) {
-                  e.preventDefault();
-                }
-              }}
-              onMouseUp={(e) => {
-                if (e.button === 1) {
-                  e.preventDefault();
-                  onQuickExportLoadout?.(folderToken, loadout.id);
-                }
-              }}
-            >
-              <i className="fas fa-file-alt loadout-icon" />
-              <span className="loadout-name">{loadout.name}</span>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}

@@ -170,6 +170,23 @@ const LoadoutHeader = forwardRef<LoadoutHeaderHandle, LoadoutHeaderProps>(({ loa
         </button>
         {!hideShare && (
           <button
+            onClick={async () => {
+              const escaped = loadout.name.replace(/([\\[\]])/g, '\\$1');
+              try {
+                await navigator.clipboard.writeText(`[${escaped}](loadout:${loadout.id})`);
+                showToast('Markdown link copied — paste into a folder readme', 'success');
+              } catch {
+                showToast('Failed to copy markdown link', 'error');
+              }
+            }}
+            className="loadout-button"
+            title="Copy a markdown link to this loadout (paste into a folder readme)"
+          >
+            <i className="fas fa-link"></i> Copy MD Link
+          </button>
+        )}
+        {!hideShare && (
+          <button
             onClick={() => setShowShareModal(true)}
             className="loadout-button loadout-button-share"
             title="Share this loadout"

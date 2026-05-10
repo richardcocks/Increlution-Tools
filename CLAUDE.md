@@ -102,18 +102,19 @@ The `originalId` matches Increlution's native 0-based ID per type, used for impo
 BrowserRouter
 ├── AuthProvider
 │   ├── SettingsProvider
-│   │   ├── SavedSharesProvider
+│   │   ├── ThemeProvider
 │   │   │   ├── / → LandingPage
 │   │   │   ├── /login → LoginPage (Discord OAuth)
 │   │   │   ├── /register → Redirects to /login
-│   │   │   ├── /share/:token → SharedLoadoutView (anonymous) or EmbeddedSharedLoadout (logged in)
-│   │   │   ├── /share/folder/:token → SharedFolderView (both anonymous and logged in)
+│   │   │   ├── /share/:token → SharedLoadoutView (anonymous) or App (logged in, embedded)
+│   │   │   ├── /share/folder/:token → FolderView mode="anonymous" or App (logged in, embedded)
 │   │   │   └── /loadouts, /settings, /favourites, /shares → ProtectedRoute
 │   │   │       └── App
 │   │   │           ├── Header (Discord username, favourites, shares, settings, logout)
-│   │   │           ├── Sidebar (folder tree, loadout selection, "Others' Loadouts")
+│   │   │           ├── Sidebar (folder tree only — no separate "Others' Loadouts" section)
 │   │   │           └── Main content (based on route):
 │   │   │               ├── LoadoutEditor (default)
+│   │   │               ├── FolderView (when a folder is selected, all 3 modes)
 │   │   │               ├── SettingsPage
 │   │   │               ├── FavouritesPage
 │   │   │               └── ManageSharesPage
@@ -122,15 +123,15 @@ BrowserRouter
 ### Sidebar and Page Views
 The sidebar shows a tree of folders and loadouts. Action buttons (rename, duplicate, delete) are in the page views, not the sidebar:
 
-- **FolderView**: Shown when a folder is selected. Contains:
-  - New Loadout / New Folder buttons
-  - Share / Duplicate / Delete buttons (for non-root folders)
-  - Inline folder name editing
-  - List of loadouts in the folder
+- **FolderView**: One unified component for owner editing, logged-in viewing of someone else's share, and anonymous viewing. Mode is selected via the `mode` prop (`'owner' | 'embedded' | 'anonymous'`):
+  - **Owner mode**: New Loadout / New Folder / Share / Duplicate / Delete / Set Readonly buttons; inline folder name editing; flat list of loadouts; markdown readme with edit toggle.
+  - **Embedded mode**: shared folder fetched by token; tree-and-panel layout with `ReadOnlyLoadoutDisplay` for the selected loadout; readme rendered read-only.
+  - **Anonymous mode**: same as embedded, wrapped in an auth-prompt header bar (Sign In / Try as Guest).
 
 - **LoadoutEditor**: Shown when a loadout is selected. The LoadoutHeader contains:
-  - Set Readonly/Writeable, Paste from Game, Copy for Game, Share
+  - Set Readonly/Writeable, Paste from Game, Copy for Game, Copy MD Link, Share
   - Duplicate / Delete buttons
+  - **Copy MD Link**: copies a `[Loadout Name](loadout:N)` markdown snippet for pasting into a folder readme.
 
 On initial load, the root folder ("My Loadouts") is selected by default.
 
@@ -177,19 +178,25 @@ Users can mark actions as favourites from the Favourites page (`/favourites`). F
 Users can share loadouts and folders via tokenized links:
 - **Create share**: Set expiration (1h, 24h, 7d, 30d, never) and attribution visibility
 - **Loadout share links**: `/share/:token` - viewable by anyone, read-only
-- **Folder share links**: `/share/folder/:token` - includes all subfolders and loadouts recursively
+- **Folder share links**: `/share/folder/:token` - includes all subfolders and loadouts recursively, plus the folder readme
 - **Live references**: Shared items always show current data (not snapshots)
-- **Saved shares**: Logged-in viewers can save to "Others' Loadouts" in sidebar
+- **Consumer flow**: viewers bookmark URLs; there's no account-required "save to my collection" step. The same `FolderView` component renders for owner, logged-in viewer, and anonymous viewer.
 - **Chapter filtering**: Shares are filtered by the sharer's unlocked chapters at creation time
 - **Root folder restriction**: Cannot share root folder ("My Loadouts")
 
 Key components:
 - `ShareModal` - Create/manage shares for both loadouts and folders (generic)
-- `SharedLoadoutView` - Anonymous loadout viewing experience
-- `SharedFolderView` - Folder viewing with sidebar tree and loadout selection
-- `EmbeddedSharedLoadout` - Logged-in loadout viewing within the app
+- `SharedLoadoutView` - Single-loadout share view (anonymous + embedded)
+- `FolderView` - Unified folder view (owner / embedded / anonymous modes)
 - `ManageSharesPage` - View/revoke all user's shares (tabbed: loadouts/folders)
-- `SavedSharesContext` - Manages saved shares (unified for both types)
+
+### Folder Readmes (Markdown Guides)
+Folders carry an optional GFM markdown readme (`Folder.Readme`, max 16KB). The readme renders above the loadout list in `FolderView` for all viewers, and is editable by the owner via `ReadmeEditor` (textarea + live preview).
+
+- `MarkdownRenderer.tsx` — react-markdown + remark-gfm + rehype-sanitize. Default schema is extended to allow `loadout:` URLs.
+- `ReadmeEditor.tsx` — split textarea + preview, char-count, save/cancel.
+- `[label](loadout:N)` shortcode — links to a loadout. The renderer resolves the URL based on context: owner sees `/loadouts/loadout/N`, share viewers see `/share/folder/{token}/N`.
+- The "Copy MD Link" button on `LoadoutHeader` copies `[Loadout Name](loadout:N)` to the clipboard for pasting into a readme.
 
 ### Chapter Unlock System
 Chapters 2-11 are locked by default to prevent spoilers. Users unlock chapters by entering the name of the first exploration in that chapter (verified server-side). Settings stored in `UserSettings`.
@@ -227,10 +234,11 @@ Users can choose between light, dark, or system theme preference. The setting pe
 ### Folders & Loadouts (require authentication)
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/api/folders/tree` | Folder hierarchy with loadout summaries |
+| GET | `/api/folders/tree` | Folder hierarchy with loadout summaries (includes readme) |
 | GET | `/api/loadout/{id}` | Single loadout with data |
 | POST | `/api/folders` | Create folder |
 | PUT | `/api/folders/{id}` | Rename folder |
+| PUT | `/api/folders/{id}/readme` | Update folder readme markdown (max 16KB) |
 | PUT | `/api/folders/{id}/parent` | Move folder |
 | POST | `/api/folders/{id}/duplicate` | Duplicate folder with all contents |
 | DELETE | `/api/folders/{id}?force=bool` | Delete folder (force=true for recursive delete, protected loadouts moved to parent) |
@@ -259,7 +267,6 @@ Users can choose between light, dark, or system theme preference. The setting pe
 | GET | `/api/shares` | Yes | List all user's loadout shares |
 | DELETE | `/api/shares/{shareId}` | Yes | Revoke loadout share link |
 | GET | `/api/share/{token}` | No | View shared loadout (public) |
-| POST | `/api/share/{token}/save` | Yes | Save loadout to "Others' Loadouts" |
 
 ### Sharing - Folders
 | Method | Endpoint | Auth | Description |
@@ -268,28 +275,19 @@ Users can choose between light, dark, or system theme preference. The setting pe
 | GET | `/api/folders/{id}/shares` | Yes | List shares for folder |
 | GET | `/api/folder-shares` | Yes | List all user's folder shares |
 | DELETE | `/api/folder-shares/{shareId}` | Yes | Revoke folder share link |
-| GET | `/api/share/folder/{token}` | No | View shared folder tree (public) |
+| GET | `/api/share/folder/{token}` | No | View shared folder tree (public, includes readme) |
 | GET | `/api/share/folder/{token}/loadout/{id}` | No | Get loadout data from shared folder |
-| POST | `/api/share/folder/{token}/save` | Yes | Save folder to "Others' Loadouts" |
-
-### Sharing - Saved Shares
-| Method | Endpoint | Auth | Description |
-|--------|----------|------|-------------|
-| GET | `/api/saved-shares` | Yes | List all saved shares (unified, both types) |
-| DELETE | `/api/saved-shares/{id}` | Yes | Remove saved share |
 
 ## Database Schema
 
 ### AppDbContext (automation.db)
-**Folders**: `Id`, `Name`, `ParentId` (null=root), `UserId`, `CreatedAt`
+**Folders**: `Id`, `Name`, `ParentId` (null=root), `UserId`, `CreatedAt`, `SortOrder`, `IsReadOnly`, `Readme` (nullable markdown text)
 
 **Loadouts**: `Id`, `Name`, `FolderId` (FK), `UserId`, `CreatedAt`, `UpdatedAt`, `Data` (JSON string), `IsProtected`
 
 **LoadoutShares**: `Id`, `LoadoutId` (FK), `OwnerUserId`, `ShareToken` (unique), `CreatedAt`, `ExpiresAt`, `ShowAttribution`, `UnlockedChapters` (JSON array of chapter numbers at share creation time)
 
 **FolderShares**: `Id`, `FolderId` (FK), `OwnerUserId`, `ShareToken` (unique), `CreatedAt`, `ExpiresAt`, `ShowAttribution`, `UnlockedChapters` (JSON array) - parallel structure to LoadoutShares for folder sharing
-
-**SavedShares**: `Id`, `UserId`, `LoadoutShareId` (FK, nullable), `FolderShareId` (FK, nullable), `SavedAt` - tracks which shares a user has saved to "Others' Loadouts". Check constraint ensures exactly one of LoadoutShareId or FolderShareId is set.
 
 **UserSettings**: `Id`, `UserId`, `InvertMouse`, `ApplyDefaultsOnImport`, `DefaultSkillPriorities` (JSON), `UnlockedChapters` (JSON array), `ThemePreference` (system/dark/light)
 

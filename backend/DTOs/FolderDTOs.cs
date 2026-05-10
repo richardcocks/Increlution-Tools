@@ -8,9 +8,12 @@ public record FolderTreeNode(
     string Name,
     int? ParentId,
     bool IsReadOnly,
+    string? Readme,
     List<FolderTreeNode> SubFolders,
     List<LoadoutSummary> Loadouts
 );
+
+public record UpdateFolderReadmeRequest(string? Readme);
 
 public record LoadoutSummary(
     int Id,

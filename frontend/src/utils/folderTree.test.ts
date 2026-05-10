@@ -8,6 +8,7 @@ function makeFolder(id: number, parentId: number | null, subFolders: FolderTreeN
     name: `Folder ${id}`,
     parentId,
     isReadOnly: false,
+    readme: null,
     subFolders,
     loadouts: [],
   };

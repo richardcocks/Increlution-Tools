@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import { useApi } from '../contexts/ApiContext';
 import type { LoadoutData } from '../types/models';
 import { normalizeLoadoutData } from '../utils/loadoutData';
-import { useSavedShares } from '../contexts/SavedSharesContext';
 import { useGameData } from '../contexts/GameDataContext';
 import { useToast } from './Toast';
 import { ReadOnlyLoadoutDisplay } from './ReadOnlyLoadoutDisplay';
@@ -26,14 +25,12 @@ interface LoadoutInfo {
 
 export function SharedLoadoutView({ token, mode, onClose }: SharedLoadoutViewProps) {
   const { api } = useApi();
-  const { saveLoadoutShare, savedShares } = useSavedShares();
   const { showToast } = useToast();
   const { actions, loading: gameDataLoading } = useGameData();
 
   const [loadout, setLoadout] = useState<LoadoutInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     const fetchLoadout = async () => {
@@ -52,25 +49,9 @@ export function SharedLoadoutView({ token, mode, onClose }: SharedLoadoutViewPro
     fetchLoadout();
   }, [token, api]);
 
-  const isSaved = useMemo(() => {
-    return savedShares.some(s => s.shareToken === token);
-  }, [savedShares, token]);
-
   const allChapters = useMemo(() => {
     return new Set(actions.map(a => a.chapter));
   }, [actions]);
-
-  const handleSave = async () => {
-    setSaving(true);
-    try {
-      await saveLoadoutShare(token);
-      showToast('Saved to your collection!', 'success');
-    } catch (err) {
-      showToast(err instanceof Error ? err.message : 'Failed to save', 'error');
-    } finally {
-      setSaving(false);
-    }
-  };
 
   const handleExportClipboard = useCallback(async () => {
     if (!loadout) return;
@@ -184,30 +165,6 @@ export function SharedLoadoutView({ token, mode, onClose }: SharedLoadoutViewPro
           </span>
         </div>
         <div className="embedded-shared-actions">
-          {mode === 'embedded' && (
-            <button
-              className="embedded-action-button primary"
-              onClick={handleSave}
-              disabled={saving || isSaved}
-            >
-              {saving ? (
-                <>
-                  <i className="fas fa-spinner fa-spin" />
-                  Saving...
-                </>
-              ) : isSaved ? (
-                <>
-                  <i className="fas fa-check" />
-                  Saved
-                </>
-              ) : (
-                <>
-                  <i className="fas fa-bookmark" />
-                  Save to Collection
-                </>
-              )}
-            </button>
-          )}
           <button
             className="embedded-action-button secondary"
             onClick={handleExportClipboard}

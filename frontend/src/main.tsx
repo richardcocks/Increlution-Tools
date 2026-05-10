@@ -10,7 +10,6 @@ import { AuthProvider, useAuth } from './contexts/AuthContext.tsx'
 import { GameDataProvider } from './contexts/GameDataContext.tsx'
 import { SettingsProvider } from './contexts/SettingsContext.tsx'
 import { ThemeProvider } from './contexts/ThemeContext.tsx'
-import { SavedSharesProvider } from './contexts/SavedSharesContext.tsx'
 import { ServerApiProvider, GuestApiProvider } from './contexts/ApiContext.tsx'
 import { ProtectedRoute } from './components/ProtectedRoute.tsx'
 import { LoginPage } from './pages/LoginPage.tsx'
@@ -58,13 +57,11 @@ function GuestLayout() {
       <AuthProvider guestMode>
         <SettingsProvider>
           <ThemeProvider>
-            <SavedSharesProvider>
-              <ToastProvider>
-                <GameDataProvider>
-                  <Outlet />
-                </GameDataProvider>
-              </ToastProvider>
-            </SavedSharesProvider>
+            <ToastProvider>
+              <GameDataProvider>
+                <Outlet />
+              </GameDataProvider>
+            </ToastProvider>
           </ThemeProvider>
         </SettingsProvider>
       </AuthProvider>
@@ -79,7 +76,6 @@ createRoot(document.getElementById('root')!).render(
         <ServerApiProvider>
         <SettingsProvider>
           <ThemeProvider>
-          <SavedSharesProvider>
             <ToastProvider>
               <div className="app-wrapper">
                 <div className="app-content">
@@ -195,7 +191,6 @@ createRoot(document.getElementById('root')!).render(
                 <Footer />
               </div>
             </ToastProvider>
-          </SavedSharesProvider>
           </ThemeProvider>
         </SettingsProvider>
         </ServerApiProvider>

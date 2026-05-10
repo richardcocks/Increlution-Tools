@@ -57,9 +57,6 @@ public record SharedLoadoutResponse(string Name, LoadoutData Data, DateTime Upda
 
 public record SharedLoadoutErrorResponse(string Error);
 
-// Loadout share saved response (legacy, kept for backwards compatibility)
-public record SavedShareResponse(int Id, string ShareToken, string LoadoutName, string? OwnerName, DateTime SavedAt);
-
 public record CreateFolderShareRequest(
     [property: Range(1, 8760, ErrorMessage = "Expiration must be between 1 hour and 1 year")]
     int? ExpiresInHours,
@@ -80,19 +77,9 @@ public record FolderShareResponse(int Id, string ShareToken, DateTime CreatedAt,
 
 public record UserFolderShareResponse(int Id, string ShareToken, int FolderId, string FolderName, DateTime CreatedAt, DateTime? ExpiresAt, bool ShowAttribution);
 
-// Recursive tree structure for shared folders
-public record SharedFolderNode(
-    int Id,
-    string Name,
-    List<SharedFolderNode> SubFolders,
-    List<SharedLoadoutSummary> Loadouts
-);
-
-public record SharedLoadoutSummary(int Id, string Name, DateTime UpdatedAt);
-
 public record SharedFolderResponse(
     string FolderName,
-    SharedFolderNode FolderTree,
+    FolderTreeNode FolderTree,
     DateTime UpdatedAt,
     string? OwnerName
 );
@@ -104,14 +91,3 @@ public record SharedFolderLoadoutResponse(
 );
 
 public record SharedFolderErrorResponse(string Error);
-
-// Unified saved share response that includes both loadout and folder shares
-public record SavedShareUnifiedResponse(
-    int Id,
-    string ShareToken,
-    string ShareType,  // "loadout" or "folder"
-    string ItemName,   // Loadout name or folder name
-    string? OwnerName,
-    DateTime SavedAt,
-    SharedFolderNode? FolderTree  // Only populated for folder shares
-);

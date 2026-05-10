@@ -1,4 +1,4 @@
-import type { IncrelutionAction, Loadout, AutomationLevel, Skill, LoadoutData, FolderTreeNode, LoadoutShare, SharedLoadout, SavedShare, CreateShareOptions, UserShare, FolderShare, UserFolderShare, SharedFolder, SharedFolderLoadout, SavedShareUnified } from '../types/models';
+import type { IncrelutionAction, Loadout, AutomationLevel, Skill, LoadoutData, FolderTreeNode, LoadoutShare, SharedLoadout, CreateShareOptions, UserShare, FolderShare, UserFolderShare, SharedFolder, SharedFolderLoadout } from '../types/models';
 import type { UserInfo } from '../types/auth';
 import type { UserSettings } from '../types/settings';
 import { defaultSettings } from '../types/settings';
@@ -153,6 +153,20 @@ export const api = {
     });
     if (!response.ok) {
       throw new Error(`Failed to update folder read-only: ${response.statusText}`);
+    }
+    return response.json();
+  },
+
+  async updateFolderReadme(folderId: number, readme: string | null): Promise<{ readme: string | null }> {
+    const response = await fetch(`${API_BASE}/folders/${folderId}/readme`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ readme })
+    });
+    if (!response.ok) {
+      const text = await response.text();
+      throw new Error(text || `Failed to update folder readme: ${response.statusText}`);
     }
     return response.json();
   },
@@ -403,39 +417,6 @@ export const api = {
     return response.json();
   },
 
-  // Saved shares (authenticated)
-  async saveShare(token: string): Promise<SavedShare> {
-    const response = await fetch(`${API_BASE}/share/${token}/save`, {
-      method: 'POST',
-      credentials: 'include'
-    });
-    if (!response.ok) {
-      const text = await response.text();
-      throw new Error(text || `Failed to save share: ${response.statusText}`);
-    }
-    return response.json();
-  },
-
-  async getSavedShares(): Promise<SavedShare[]> {
-    const response = await fetch(`${API_BASE}/saved-shares`, {
-      credentials: 'include'
-    });
-    if (!response.ok) {
-      throw new Error(`Failed to get saved shares: ${response.statusText}`);
-    }
-    return response.json();
-  },
-
-  async removeSavedShare(id: number): Promise<void> {
-    const response = await fetch(`${API_BASE}/saved-shares/${id}`, {
-      method: 'DELETE',
-      credentials: 'include'
-    });
-    if (!response.ok) {
-      throw new Error(`Failed to remove saved share: ${response.statusText}`);
-    }
-  },
-
   // === Folder Sharing ===
 
   async createFolderShare(folderId: number, options: CreateShareOptions): Promise<FolderShare> {
@@ -543,29 +524,6 @@ export const api = {
         // Response wasn't JSON, use default message
       }
       throw new Error(errorMessage);
-    }
-    return response.json();
-  },
-
-  async saveFolderShare(token: string): Promise<SavedShareUnified> {
-    const response = await fetch(`${API_BASE}/share/folder/${token}/save`, {
-      method: 'POST',
-      credentials: 'include'
-    });
-    if (!response.ok) {
-      const text = await response.text();
-      throw new Error(text || `Failed to save folder share: ${response.statusText}`);
-    }
-    return response.json();
-  },
-
-  // Unified saved shares (both loadouts and folders)
-  async getSavedSharesUnified(): Promise<SavedShareUnified[]> {
-    const response = await fetch(`${API_BASE}/saved-shares/unified`, {
-      credentials: 'include'
-    });
-    if (!response.ok) {
-      throw new Error(`Failed to get saved shares: ${response.statusText}`);
     }
     return response.json();
   }

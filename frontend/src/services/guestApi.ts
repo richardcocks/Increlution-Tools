@@ -1,6 +1,6 @@
 import { api } from './api';
 import type { ApiType } from '../contexts/ApiContext';
-import type { FolderTreeNode, IncrelutionAction, Loadout, LoadoutData, SavedShareUnified } from '../types/models';
+import type { FolderTreeNode, IncrelutionAction, Loadout, LoadoutData } from '../types/models';
 import { ActionType } from '../types/models';
 import type { UserSettings } from '../types/settings';
 import { defaultSettings, makeSkillActionKey } from '../types/settings';
@@ -13,7 +13,6 @@ export interface GuestData {
   folderTree: FolderTreeNode;
   loadouts: Record<number, Loadout>;
   settings: UserSettings;
-  savedShares: SavedShareUnified[];
   nextId: number;
 }
 
@@ -36,12 +35,12 @@ function getDefaultData(): GuestData {
       name: 'My Loadouts',
       parentId: null,
       isReadOnly: false,
+      readme: null,
       subFolders: [],
       loadouts: []
     },
     loadouts: {},
     settings: { ...defaultSettings },
-    savedShares: [],
     nextId: -2
   };
 }
@@ -123,6 +122,7 @@ function cloneFolderTree(node: FolderTreeNode, parentId: number | null, data: Gu
     name: node.name,
     parentId,
     isReadOnly: node.isReadOnly,
+    readme: node.readme ?? null,
     subFolders: node.subFolders.map(sub => cloneFolderTree(sub, newId, data)),
     loadouts: clonedLoadouts
   };
@@ -280,6 +280,7 @@ export function createGuestApi(): ApiType {
         name,
         parentId,
         isReadOnly: false,
+        readme: null,
         subFolders: [],
         loadouts: []
       });
@@ -325,6 +326,14 @@ export function createGuestApi(): ApiType {
       folder.isReadOnly = isReadOnly;
       save();
       return { isReadOnly };
+    },
+
+    async updateFolderReadme(folderId: number, readme: string | null) {
+      const folder = findFolder(data.folderTree, folderId);
+      if (!folder) throw new Error('Folder not found');
+      folder.readme = readme && readme.trim() ? readme : null;
+      save();
+      return { readme: folder.readme };
     },
 
     async reorderItems(folderId: number, itemType: 'folder' | 'loadout', orderedIds: number[]) {
@@ -611,70 +620,6 @@ export function createGuestApi(): ApiType {
     },
     async getSharedFolderLoadout(token: string, loadoutId: number) {
       return api.getSharedFolderLoadout(token, loadoutId);
-    },
-
-    // Saved shares - localStorage backed
-    async saveShare(token: string) {
-      // Fetch the shared loadout info from server
-      const shared = await api.getSharedLoadout(token);
-      const id = allocateId(data);
-      const savedShare: SavedShareUnified = {
-        id,
-        shareToken: token,
-        shareType: 'loadout',
-        itemName: shared.name,
-        ownerName: shared.ownerName,
-        savedAt: new Date().toISOString(),
-        folderTree: null
-      };
-      data.savedShares.push(savedShare);
-      save();
-      // Return in SavedShare format for the caller
-      return {
-        id,
-        shareToken: token,
-        loadoutName: shared.name,
-        ownerName: shared.ownerName,
-        savedAt: savedShare.savedAt
-      };
-    },
-
-    async getSavedShares() {
-      return data.savedShares
-        .filter(s => s.shareType === 'loadout')
-        .map(s => ({
-          id: s.id,
-          shareToken: s.shareToken,
-          loadoutName: s.itemName,
-          ownerName: s.ownerName,
-          savedAt: s.savedAt
-        }));
-    },
-
-    async removeSavedShare(id: number) {
-      data.savedShares = data.savedShares.filter(s => s.id !== id);
-      save();
-    },
-
-    async saveFolderShare(token: string) {
-      const shared = await api.getSharedFolder(token);
-      const id = allocateId(data);
-      const savedShare: SavedShareUnified = {
-        id,
-        shareToken: token,
-        shareType: 'folder',
-        itemName: shared.folderName,
-        ownerName: shared.ownerName,
-        savedAt: new Date().toISOString(),
-        folderTree: shared.folderTree
-      };
-      data.savedShares.push(savedShare);
-      save();
-      return savedShare;
-    },
-
-    async getSavedSharesUnified() {
-      return JSON.parse(JSON.stringify(data.savedShares));
     }
   };
 

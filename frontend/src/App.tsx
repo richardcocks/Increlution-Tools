@@ -6,7 +6,6 @@ import { Sidebar } from './components/Sidebar'
 import { useToast } from './components/Toast'
 import { DeleteConfirmation } from './components/DeleteConfirmation'
 import { SharedLoadoutView } from './components/SharedLoadoutView'
-import { SharedFolderView } from './components/SharedFolderView'
 import { TextInputModal } from './components/TextInputModal'
 import { FolderView } from './components/FolderView'
 import { ShareModal } from './components/ShareModal'
@@ -19,7 +18,7 @@ import { useApi } from './contexts/ApiContext'
 import type { FolderTreeNode } from './types/models'
 import { ActionType } from './types/models'
 import { makeSkillActionKey } from './types/settings'
-import { filterLoadoutByChapters, normalizeLoadoutData } from './utils/loadoutData'
+import { filterLoadoutByChapters } from './utils/loadoutData'
 import { buildEffectiveReadOnlyMap } from './utils/folderUtils'
 import { SettingsPage } from './pages/SettingsPage'
 import { FavouritesPage } from './pages/FavouritesPage'
@@ -593,22 +592,6 @@ function App() {
     navigate(`${prefix}/loadout/${loadoutId}`)
   }
 
-  const handleViewShare = (token: string, shareType: 'loadout' | 'folder' = 'loadout') => {
-    setPendingDelete(null)
-    // Navigate to canonical /share/ URLs (guest mode uses its own prefix)
-    if (shareType === 'folder') {
-      navigate(isGuest ? `${prefix}/shared/folder/${token}` : `/share/folder/${token}`)
-    } else {
-      navigate(isGuest ? `${prefix}/shared/${token}` : `/share/${token}`)
-    }
-  }
-
-  const handleViewSharedFolderLoadout = (folderToken: string, loadoutId: number) => {
-    setPendingDelete(null)
-    // Navigate to canonical /share/ URLs (guest mode uses its own prefix)
-    navigate(isGuest ? `${prefix}/shared/folder/${folderToken}/${loadoutId}` : `/share/folder/${folderToken}/${loadoutId}`)
-  }
-
   const handleCloseShare = () => {
     navigate(prefix)
   }
@@ -703,6 +686,25 @@ function App() {
     } catch (err) {
       console.error('Error duplicating folder:', err)
       showToast(err instanceof Error ? err.message : 'Failed to duplicate folder', 'error')
+    }
+  }
+
+  const handleUpdateFolderReadme = async (folderId: number, readme: string | null) => {
+    // Optimistic update
+    const previousTree = folderTree
+    const updateReadme = (tree: FolderTreeNode): FolderTreeNode => {
+      if (tree.id === folderId) return { ...tree, readme }
+      return { ...tree, subFolders: tree.subFolders.map(updateReadme) }
+    }
+    setFolderTree(prev => prev ? updateReadme(prev) : prev)
+
+    try {
+      await api.updateFolderReadme(folderId, readme)
+    } catch (err) {
+      console.error('Error updating readme:', err)
+      showToast(err instanceof Error ? err.message : 'Failed to update readme', 'error')
+      setFolderTree(previousTree)
+      throw err
     }
   }
 
@@ -805,32 +807,6 @@ function App() {
     }
   }, [actions, unlockedChaptersSet, showToast, api])
 
-  // Quick export shared loadout to clipboard (middle-click on sidebar)
-  const handleQuickExportShare = useCallback(async (token: string) => {
-    try {
-      const sharedLoadout = await api.getSharedLoadout(token)
-      const jsonString = JSON.stringify(normalizeLoadoutData(sharedLoadout.data))
-      await navigator.clipboard.writeText(jsonString)
-      showToast('Copied to clipboard!', 'success')
-    } catch (err) {
-      console.error('Error exporting to clipboard:', err)
-      showToast('Failed to copy to clipboard', 'error')
-    }
-  }, [showToast, api])
-
-  // Quick export shared folder loadout to clipboard (middle-click on sidebar)
-  const handleQuickExportSharedFolderLoadout = useCallback(async (folderToken: string, loadoutId: number) => {
-    try {
-      const loadout = await api.getSharedFolderLoadout(folderToken, loadoutId)
-      const jsonString = JSON.stringify(normalizeLoadoutData(loadout.data))
-      await navigator.clipboard.writeText(jsonString)
-      showToast('Copied to clipboard!', 'success')
-    } catch (err) {
-      console.error('Error exporting to clipboard:', err)
-      showToast('Failed to copy to clipboard', 'error')
-    }
-  }, [showToast, api])
-
   // Handle compare loadouts bucket
   const handleAddToCompare = useCallback(() => {
     if (!selectedLoadoutId || !folderTree) return
@@ -884,9 +860,9 @@ function App() {
 
     if (viewingSharedFolder) {
       return (
-        <SharedFolderView
-          token={viewingSharedFolder.token}
+        <FolderView
           mode="embedded"
+          shareToken={viewingSharedFolder.token}
           selectedLoadoutId={viewingSharedFolder.loadoutId}
           onClose={handleCloseShare}
         />
@@ -923,16 +899,19 @@ function App() {
       if (currentFolder) {
         return (
           <FolderView
+            mode="owner"
             folder={currentFolder}
             breadcrumb={folderBreadcrumb}
             isRootFolder={currentFolder.parentId === null}
             isEffectivelyReadOnly={effectiveReadOnlyMap.get(selectedFolderId) ?? false}
+            prefix={prefix}
             startEditing={renamingFolderId === selectedFolderId}
             onStartEditingConsumed={() => setRenamingFolderId(null)}
             onRenameFolder={(name) => doRenameFolder(selectedFolderId, name)}
             onCreateFolder={() => handleCreateFolder(selectedFolderId)}
             onCreateLoadout={() => handleCreateLoadout(selectedFolderId)}
             onSelectLoadout={(loadoutId) => handleLoadoutSelect(loadoutId, selectedFolderId)}
+            onUpdateReadme={(readme) => handleUpdateFolderReadme(selectedFolderId, readme)}
             onDuplicateFolder={() => handleDuplicateFolder(selectedFolderId)}
             onDeleteFolder={() => handleDeleteFolder(selectedFolderId)}
             onShareFolder={() => setShareModalState({ type: 'folder', folderId: selectedFolderId, folderName: currentFolder.name })}
@@ -1059,12 +1038,6 @@ function App() {
               folderTree={folderTree}
               effectiveReadOnlyMap={effectiveReadOnlyMap}
               onCreateLoadout={() => handleCreateLoadout(selectedFolderId ?? folderTree?.id ?? 0)}
-              onViewShare={handleViewShare}
-              viewingShareToken={viewingShareToken}
-              viewingSharedFolder={viewingSharedFolder}
-              onQuickExportShare={handleQuickExportShare}
-              onQuickExportSharedFolderLoadout={handleQuickExportSharedFolderLoadout}
-              onViewSharedFolderLoadout={handleViewSharedFolderLoadout}
             />
             <div className="main-content">
               {renderMainContent()}

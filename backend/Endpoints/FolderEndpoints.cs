@@ -4,6 +4,7 @@ using IncrelutionAutomationEditor.Api.Data;
 using IncrelutionAutomationEditor.Api.DTOs;
 using IncrelutionAutomationEditor.Api.Models;
 using IncrelutionAutomationEditor.Api.Services;
+using Microsoft.AspNetCore.OutputCaching;
 using Microsoft.EntityFrameworkCore;
 
 namespace IncrelutionAutomationEditor.Api.Endpoints;
@@ -43,6 +44,7 @@ public static class FolderEndpoints
                     folder.Name,
                     folder.ParentId,
                     folder.IsReadOnly,
+                    folder.Readme,
                     folders.Where(f => f.ParentId == folder.Id)
                         .OrderBy(f => f.SortOrder)
                         .Select(f => BuildTree(f.Id))
@@ -418,6 +420,39 @@ public static class FolderEndpoints
         })
         .RequireAuthorization()
         .WithName("SetFolderReadOnly");
+
+        // PUT /api/folders/{id}/readme - Update folder readme markdown
+        app.MapPut("/api/folders/{id}/readme", async (
+            int id,
+            UpdateFolderReadmeRequest request,
+            ClaimsPrincipal user,
+            AppDbContext db,
+            FolderService folderService,
+            IOutputCacheStore cacheStore,
+            AppLimits limits) =>
+        {
+            var userId = EndpointHelpers.GetUserId(user);
+
+            if (request.Readme != null && request.Readme.Length > limits.MaxFolderReadmeLength)
+                return Results.BadRequest($"Readme exceeds maximum length ({limits.MaxFolderReadmeLength} characters)");
+
+            var folder = await db.Folders.FirstOrDefaultAsync(f => f.Id == id && f.UserId == userId);
+            if (folder == null)
+                return Results.NotFound("Folder not found");
+
+            var allFolders = await db.Folders.Where(f => f.UserId == userId).ToListAsync();
+            if (folderService.IsFolderOrAncestorReadOnly(allFolders, id))
+                return Results.BadRequest("Folder is read-only");
+
+            folder.Readme = string.IsNullOrWhiteSpace(request.Readme) ? null : request.Readme;
+            await db.SaveChangesAsync();
+
+            await cacheStore.EvictByTagAsync("shared-loadouts", default);
+
+            return Results.Ok(new { folder.Readme });
+        })
+        .RequireAuthorization()
+        .WithName("UpdateFolderReadme");
 
         // POST /api/folders/{id}/duplicate - Duplicate a folder and all its contents
         app.MapPost("/api/folders/{id}/duplicate", async (int id, ClaimsPrincipal user, AppDbContext db, FolderService folderService, AppLimits limits) =>

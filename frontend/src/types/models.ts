@@ -60,6 +60,7 @@ export interface FolderTreeNode {
   name: string;
   parentId: number | null;
   isReadOnly: boolean;
+  readme: string | null;
   subFolders: FolderTreeNode[];
   loadouts: LoadoutSummary[];
 }
@@ -78,14 +79,6 @@ export interface SharedLoadout {
   data: LoadoutData;
   updatedAt: string;
   ownerName: string | null;  // null if attribution disabled
-}
-
-export interface SavedShare {
-  id: number;
-  shareToken: string;
-  loadoutName: string;
-  ownerName: string | null;
-  savedAt: string;
 }
 
 export interface CreateShareOptions {
@@ -126,23 +119,11 @@ export interface UserFolderShare {
   showAttribution: boolean;
 }
 
-// Recursive tree structure for shared folders
-export interface SharedFolderNode {
-  id: number;
-  name: string;
-  subFolders: SharedFolderNode[];
-  loadouts: SharedLoadoutSummary[];
-}
-
-export interface SharedLoadoutSummary {
-  id: number;
-  name: string;
-  updatedAt: string;
-}
-
+// Shared folder responses reuse the owner FolderTreeNode shape — one tree
+// type for everywhere.
 export interface SharedFolder {
   folderName: string;
-  folderTree: SharedFolderNode;
+  folderTree: FolderTreeNode;
   updatedAt: string;
   ownerName: string | null;
 }
@@ -151,15 +132,4 @@ export interface SharedFolderLoadout {
   name: string;
   data: LoadoutData;
   updatedAt: string;
-}
-
-// Unified saved share (supports both loadout and folder shares)
-export interface SavedShareUnified {
-  id: number;
-  shareToken: string;
-  shareType: 'loadout' | 'folder';
-  itemName: string;
-  ownerName: string | null;
-  savedAt: string;
-  folderTree: SharedFolderNode | null;  // Only populated for folder shares
 }
