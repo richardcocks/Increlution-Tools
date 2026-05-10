@@ -1,5 +1,5 @@
 import type { AnchorHTMLAttributes } from 'react';
-import ReactMarkdown from 'react-markdown';
+import ReactMarkdown, { defaultUrlTransform } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeSanitize, { defaultSchema } from 'rehype-sanitize';
 import { useNavigate } from 'react-router-dom';
@@ -14,6 +14,14 @@ const schema = {
     href: [...(defaultSchema.protocols?.href ?? []), 'loadout'],
   },
 };
+
+// react-markdown's defaultUrlTransform strips any URL whose scheme isn't in
+// http/https/mailto/xmpp/ircs. Without overriding it, `loadout:N` becomes ""
+// before our `a` component sees it, so the link silently falls back to an
+// empty href that reloads the current page. Pass `loadout:` URLs through and
+// defer to the default for everything else.
+const urlTransform = (url: string) =>
+  url.startsWith('loadout:') ? url : defaultUrlTransform(url);
 
 export type LinkContext =
   | { kind: 'owner'; prefix: string }            // e.g. '/loadouts' or '/guest'
@@ -30,6 +38,7 @@ export function MarkdownRenderer({ source, linkContext }: Props) {
   return (
     <div className="markdown-body">
       <ReactMarkdown
+        urlTransform={urlTransform}
         remarkPlugins={[remarkGfm]}
         rehypePlugins={[[rehypeSanitize, schema]]}
         components={{
