@@ -1,0 +1,7 @@
+# Server-side scripts and config must keep LF line endings even on Windows
+# checkouts, so they run correctly when copied to (scp) or checked out on Linux.
+# Without this, core.autocrlf=true rewrites them to CRLF and the shebang breaks
+# with "cannot execute: required file not found".
+*.sh         text eol=lf
+Caddyfile    text eol=lf
+Caddyfile.*  text eol=lf

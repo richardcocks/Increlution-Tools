@@ -25,7 +25,12 @@ echo "Copying application files..."
 echo "Setting permissions..."
 sudo chown -R "$SERVICE_USER:$SERVICE_USER" "$APP_DIR"
 sudo chown -R "$SERVICE_USER:$SERVICE_USER" "$DATA_DIR"
-sudo chmod +x "$APP_DIR/IncrelutionAutomationEditor.Api"
+# Only chmod once the binary is present. This script may be run before the
+# publish files are uploaded (it just creates dirs + the unit); with `set -e`
+# an unconditional chmod here would abort before the systemd unit is created.
+if [ -f "$APP_DIR/IncrelutionAutomationEditor.Api" ]; then
+    sudo chmod +x "$APP_DIR/IncrelutionAutomationEditor.Api"
+fi
 
 # Create systemd service
 echo "Creating systemd service..."
