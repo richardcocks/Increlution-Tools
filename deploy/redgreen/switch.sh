@@ -66,9 +66,17 @@ sudo systemctl reload caddy
 # Update state file
 echo "$TARGET" | sudo tee "$STATE_FILE" > /dev/null
 
+# Reconcile systemd boot state so a reboot brings up the live environment.
+# The active slot is enabled (auto-starts on boot); the standby is disabled
+# but left running, so ./switch.sh back to it is still an instant rollback.
+echo "Reconciling boot state (enable $TARGET, disable $CURRENT)..."
+sudo systemctl enable "increlution-editor-$TARGET" > /dev/null 2>&1
+sudo systemctl disable "increlution-editor-$CURRENT" > /dev/null 2>&1
+
 echo ""
 echo "=== Switch Complete ==="
 echo "Active environment: $TARGET (port $NEW_PORT)"
 echo "Standby environment: $CURRENT (port $OLD_PORT)"
+echo "Boot: $TARGET auto-starts on reboot; $CURRENT does not (still running for rollback)"
 echo ""
 echo "To rollback, run: ./switch.sh $CURRENT"

@@ -16,6 +16,16 @@
     </PackageReference>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.5" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.5" />
+
+    <!-- Pin transitive dependencies to patched versions to clear NU1903 advisories. -->
+    <!-- CVE-2026-49451: Microsoft.OpenApi <= 2.7.4 vulnerable (stack overflow parsing
+         untrusted OpenAPI docs); fixed in 2.7.5. We never parse untrusted docs and only
+         map the OpenAPI endpoint in Development, so this is warning-clearing only. -->
+    <PackageReference Include="Microsoft.OpenApi" Version="2.12.2" />
+    <!-- CVE-2025-6965: SQLitePCLRaw.lib.e_sqlite3 <= 2.1.11 bundles a vulnerable SQLite;
+         2.1.13 bundles the patched SQLite. Reachable only via attacker-controlled SQL,
+         which EF Core parameterization prevents. -->
+    <PackageReference Include="SQLitePCLRaw.lib.e_sqlite3" Version="2.1.13" />
   </ItemGroup>
 
   <ItemGroup>
