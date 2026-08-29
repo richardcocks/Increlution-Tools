@@ -155,7 +155,7 @@ export const BadgeSvg = forwardRef<SVGSVGElement, BadgeSvgProps>(function BadgeS
           fontSize={11}
           fill={C.muted}
         >
-          Run {model.ngPlusRuns}
+          NG+: {model.ngPlusRuns}
         </text>
       ) : null}
       <text
