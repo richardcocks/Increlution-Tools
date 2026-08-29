@@ -23,8 +23,7 @@ const MONO = "'Consolas', 'DejaVu Sans Mono', 'Roboto Mono', 'Courier New', mono
 const NUM_SPACING = 0.5;
 const W = 552;
 
-// Skill icons, in the save's skill order. The game uses Font Awesome Pro glyphs;
-// these are the closest Font Awesome Free equivalents.
+// Skill icons, in the save's skill order — matching backend/GameData/skills.json.
 const SKILL_ICONS: IconName[] = [
   'farming',
   'woodcutting',
