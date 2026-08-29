@@ -30,6 +30,11 @@ Pop-Location
 # Publish backend
 Write-Host "`nPublishing backend..." -ForegroundColor Yellow
 Push-Location backend
+
+# Clean the output dir first so stale files (e.g. leftover runtime libs from an old
+# self-contained build) can't survive into a framework-dependent publish.
+if (Test-Path ../publish) { Remove-Item -Recurse -Force ../publish }
+
 dotnet publish IncrelutionAutomationEditor.Api.csproj -c Release -r linux-x64 --self-contained false -o ../publish
 
 if ($LASTEXITCODE -ne 0) {

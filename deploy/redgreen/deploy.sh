@@ -55,6 +55,17 @@ if [ ! -d "$PUBLISH_DIR" ]; then
     exit 1
 fi
 
+# Guard: a framework-dependent publish must NOT contain runtime native libs. Their
+# presence means a stale/self-contained publish (e.g. old files merged in by scp) —
+# the apphost would then resolve app-local and fail with "No frameworks were found".
+if ls "$PUBLISH_DIR"/libcoreclr.so "$PUBLISH_DIR"/libhostfxr.so >/dev/null 2>&1; then
+    echo "Error: $PUBLISH_DIR contains runtime libs (libcoreclr.so/libhostfxr.so)."
+    echo "This is a stale or self-contained publish and would break at startup."
+    echo "Clean it and re-upload a fresh framework-dependent build:"
+    echo "  rm -rf $PUBLISH_DIR"
+    exit 1
+fi
+
 # Stop the target service if running
 echo "Stopping $SERVICE service..."
 sudo systemctl stop "$SERVICE" 2>/dev/null || true
