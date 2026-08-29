@@ -167,7 +167,7 @@ export const BadgeSvg = forwardRef<SVGSVGElement, BadgeSvgProps>(function BadgeS
         letterSpacing={1}
         fill={C.text}
       >
-        {hasPerks ? model.perks.join(' ') : '—'}
+        {hasPerks ? model.perks.join('  ·  ') : '—'}
       </text>
       <Icon name="dna" x={rightX + 56} y={topY + 64} size={14} color={C.icon} />
       <text
@@ -198,13 +198,14 @@ export const BadgeSvg = forwardRef<SVGSVGElement, BadgeSvgProps>(function BadgeS
           <g key={skill.name}>
             <Icon name={SKILL_ICONS[i]} x={leftX + 18} y={baseline - 12} size={14} color={C.icon} />
             <text
-              x={leftX + 44}
+              x={leftX + leftW - 14}
               y={baseline}
               fontFamily={MONO}
               fontSize={13}
               fontWeight={600}
               letterSpacing={NUM_SPACING}
               fill={C.value}
+              textAnchor="end"
             >
               {skill.instinctLevel}
             </text>
