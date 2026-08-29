@@ -88,9 +88,9 @@ describe('buildBadgeModel', () => {
 
 describe('formatShortNumber', () => {
   it('formats magnitudes like the game', () => {
-    expect(formatShortNumber(667278)).toBe('667 K');
-    expect(formatShortNumber(2_400_000)).toBe('2.40 M');
-    expect(formatShortNumber(15_100_000_000_000)).toBe('15.1 T');
+    expect(formatShortNumber(667278)).toBe('667K');
+    expect(formatShortNumber(2_400_000)).toBe('2.40M');
+    expect(formatShortNumber(15_100_000_000_000)).toBe('15.1T');
     expect(formatShortNumber(999)).toBe('999');
   });
 });

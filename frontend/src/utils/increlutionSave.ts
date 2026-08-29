@@ -138,11 +138,11 @@ function toNum(value: number | string | null | undefined): number {
   return Number.isFinite(n) ? n : 0;
 }
 
-const NUMBER_SUFFIXES = ['', ' K', ' M', ' B', ' T', ' Qa', ' Qi', ' Sx', ' Sp', ' Oc', ' No', ' Dc'];
+const NUMBER_SUFFIXES = ['', 'K', 'M', 'B', 'T', 'Qa', 'Qi', 'Sx', 'Sp', 'Oc', 'No', 'Dc'];
 
 /**
- * Compact number notation matching the game's "Standard" style
- * (e.g. 667 K, 2.40 M, 15.1 T) — three significant figures with a magnitude suffix.
+ * Compact number notation (e.g. 667K, 2.40M, 15.1T) — three significant figures
+ * with a magnitude suffix, matching the original badge's tight formatting.
  */
 export function formatShortNumber(value: number): string {
   if (!Number.isFinite(value)) return '0';

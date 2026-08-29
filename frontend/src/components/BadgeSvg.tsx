@@ -14,7 +14,6 @@ const C = {
   muted: '#9b9ba6',
   value: '#ffffff',
   icon: '#d7d7e0',
-  chapter: '#e0a24a', // warm accent for chapter numbers, as in the original
 } as const;
 
 // Labels use a plain sans; all numeric values use a monospace stack (as the
@@ -22,7 +21,7 @@ const C = {
 const FONT = 'Arial, Helvetica, sans-serif';
 const MONO = "'Consolas', 'DejaVu Sans Mono', 'Roboto Mono', 'Courier New', monospace";
 const NUM_SPACING = 0.5;
-const W = 580;
+const W = 552;
 
 // Skill icons, in the save's skill order. The game uses Font Awesome Pro glyphs;
 // these are the closest Font Awesome Free equivalents.
@@ -76,9 +75,9 @@ interface BadgeSvgProps {
 
 export const BadgeSvg = forwardRef<SVGSVGElement, BadgeSvgProps>(function BadgeSvg({ model }, ref) {
   const leftX = 12;
-  const leftW = 196;
-  const rightX = 216;
-  const rightW = W - rightX - 12; // 352
+  const leftW = 184;
+  const rightX = 208;
+  const rightW = W - rightX - 12; // 332
 
   const topY = 12;
   const topH = 96;
@@ -111,7 +110,7 @@ export const BadgeSvg = forwardRef<SVGSVGElement, BadgeSvgProps>(function BadgeS
       <rect x={leftX} y={topY} width={leftW} height={topH} rx={6} fill={C.card} stroke={C.stroke} />
       <Icon name="heart" x={leftX + 14} y={topY + 17} size={22} color={C.icon} />
       <text
-        x={leftX + 46}
+        x={leftX + 44}
         y={topY + 36}
         fontFamily={MONO}
         fontSize={22}
@@ -123,7 +122,7 @@ export const BadgeSvg = forwardRef<SVGSVGElement, BadgeSvgProps>(function BadgeS
       </text>
       {hasFunnels &&
         model.funnels.map((funnel, i) => {
-          const x = leftX + 14 + i * 46;
+          const x = leftX + 14 + i * 42;
           return (
             <g key={funnel.key}>
               <Icon name={FUNNEL_ICONS[funnel.key]} x={x} y={topY + 64} size={14} color={C.icon} />
@@ -142,7 +141,7 @@ export const BadgeSvg = forwardRef<SVGSVGElement, BadgeSvgProps>(function BadgeS
           );
         })}
 
-      {/* ---- Top-right box: New Game+ (flask), perks, DNA + unlock requirement ---- */}
+      {/* ---- Top-right box: New Game+ (flask), perks, DNA + unlock req + exploration ---- */}
       <rect x={rightX} y={topY} width={rightW} height={topH} rx={6} fill={C.card} stroke={C.stroke} />
       <Icon name="flask" x={rightX + 12} y={topY + 32} size={30} color={C.icon} />
       <text x={rightX + 56} y={topY + 25} fontFamily={FONT} fontSize={11} fill={C.muted}>
@@ -154,10 +153,10 @@ export const BadgeSvg = forwardRef<SVGSVGElement, BadgeSvgProps>(function BadgeS
         fontFamily={MONO}
         fontSize={13}
         fontWeight={600}
-        letterSpacing={NUM_SPACING}
+        letterSpacing={1}
         fill={C.text}
       >
-        {hasPerks ? model.perks.join('  ·  ') : '—'}
+        {hasPerks ? model.perks.join(' ') : '—'}
       </text>
       <Icon name="dna" x={rightX + 56} y={topY + 64} size={14} color={C.icon} />
       <text
@@ -171,27 +170,30 @@ export const BadgeSvg = forwardRef<SVGSVGElement, BadgeSvgProps>(function BadgeS
       >
         {formatShortNumber(model.dna)}
       </text>
-      <Icon name="lock" x={rightX + 172} y={topY + 64} size={13} color={C.muted} />
-      <text x={rightX + 192} y={topY + 76} fontFamily={MONO} fontSize={13} letterSpacing={NUM_SPACING} fill={C.muted}>
+      <Icon name="lock" x={rightX + 160} y={topY + 64} size={13} color={C.muted} />
+      <text x={rightX + 180} y={topY + 76} fontFamily={MONO} fontSize={13} letterSpacing={NUM_SPACING} fill={C.muted}>
         {formatUnlockRequirement(model.dna)}
       </text>
+      <Icon name="explored" x={rightX + 258} y={topY + 64} size={13} color={C.icon} />
+      <text x={rightX + 278} y={topY + 76} fontFamily={MONO} fontSize={13} letterSpacing={NUM_SPACING} fill={C.value}>
+        {model.highestExploration}
+      </text>
 
-      {/* ---- Bottom-left box: skill instincts (icon + level) ---- */}
+      {/* ---- Bottom-left box: skill instincts (icon + level, grouped left) ---- */}
       <rect x={leftX} y={botY} width={leftW} height={botBoxH} rx={6} fill={C.card} stroke={C.stroke} />
       {model.skills.map((skill, i) => {
         const baseline = rowBaseline(i);
         return (
           <g key={skill.name}>
-            <Icon name={SKILL_ICONS[i]} x={leftX + 14} y={baseline - 12} size={14} color={C.icon} />
+            <Icon name={SKILL_ICONS[i]} x={leftX + 18} y={baseline - 12} size={14} color={C.icon} />
             <text
-              x={leftX + leftW - 14}
+              x={leftX + 44}
               y={baseline}
               fontFamily={MONO}
               fontSize={13}
               fontWeight={600}
               letterSpacing={NUM_SPACING}
               fill={C.value}
-              textAnchor="end"
             >
               {skill.instinctLevel}
             </text>
@@ -201,7 +203,7 @@ export const BadgeSvg = forwardRef<SVGSVGElement, BadgeSvgProps>(function BadgeS
 
       {/* ---- Bottom-right box: run summary header + chapter completions ---- */}
       <rect x={rightX} y={botY} width={rightW} height={botBoxH} rx={6} fill={C.card} stroke={C.stroke} />
-      {/* Header row: total time, generation, exploration, best life */}
+      {/* Header row: total time, generation, best life */}
       <Icon name="clock" x={rightX + 12} y={rowBaseline(0) - 12} size={13} color={C.icon} />
       <text
         x={rightX + 30}
@@ -214,16 +216,12 @@ export const BadgeSvg = forwardRef<SVGSVGElement, BadgeSvgProps>(function BadgeS
       >
         {formatDuration(model.totalTimeMs)}
       </text>
-      <Icon name="user" x={rightX + 156} y={rowBaseline(0) - 12} size={13} color={C.icon} />
-      <text x={rightX + 174} y={rowBaseline(0)} fontFamily={MONO} fontSize={12} letterSpacing={NUM_SPACING} fill={C.text}>
+      <Icon name="user" x={rightX + 164} y={rowBaseline(0) - 12} size={13} color={C.icon} />
+      <text x={rightX + 182} y={rowBaseline(0)} fontFamily={MONO} fontSize={12} letterSpacing={NUM_SPACING} fill={C.text}>
         {model.generation}
       </text>
-      <Icon name="explored" x={rightX + 212} y={rowBaseline(0) - 12} size={13} color={C.icon} />
-      <text x={rightX + 232} y={rowBaseline(0)} fontFamily={MONO} fontSize={12} letterSpacing={NUM_SPACING} fill={C.text}>
-        {model.highestExploration}
-      </text>
-      <Icon name="heartPulse" x={rightX + 274} y={rowBaseline(0) - 12} size={13} color={C.icon} />
-      <text x={rightX + 292} y={rowBaseline(0)} fontFamily={MONO} fontSize={12} letterSpacing={NUM_SPACING} fill={C.text}>
+      <Icon name="heartPulse" x={rightX + 244} y={rowBaseline(0) - 12} size={13} color={C.icon} />
+      <text x={rightX + 262} y={rowBaseline(0)} fontFamily={MONO} fontSize={12} letterSpacing={NUM_SPACING} fill={C.text}>
         {formatClock(model.longestLifeMs)}
       </text>
       <line
@@ -245,7 +243,7 @@ export const BadgeSvg = forwardRef<SVGSVGElement, BadgeSvgProps>(function BadgeS
               fontSize={12}
               fontWeight={700}
               letterSpacing={NUM_SPACING}
-              fill={C.chapter}
+              fill={C.value}
             >
               {chapter.chapter}
             </text>
