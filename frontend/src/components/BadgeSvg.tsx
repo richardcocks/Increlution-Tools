@@ -109,7 +109,10 @@ export const BadgeSvg = forwardRef<SVGSVGElement, BadgeSvgProps>(function BadgeS
       role="img"
       aria-label={`Increlution stats badge: generation ${model.generation}, ${model.chapters.length} chapters completed`}
     >
-      <rect x={0} y={0} width={W} height={H} rx={12} fill={C.bg} />
+      {/* Full-bleed opaque background: no rounded outer corners, so the exported
+          PNG has no transparent (white-on-export) corners. The on-page preview is
+          rounded via CSS border-radius instead. */}
+      <rect x={0} y={0} width={W} height={H} fill={C.bg} />
 
       {/* Header card */}
       <rect x={leftX} y={headerY} width={W - 28} height={headerH} rx={8} fill={C.card} stroke={C.stroke} />
