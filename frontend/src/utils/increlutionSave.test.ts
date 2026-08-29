@@ -73,6 +73,16 @@ describe('buildBadgeModel', () => {
   it('reads new game+ perks', () => {
     expect(model.perks).toEqual([3, 3, 0, 0, 1, 1, 1, 0, 2, 1]);
   });
+
+  it('reads funnel counts from the funnel explorations timesCompleted', () => {
+    // explorations 161/190/228/304 -> hourglass/shield/tooth/core
+    expect(model.funnels.map((f) => [f.name, f.count])).toEqual([
+      ['Hourglass', 7],
+      ['Shield', 8],
+      ['Tooth', 0],
+      ['Titan Core', 0],
+    ]);
+  });
 });
 
 describe('formatShortNumber', () => {

@@ -16,6 +16,18 @@ import CryptoJS from '../vendor/cryptojs-aes-3.1.2.js';
 
 const SAVE_PASSWORD = 'gXVgN';
 
+/**
+ * Hourglass "funnels": optional, hard, skippable explorations whose
+ * `timesCompleted` counts how many times the player has funnelled each
+ * artifact's power. Order matches the original badge (hourglass/shield/tooth/core).
+ */
+export const FUNNELS = [
+  { key: 'hourglass', name: 'Hourglass', explorationId: 161 },
+  { key: 'shield', name: 'Shield', explorationId: 190 },
+  { key: 'tooth', name: 'Tooth', explorationId: 228 },
+  { key: 'core', name: 'Titan Core', explorationId: 304 },
+] as const;
+
 /** Skill order as stored in the save's `skills` array. */
 export const SKILL_NAMES = [
   'Farming',
@@ -61,6 +73,10 @@ interface RawStats {
   chapterCompletions?: RawChapterCompletions;
 }
 
+interface RawExploration {
+  timesCompleted?: number | string;
+}
+
 /** Only the fields the badge consumes are declared; saves contain much more. */
 export interface IncrelutionSave {
   generation?: number | string;
@@ -68,6 +84,7 @@ export interface IncrelutionSave {
   maxHealth?: number | string;
   dna?: number | string;
   skills?: RawSkill[];
+  exploration?: RawExploration[];
   newGamePlus?: RawNewGamePlus | null;
   stats?: RawStats;
   saveUpdateVersion?: number | string;
@@ -186,6 +203,12 @@ export interface BadgeChapter {
   generation: number;
 }
 
+export interface BadgeFunnel {
+  key: string;
+  name: string;
+  count: number;
+}
+
 export interface BadgeModel {
   generation: number;
   maxHealth: number;
@@ -194,6 +217,7 @@ export interface BadgeModel {
   longestLifeMs: number;
   highestExploration: number;
   perks: number[];
+  funnels: BadgeFunnel[];
   skills: BadgeSkill[];
   chapters: BadgeChapter[];
 }
@@ -227,6 +251,13 @@ export function buildBadgeModel(save: IncrelutionSave): BadgeModel {
 
   const perks = (save.newGamePlus?.perks ?? []).map(toNum);
 
+  const exploration = save.exploration ?? [];
+  const funnels: BadgeFunnel[] = FUNNELS.map((funnel) => ({
+    key: funnel.key,
+    name: funnel.name,
+    count: toNum(exploration[funnel.explorationId]?.timesCompleted),
+  }));
+
   return {
     generation: toNum(save.generation),
     maxHealth: toNum(save.maxHealth),
@@ -237,6 +268,7 @@ export function buildBadgeModel(save: IncrelutionSave): BadgeModel {
     longestLifeMs: toNum(stats.longestLife),
     highestExploration: toNum(stats.highestExploration),
     perks,
+    funnels,
     skills,
     chapters,
   };

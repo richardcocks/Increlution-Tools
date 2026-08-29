@@ -36,6 +36,14 @@ const SKILL_ICONS: IconName[] = [
   'hourglass',
 ];
 
+// Maps a funnel's key (from the save model) to its icon.
+const FUNNEL_ICONS: Record<string, IconName> = {
+  hourglass: 'hourglass',
+  shield: 'shield',
+  tooth: 'tooth',
+  core: 'core',
+};
+
 interface IconProps {
   name: IconName;
   x: number;
@@ -79,10 +87,14 @@ export const BadgeSvg = forwardRef<SVGSVGElement, BadgeSvgProps>(function BadgeS
   const cellW = (W - 2 * chipX0) / 3;
 
   const hasPerks = model.perks.length > 0;
-  const perksIconY = headerY + headerH + 6;
-  const perksBaseline = perksIconY + 13;
+  const hasFunnels = model.funnels.some((f) => f.count > 0);
+  const metaTop = headerY + headerH + 6;
+  const metaRowH = 22;
+  const perksIconY = metaTop;
+  const funnelsIconY = metaTop + (hasPerks ? metaRowH : 0);
+  const metaRows = (hasPerks ? 1 : 0) + (hasFunnels ? 1 : 0);
 
-  const panelTop = headerY + headerH + (hasPerks ? 36 : 12);
+  const panelTop = metaTop + metaRows * metaRowH + 8;
   const headingY = panelTop + 14;
   const dividerY = panelTop + 22;
   const rowsTop = panelTop + 42;
@@ -135,12 +147,39 @@ export const BadgeSvg = forwardRef<SVGSVGElement, BadgeSvgProps>(function BadgeS
       {hasPerks && (
         <>
           <Icon name="flask" x={leftX + 6} y={perksIconY} size={15} color={C.accent} />
-          <text x={leftX + 28} y={perksBaseline} fontFamily={FONT} fontSize={12} fill={C.muted}>
+          <text x={leftX + 28} y={perksIconY + 13} fontFamily={FONT} fontSize={12} fill={C.muted}>
             New Game+ Perks{'   '}
             <tspan fill={C.accent} fontWeight={600}>
               {model.perks.join('  ·  ')}
             </tspan>
           </text>
+        </>
+      )}
+
+      {/* Hourglass funnels */}
+      {hasFunnels && (
+        <>
+          <text x={leftX + 6} y={funnelsIconY + 13} fontFamily={FONT} fontSize={12} fill={C.muted}>
+            Funnels
+          </text>
+          {model.funnels.map((funnel, i) => {
+            const gx = leftX + 64 + i * 92;
+            return (
+              <g key={funnel.key}>
+                <Icon name={FUNNEL_ICONS[funnel.key]} x={gx} y={funnelsIconY + 1} size={14} color={C.accent} />
+                <text
+                  x={gx + 20}
+                  y={funnelsIconY + 13}
+                  fontFamily={FONT}
+                  fontSize={13}
+                  fontWeight={600}
+                  fill={C.value}
+                >
+                  {funnel.count}
+                </text>
+              </g>
+            );
+          })}
         </>
       )}
 
