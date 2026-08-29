@@ -205,7 +205,9 @@ export interface BadgeModel {
 export function buildBadgeModel(save: IncrelutionSave): BadgeModel {
   const stats = save.stats ?? {};
   const completions = stats.chapterCompletions ?? {};
-  const source = completions.best ?? completions.last ?? completions.current ?? [];
+  // `current` is this playthrough's progress; `best`/`last` span all New Game+
+  // playthroughs, which would over-report chapters not completed this run.
+  const source = completions.current ?? completions.last ?? completions.best ?? [];
 
   const chapters: BadgeChapter[] = [];
   source.forEach((entry, index) => {
@@ -228,7 +230,9 @@ export function buildBadgeModel(save: IncrelutionSave): BadgeModel {
   return {
     generation: toNum(save.generation),
     maxHealth: toNum(save.maxHealth),
-    dna: toNum(save.dna),
+    // New Game+ DNA (carried across playthroughs), not the in-run automation
+    // currency at top-level `dna`.
+    dna: toNum(save.newGamePlus?.dna),
     totalTimeMs: toNum(save.tickClock),
     longestLifeMs: toNum(stats.longestLife),
     highestExploration: toNum(stats.highestExploration),

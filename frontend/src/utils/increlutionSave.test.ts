@@ -46,15 +46,23 @@ describe('buildBadgeModel', () => {
     expect(model.totalTimeMs).toBeGreaterThan(0);
   });
 
+  it('uses New Game+ DNA, not the in-run automation currency', () => {
+    // save.dna is ~32.8M (automation currency); newGamePlus.dna is 440.
+    expect(model.dna).toBe(440);
+  });
+
   it('maps all 12 skills with names in order', () => {
     expect(model.skills).toHaveLength(12);
     expect(model.skills[0]).toEqual({ name: 'Farming', instinctLevel: 993 });
     expect(model.skills[11].name).toBe('Hourglass');
   });
 
-  it('builds the chapter table indexed by chapter (no null chapter 0)', () => {
-    expect(model.chapters.length).toBeGreaterThan(0);
+  it('builds the chapter table from this run (current), indexed by chapter', () => {
+    // The sample save has completed chapters 1-7 this playthrough (current),
+    // even though best/last span all 11 across playthroughs.
+    expect(model.chapters.length).toBe(7);
     expect(model.chapters[0].chapter).toBe(1);
+    expect(model.chapters[model.chapters.length - 1].chapter).toBe(7);
     for (const chapter of model.chapters) {
       expect(chapter.chapter).toBeGreaterThanOrEqual(1);
       expect(chapter.generation).toBeGreaterThan(0);
