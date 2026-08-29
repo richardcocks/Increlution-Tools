@@ -4,22 +4,24 @@ import type { BadgeModel } from '../utils/increlutionSave';
 import { ICONS } from './badgeIcons';
 import type { IconName } from './badgeIcons';
 
-// Fixed dark palette so the SVG (and any PNG exported from it) looks identical
-// regardless of the viewer's app theme — badges are shared out of context.
+// Fixed near-black palette (matching the original badge) so the SVG — and any
+// PNG exported from it — looks identical regardless of the viewer's app theme.
 const C = {
-  bg: '#171a26',
-  card: '#232838',
-  stroke: '#333a52',
-  text: '#e8eaf2',
-  muted: '#99a0b8',
-  accent: '#7aa2f7',
+  bg: '#0e0e12',
+  card: '#191920',
+  stroke: 'rgba(255, 255, 255, 0.16)',
+  text: '#ececf0',
+  muted: '#9b9ba6',
   value: '#ffffff',
+  icon: '#d7d7e0',
+  chapter: '#e0a24a', // warm accent for chapter numbers, as in the original
 } as const;
 
-const FONT = "'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
-const W = 560;
+// A plain sans stack, close to the original badge and consistent when rasterised.
+const FONT = 'Arial, Helvetica, sans-serif';
+const W = 580;
 
-// Skill icons, in the save's skill order. Game uses Font Awesome Pro glyphs;
+// Skill icons, in the save's skill order. The game uses Font Awesome Pro glyphs;
 // these are the closest Font Awesome Free equivalents.
 const SKILL_ICONS: IconName[] = [
   'farming',
@@ -70,48 +72,25 @@ interface BadgeSvgProps {
 }
 
 export const BadgeSvg = forwardRef<SVGSVGElement, BadgeSvgProps>(function BadgeSvg({ model }, ref) {
-  const chips: { icon: IconName; value: string; sub?: { icon: IconName; value: string } }[] = [
-    { icon: 'heart', value: formatShortNumber(model.maxHealth) },
-    { icon: 'clock', value: formatDuration(model.totalTimeMs) },
-    { icon: 'heartPulse', value: formatClock(model.longestLifeMs) },
-    { icon: 'user', value: String(model.generation) },
-    { icon: 'explored', value: String(model.highestExploration) },
-    // DNA is New Game+ DNA; the sub-figure is the automation unlock requirement
-    // (0.999^dna), matching the game's New Game+ screen.
-    { icon: 'dna', value: formatShortNumber(model.dna), sub: { icon: 'lock', value: formatUnlockRequirement(model.dna) } },
-  ];
+  const leftX = 12;
+  const leftW = 196;
+  const rightX = 216;
+  const rightW = W - rightX - 12; // 352
 
-  const headerY = 12;
-  const headerH = 92;
-  const chipX0 = 26;
-  const chipTop = 32;
-  const chipRowH = 40;
-  const cellW = (W - 2 * chipX0) / 3;
+  const topY = 12;
+  const topH = 94;
+  const botY = topY + topH + 10; // 116
 
+  const rowH = 17;
   const hasPerks = model.perks.length > 0;
   const hasFunnels = model.funnels.some((f) => f.count > 0);
-  const metaTop = headerY + headerH + 6;
-  const metaRowH = 22;
-  const perksIconY = metaTop;
-  const funnelsIconY = metaTop + (hasPerks ? metaRowH : 0);
-  const metaRows = (hasPerks ? 1 : 0) + (hasFunnels ? 1 : 0);
 
-  const panelTop = metaTop + metaRows * metaRowH + 8;
-  const headingY = panelTop + 14;
-  const dividerY = panelTop + 22;
-  const rowsTop = panelTop + 42;
-  const rowH = 18;
-
-  const skillsBottom = rowsTop + model.skills.length * rowH;
-  const chaptersBottom = rowsTop + (model.chapters.length + 1) * rowH;
-  const contentBottom = Math.max(skillsBottom, chaptersBottom);
-  const H = Math.round(contentBottom + 32);
-
-  const leftX = 14;
-  const leftW = 262;
-  const rightX = 284;
-  const rightW = 262;
-  const panelH = contentBottom - (panelTop - 6) + 8;
+  // Both bottom boxes share a baseline grid: row 0 is the chapter header, and
+  // skills / chapters fill rows from there. The taller of the two sets height.
+  const maxRows = Math.max(model.skills.length, 1 + model.chapters.length);
+  const botBoxH = 14 + maxRows * rowH + 8;
+  const H = Math.round(botY + botBoxH + 24);
+  const rowBaseline = (r: number) => botY + 24 + r * rowH;
 
   return (
     <svg
@@ -123,105 +102,57 @@ export const BadgeSvg = forwardRef<SVGSVGElement, BadgeSvgProps>(function BadgeS
       role="img"
       aria-label={`Increlution stats badge: generation ${model.generation}, ${model.chapters.length} chapters completed`}
     >
-      {/* Full-bleed opaque background: no rounded outer corners, so the exported
-          PNG has no transparent (white-on-export) corners. The on-page preview is
-          rounded via CSS border-radius instead. */}
       <rect x={0} y={0} width={W} height={H} fill={C.bg} />
 
-      {/* Header card */}
-      <rect x={leftX} y={headerY} width={W - 28} height={headerH} rx={8} fill={C.card} stroke={C.stroke} />
-      {chips.map((chip, i) => {
-        const col = i % 3;
-        const row = Math.floor(i / 3);
-        const x = chipX0 + col * cellW;
-        const baseline = chipTop + row * chipRowH + 13;
-        return (
-          <g key={chip.icon}>
-            <Icon name={chip.icon} x={x} y={baseline - 15} size={18} color={C.accent} />
-            <text x={x + 26} y={baseline} fontFamily={FONT} fontSize={17} fontWeight={700} fill={C.value}>
-              {chip.value}
-            </text>
-            {chip.sub && (
-              <>
-                <Icon name={chip.sub.icon} x={x + cellW - 62} y={baseline - 12} size={13} color={C.muted} />
-                <text
-                  x={x + cellW - 16}
-                  y={baseline}
-                  textAnchor="end"
-                  fontFamily={FONT}
-                  fontSize={12}
-                  fill={C.muted}
-                >
-                  {chip.sub.value}
-                </text>
-              </>
-            )}
-          </g>
-        );
-      })}
-
-      {/* New Game+ perks */}
-      {hasPerks && (
-        <>
-          <Icon name="flask" x={leftX + 6} y={perksIconY} size={15} color={C.accent} />
-          <text x={leftX + 28} y={perksIconY + 13} fontFamily={FONT} fontSize={12} fill={C.muted}>
-            New Game+ Perks{'   '}
-            <tspan fill={C.accent} fontWeight={600}>
-              {model.perks.join('  ·  ')}
-            </tspan>
-          </text>
-        </>
-      )}
-
-      {/* Hourglass funnels */}
-      {hasFunnels && (
-        <>
-          <text x={leftX + 6} y={funnelsIconY + 13} fontFamily={FONT} fontSize={12} fill={C.muted}>
-            Funnels
-          </text>
-          {model.funnels.map((funnel, i) => {
-            const gx = leftX + 64 + i * 92;
-            return (
-              <g key={funnel.key}>
-                <Icon name={FUNNEL_ICONS[funnel.key]} x={gx} y={funnelsIconY + 1} size={14} color={C.accent} />
-                <text
-                  x={gx + 20}
-                  y={funnelsIconY + 13}
-                  fontFamily={FONT}
-                  fontSize={13}
-                  fontWeight={600}
-                  fill={C.value}
-                >
-                  {funnel.count}
-                </text>
-              </g>
-            );
-          })}
-        </>
-      )}
-
-      {/* Panels */}
-      <rect x={leftX} y={panelTop - 6} width={leftW} height={panelH} rx={8} fill={C.card} stroke={C.stroke} />
-      <rect x={rightX} y={panelTop - 6} width={rightW} height={panelH} rx={8} fill={C.card} stroke={C.stroke} />
-
-      {/* Skills panel */}
-      <text x={leftX + 14} y={headingY} fontFamily={FONT} fontSize={13} fontWeight={700} fill={C.text}>
-        Skill Instincts
+      {/* ---- Top-left box: max HP + funnels ---- */}
+      <rect x={leftX} y={topY} width={leftW} height={topH} rx={6} fill={C.card} stroke={C.stroke} />
+      <Icon name="heart" x={leftX + 14} y={topY + 16} size={22} color={C.icon} />
+      <text x={leftX + 44} y={topY + 35} fontFamily={FONT} fontSize={22} fontWeight={700} fill={C.value}>
+        {formatShortNumber(model.maxHealth)}
       </text>
-      <line x1={leftX + 12} y1={dividerY} x2={leftX + leftW - 12} y2={dividerY} stroke={C.stroke} />
+      {hasFunnels &&
+        model.funnels.map((funnel, i) => {
+          const x = leftX + 14 + i * 45;
+          return (
+            <g key={funnel.key}>
+              <Icon name={FUNNEL_ICONS[funnel.key]} x={x} y={topY + 62} size={14} color={C.icon} />
+              <text x={x + 18} y={topY + 74} fontFamily={FONT} fontSize={12} fontWeight={600} fill={C.value}>
+                {funnel.count}
+              </text>
+            </g>
+          );
+        })}
+
+      {/* ---- Top-right box: New Game+ (flask), perks, DNA + unlock requirement ---- */}
+      <rect x={rightX} y={topY} width={rightW} height={topH} rx={6} fill={C.card} stroke={C.stroke} />
+      <Icon name="flask" x={rightX + 12} y={topY + 30} size={30} color={C.icon} />
+      <text x={rightX + 56} y={topY + 24} fontFamily={FONT} fontSize={11} fill={C.muted}>
+        New Game+ Perks
+      </text>
+      <text x={rightX + 56} y={topY + 44} fontFamily={FONT} fontSize={13} fontWeight={600} fill={C.text}>
+        {hasPerks ? model.perks.join('  ·  ') : '—'}
+      </text>
+      <Icon name="dna" x={rightX + 56} y={topY + 62} size={14} color={C.icon} />
+      <text x={rightX + 78} y={topY + 74} fontFamily={FONT} fontSize={15} fontWeight={700} fill={C.value}>
+        {formatShortNumber(model.dna)}
+      </text>
+      <Icon name="lock" x={rightX + 170} y={topY + 62} size={13} color={C.muted} />
+      <text x={rightX + 190} y={topY + 74} fontFamily={FONT} fontSize={13} fill={C.muted}>
+        {formatUnlockRequirement(model.dna)}
+      </text>
+
+      {/* ---- Bottom-left box: skill instincts (icon + level) ---- */}
+      <rect x={leftX} y={botY} width={leftW} height={botBoxH} rx={6} fill={C.card} stroke={C.stroke} />
       {model.skills.map((skill, i) => {
-        const baseline = rowsTop + i * rowH + 12;
+        const baseline = rowBaseline(i);
         return (
           <g key={skill.name}>
-            <Icon name={SKILL_ICONS[i]} x={leftX + 14} y={baseline - 11} size={13} color={C.muted} />
-            <text x={leftX + 34} y={baseline} fontFamily={FONT} fontSize={12} fill={C.muted}>
-              {skill.name}
-            </text>
+            <Icon name={SKILL_ICONS[i]} x={leftX + 14} y={baseline - 11} size={13} color={C.icon} />
             <text
               x={leftX + leftW - 14}
               y={baseline}
               fontFamily={FONT}
-              fontSize={12}
+              fontSize={13}
               fontWeight={600}
               fill={C.value}
               textAnchor="end"
@@ -232,28 +163,41 @@ export const BadgeSvg = forwardRef<SVGSVGElement, BadgeSvgProps>(function BadgeS
         );
       })}
 
-      {/* Chapters panel */}
-      <text x={rightX + 14} y={headingY} fontFamily={FONT} fontSize={13} fontWeight={700} fill={C.text}>
-        Chapter Completions
+      {/* ---- Bottom-right box: run summary header + chapter completions ---- */}
+      <rect x={rightX} y={botY} width={rightW} height={botBoxH} rx={6} fill={C.card} stroke={C.stroke} />
+      {/* Header row: total time, generation, exploration, best life */}
+      <Icon name="clock" x={rightX + 12} y={rowBaseline(0) - 11} size={12} color={C.icon} />
+      <text x={rightX + 28} y={rowBaseline(0)} fontFamily={FONT} fontSize={12} fontWeight={600} fill={C.text}>
+        {formatDuration(model.totalTimeMs)}
       </text>
-      <line x1={rightX + 12} y1={dividerY} x2={rightX + rightW - 12} y2={dividerY} stroke={C.stroke} />
-      {/* Column headers */}
-      <text x={rightX + 14} y={rowsTop + 12} fontFamily={FONT} fontSize={10} fill={C.muted}>
-        CH
+      <Icon name="user" x={rightX + 154} y={rowBaseline(0) - 11} size={12} color={C.icon} />
+      <text x={rightX + 170} y={rowBaseline(0)} fontFamily={FONT} fontSize={12} fill={C.text}>
+        {model.generation}
       </text>
-      <text x={rightX + 54} y={rowsTop + 12} fontFamily={FONT} fontSize={10} fill={C.muted}>
-        TIME
+      <Icon name="explored" x={rightX + 208} y={rowBaseline(0) - 11} size={12} color={C.icon} />
+      <text x={rightX + 226} y={rowBaseline(0)} fontFamily={FONT} fontSize={12} fill={C.text}>
+        {model.highestExploration}
       </text>
-      <Icon name="user" x={rightX + rightW - 24} y={rowsTop + 2} size={11} color={C.muted} />
+      <Icon name="heartPulse" x={rightX + 268} y={rowBaseline(0) - 11} size={12} color={C.icon} />
+      <text x={rightX + 284} y={rowBaseline(0)} fontFamily={FONT} fontSize={12} fill={C.text}>
+        {formatClock(model.longestLifeMs)}
+      </text>
+      <line
+        x1={rightX + 12}
+        y1={rowBaseline(0) + 7}
+        x2={rightX + rightW - 12}
+        y2={rowBaseline(0) + 7}
+        stroke={C.stroke}
+      />
       {model.chapters.map((chapter, i) => {
-        const baseline = rowsTop + (i + 1) * rowH + 12;
+        const baseline = rowBaseline(i + 1);
         return (
           <g key={chapter.chapter}>
-            <Icon name="book" x={rightX + 12} y={baseline - 11} size={12} color={C.accent} />
-            <text x={rightX + 30} y={baseline} fontFamily={FONT} fontSize={12} fontWeight={600} fill={C.accent}>
+            <Icon name="book" x={rightX + 12} y={baseline - 11} size={12} color={C.muted} />
+            <text x={rightX + 30} y={baseline} fontFamily={FONT} fontSize={12} fontWeight={700} fill={C.chapter}>
               {chapter.chapter}
             </text>
-            <text x={rightX + 54} y={baseline} fontFamily={FONT} fontSize={11} fill={C.text}>
+            <text x={rightX + 56} y={baseline} fontFamily={FONT} fontSize={11} fill={C.text}>
               {formatDuration(chapter.timeMs)}
             </text>
             <text
@@ -271,7 +215,7 @@ export const BadgeSvg = forwardRef<SVGSVGElement, BadgeSvgProps>(function BadgeS
       })}
 
       {/* Footer */}
-      <text x={W - 16} y={H - 12} fontFamily={FONT} fontSize={10} fill={C.muted} textAnchor="end">
+      <text x={W - 14} y={H - 10} fontFamily={FONT} fontSize={10} fill={C.muted} textAnchor="end">
         automations.eterm.uk
       </text>
     </svg>
