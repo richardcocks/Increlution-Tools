@@ -17,6 +17,7 @@ import { LoginPage } from './pages/LoginPage.tsx'
 import { LandingPage } from './pages/LandingPage.tsx'
 import AboutPage from './pages/AboutPage.tsx'
 import TermsPage from './pages/TermsPage.tsx'
+import BadgePage from './pages/BadgePage.tsx'
 import { AuthAwareShareRoute } from './components/AuthAwareShareRoute.tsx'
 import { AuthAwareFolderShareRoute } from './components/AuthAwareFolderShareRoute.tsx'
 import { DeleteAccountPage } from './pages/DeleteAccountPage.tsx'
@@ -89,6 +90,7 @@ createRoot(document.getElementById('root')!).render(
                     <Route path="/register" element={<Navigate to="/login" replace />} />
                     <Route path="/about" element={<AboutPage />} />
                     <Route path="/terms" element={<TermsPage />} />
+                    <Route path="/badge" element={<BadgePage />} />
                     <Route path="/share/:token" element={
                       <GameDataProvider>
                         <AuthAwareShareRoute />

@@ -1,0 +1,116 @@
+.badge-page {
+  display: flex;
+  justify-content: center;
+  flex: 1;
+  background-color: var(--color-bg-muted);
+  padding: 2rem;
+}
+
+.badge-page-content {
+  background-color: var(--color-bg-elevated);
+  padding: 2rem;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 640px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="dark"] .badge-page-content {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.badge-page-content h1 {
+  color: var(--color-text-primary);
+  margin-top: 0;
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+}
+
+.badge-intro {
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+  margin-bottom: 1.25rem;
+}
+
+.badge-input {
+  width: 100%;
+  min-height: 96px;
+  resize: vertical;
+  box-sizing: border-box;
+  padding: 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background-color: var(--color-bg-muted);
+  color: var(--color-text-primary);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
+.badge-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0.75rem 0;
+}
+
+.badge-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.9rem;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background-color: var(--color-bg-elevated);
+  color: var(--color-text-primary);
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.badge-btn:hover {
+  background-color: var(--color-bg-muted);
+}
+
+.badge-btn.primary {
+  background-color: #7aa2f7;
+  border-color: #7aa2f7;
+  color: #0b1020;
+  font-weight: 600;
+}
+
+.badge-btn.primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.badge-error {
+  color: #e06c75;
+  margin: 0.75rem 0;
+  font-size: 0.9rem;
+}
+
+.badge-preview {
+  margin-top: 1rem;
+  overflow-x: auto;
+}
+
+.badge-preview svg {
+  max-width: 100%;
+  height: auto;
+  border-radius: 12px;
+}
+
+.badge-back {
+  display: inline-block;
+  margin-top: 1.5rem;
+  background: none;
+  border: none;
+  color: #7aa2f7;
+  font-size: inherit;
+  padding: 0;
+  cursor: pointer;
+}
+
+.badge-back:hover {
+  text-decoration: underline;
+}
