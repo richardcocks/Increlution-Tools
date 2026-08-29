@@ -93,6 +93,13 @@ export const BadgeSvg = forwardRef<SVGSVGElement, BadgeSvgProps>(function BadgeS
   const H = Math.round(botY + botBoxH + 24);
   const rowBaseline = (r: number) => botY + 26 + r * rowH;
 
+  // Perk row: sits at rightX + 56 and must not spill past the box's right padding.
+  // A long perk list is condensed to fit (spacingAndGlyphs) rather than clipped.
+  const perkStr = hasPerks ? model.perks.join('  ·  ') : '—';
+  const perkX = rightX + 56;
+  const perkMaxW = rightW - 70; // right-box width minus the 56 left offset and 14 right padding
+  const perkNeedsFit = perkStr.length * 8.4 > perkMaxW; // ~8.4px per mono glyph at 13px
+
   return (
     <svg
       ref={ref}
@@ -159,15 +166,17 @@ export const BadgeSvg = forwardRef<SVGSVGElement, BadgeSvgProps>(function BadgeS
         </text>
       ) : null}
       <text
-        x={rightX + 56}
+        x={perkX}
         y={topY + 46}
         fontFamily={MONO}
         fontSize={13}
         fontWeight={600}
-        letterSpacing={1}
+        letterSpacing={0.25}
         fill={C.text}
+        textLength={perkNeedsFit ? perkMaxW : undefined}
+        lengthAdjust={perkNeedsFit ? 'spacingAndGlyphs' : undefined}
       >
-        {hasPerks ? model.perks.join('  ·  ') : '—'}
+        {perkStr}
       </text>
       <Icon name="dna" x={rightX + 56} y={topY + 64} size={14} color={C.icon} />
       <text
