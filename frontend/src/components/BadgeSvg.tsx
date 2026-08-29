@@ -1,6 +1,8 @@
 import { forwardRef } from 'react';
 import { formatShortNumber, formatDuration, formatClock } from '../utils/increlutionSave';
 import type { BadgeModel } from '../utils/increlutionSave';
+import { ICONS } from './badgeIcons';
+import type { IconName } from './badgeIcons';
 
 // Fixed dark palette so the SVG (and any PNG exported from it) looks identical
 // regardless of the viewer's app theme — badges are shared out of context.
@@ -17,45 +19,85 @@ const C = {
 const FONT = "'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
 const W = 560;
 
+// Skill icons, in the save's skill order. Game uses Font Awesome Pro glyphs;
+// these are the closest Font Awesome Free equivalents.
+const SKILL_ICONS: IconName[] = [
+  'farming',
+  'woodcutting',
+  'construction',
+  'agility',
+  'fishing',
+  'cooking',
+  'digging',
+  'combat',
+  'hunting',
+  'sailing',
+  'social',
+  'hourglass',
+];
+
+interface IconProps {
+  name: IconName;
+  x: number;
+  /** Top of the icon box. */
+  y: number;
+  size: number;
+  color: string;
+}
+
+/** Renders an icon path scaled to `size` (tall) and horizontally centred in a `size`-wide slot. */
+function Icon({ name, x, y, size, color }: IconProps) {
+  const icon = ICONS[name];
+  const scale = size / icon.h;
+  const dx = x + (size - icon.w * scale) / 2;
+  return (
+    <g transform={`translate(${dx}, ${y}) scale(${scale})`}>
+      <path d={icon.d} fill={color} />
+    </g>
+  );
+}
+
 interface BadgeSvgProps {
   model: BadgeModel;
 }
 
 export const BadgeSvg = forwardRef<SVGSVGElement, BadgeSvgProps>(function BadgeSvg({ model }, ref) {
-  const chips = [
-    { label: 'Max HP', value: formatShortNumber(model.maxHealth) },
-    { label: 'Total time', value: formatDuration(model.totalTimeMs) },
-    { label: 'Best life', value: formatClock(model.longestLifeMs) },
-    { label: 'Generation', value: String(model.generation) },
-    { label: 'Explored', value: String(model.highestExploration) },
-    { label: 'DNA', value: formatShortNumber(model.dna) },
+  const chips: { icon: IconName; value: string }[] = [
+    { icon: 'heart', value: formatShortNumber(model.maxHealth) },
+    { icon: 'clock', value: formatDuration(model.totalTimeMs) },
+    { icon: 'heartPulse', value: formatClock(model.longestLifeMs) },
+    { icon: 'user', value: String(model.generation) },
+    { icon: 'explored', value: String(model.highestExploration) },
+    { icon: 'dna', value: formatShortNumber(model.dna) },
   ];
 
-  const chipAreaX = 20;
-  const chipTop = 22;
-  const cellW = (W - 40) / 3;
-  const chipRowH = 44;
+  const headerY = 12;
+  const headerH = 92;
+  const chipX0 = 26;
+  const chipTop = 32;
+  const chipRowH = 40;
+  const cellW = (W - 2 * chipX0) / 3;
 
-  const headerBottom = chipTop + 2 * chipRowH; // 110
   const hasPerks = model.perks.length > 0;
-  const perksBaseline = headerBottom + 16;
-  const panelTop = headerBottom + (hasPerks ? 34 : 10);
+  const perksIconY = headerY + headerH + 6;
+  const perksBaseline = perksIconY + 13;
 
+  const panelTop = headerY + headerH + (hasPerks ? 36 : 12);
   const headingY = panelTop + 14;
   const dividerY = panelTop + 22;
   const rowsTop = panelTop + 42;
-  const rowH = 17;
+  const rowH = 18;
 
   const skillsBottom = rowsTop + model.skills.length * rowH;
   const chaptersBottom = rowsTop + (model.chapters.length + 1) * rowH;
   const contentBottom = Math.max(skillsBottom, chaptersBottom);
-  const H = Math.round(contentBottom + 34);
+  const H = Math.round(contentBottom + 32);
 
   const leftX = 14;
   const leftW = 262;
   const rightX = 284;
   const rightW = 262;
-  const panelH = contentBottom - panelTop + 14;
+  const panelH = contentBottom - (panelTop - 6) + 8;
 
   return (
     <svg
@@ -70,18 +112,16 @@ export const BadgeSvg = forwardRef<SVGSVGElement, BadgeSvgProps>(function BadgeS
       <rect x={0} y={0} width={W} height={H} rx={12} fill={C.bg} />
 
       {/* Header card */}
-      <rect x={leftX} y={12} width={W - 28} height={headerBottom - 6} rx={8} fill={C.card} stroke={C.stroke} />
+      <rect x={leftX} y={headerY} width={W - 28} height={headerH} rx={8} fill={C.card} stroke={C.stroke} />
       {chips.map((chip, i) => {
         const col = i % 3;
         const row = Math.floor(i / 3);
-        const x = chipAreaX + col * cellW + 12;
-        const yLabel = chipTop + row * chipRowH + 14;
+        const x = chipX0 + col * cellW;
+        const baseline = chipTop + row * chipRowH + 13;
         return (
-          <g key={chip.label}>
-            <text x={x} y={yLabel} fontFamily={FONT} fontSize={11} fill={C.muted}>
-              {chip.label}
-            </text>
-            <text x={x} y={yLabel + 20} fontFamily={FONT} fontSize={17} fontWeight={700} fill={C.value}>
+          <g key={chip.icon}>
+            <Icon name={chip.icon} x={x} y={baseline - 15} size={18} color={C.accent} />
+            <text x={x + 26} y={baseline} fontFamily={FONT} fontSize={17} fontWeight={700} fill={C.value}>
               {chip.value}
             </text>
           </g>
@@ -90,12 +130,15 @@ export const BadgeSvg = forwardRef<SVGSVGElement, BadgeSvgProps>(function BadgeS
 
       {/* New Game+ perks */}
       {hasPerks && (
-        <text x={chipAreaX} y={perksBaseline} fontFamily={FONT} fontSize={12} fill={C.muted}>
-          New Game+ Perks{'   '}
-          <tspan fill={C.accent} fontWeight={600}>
-            {model.perks.join('  ·  ')}
-          </tspan>
-        </text>
+        <>
+          <Icon name="flask" x={leftX + 6} y={perksIconY} size={15} color={C.accent} />
+          <text x={leftX + 28} y={perksBaseline} fontFamily={FONT} fontSize={12} fill={C.muted}>
+            New Game+ Perks{'   '}
+            <tspan fill={C.accent} fontWeight={600}>
+              {model.perks.join('  ·  ')}
+            </tspan>
+          </text>
+        </>
       )}
 
       {/* Panels */}
@@ -108,15 +151,16 @@ export const BadgeSvg = forwardRef<SVGSVGElement, BadgeSvgProps>(function BadgeS
       </text>
       <line x1={leftX + 12} y1={dividerY} x2={leftX + leftW - 12} y2={dividerY} stroke={C.stroke} />
       {model.skills.map((skill, i) => {
-        const y = rowsTop + i * rowH + 12;
+        const baseline = rowsTop + i * rowH + 12;
         return (
           <g key={skill.name}>
-            <text x={leftX + 14} y={y} fontFamily={FONT} fontSize={12} fill={C.muted}>
+            <Icon name={SKILL_ICONS[i]} x={leftX + 14} y={baseline - 11} size={13} color={C.muted} />
+            <text x={leftX + 34} y={baseline} fontFamily={FONT} fontSize={12} fill={C.muted}>
               {skill.name}
             </text>
             <text
               x={leftX + leftW - 14}
-              y={y}
+              y={baseline}
               fontFamily={FONT}
               fontSize={12}
               fontWeight={600}
@@ -138,25 +182,24 @@ export const BadgeSvg = forwardRef<SVGSVGElement, BadgeSvgProps>(function BadgeS
       <text x={rightX + 14} y={rowsTop + 12} fontFamily={FONT} fontSize={10} fill={C.muted}>
         CH
       </text>
-      <text x={rightX + 52} y={rowsTop + 12} fontFamily={FONT} fontSize={10} fill={C.muted}>
+      <text x={rightX + 54} y={rowsTop + 12} fontFamily={FONT} fontSize={10} fill={C.muted}>
         TIME
       </text>
-      <text x={rightX + rightW - 14} y={rowsTop + 12} fontFamily={FONT} fontSize={10} fill={C.muted} textAnchor="end">
-        GEN
-      </text>
+      <Icon name="user" x={rightX + rightW - 24} y={rowsTop + 2} size={11} color={C.muted} />
       {model.chapters.map((chapter, i) => {
-        const y = rowsTop + (i + 1) * rowH + 12;
+        const baseline = rowsTop + (i + 1) * rowH + 12;
         return (
           <g key={chapter.chapter}>
-            <text x={rightX + 14} y={y} fontFamily={FONT} fontSize={12} fontWeight={600} fill={C.accent}>
+            <Icon name="book" x={rightX + 12} y={baseline - 11} size={12} color={C.accent} />
+            <text x={rightX + 30} y={baseline} fontFamily={FONT} fontSize={12} fontWeight={600} fill={C.accent}>
               {chapter.chapter}
             </text>
-            <text x={rightX + 52} y={y} fontFamily={FONT} fontSize={11} fill={C.text}>
+            <text x={rightX + 54} y={baseline} fontFamily={FONT} fontSize={11} fill={C.text}>
               {formatDuration(chapter.timeMs)}
             </text>
             <text
               x={rightX + rightW - 14}
-              y={y}
+              y={baseline}
               fontFamily={FONT}
               fontSize={12}
               fill={C.value}
@@ -169,7 +212,7 @@ export const BadgeSvg = forwardRef<SVGSVGElement, BadgeSvgProps>(function BadgeS
       })}
 
       {/* Footer */}
-      <text x={W - 16} y={H - 14} fontFamily={FONT} fontSize={10} fill={C.muted} textAnchor="end">
+      <text x={W - 16} y={H - 12} fontFamily={FONT} fontSize={10} fill={C.muted} textAnchor="end">
         automations.eterm.uk
       </text>
     </svg>
