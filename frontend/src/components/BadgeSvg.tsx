@@ -146,6 +146,18 @@ export const BadgeSvg = forwardRef<SVGSVGElement, BadgeSvgProps>(function BadgeS
       <text x={rightX + 56} y={topY + 25} fontFamily={FONT} fontSize={11} fill={C.muted}>
         New Game+ Perks
       </text>
+      {model.ngPlusRuns ? (
+        <text
+          x={rightX + rightW - 14}
+          y={topY + 25}
+          textAnchor="end"
+          fontFamily={FONT}
+          fontSize={11}
+          fill={C.muted}
+        >
+          Run {model.ngPlusRuns}
+        </text>
+      ) : null}
       <text
         x={rightX + 56}
         y={topY + 46}

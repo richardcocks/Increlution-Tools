@@ -194,6 +194,27 @@ export function formatUnlockRequirement(dna: number): string {
 }
 
 /**
+ * Estimate the number of completed New Game+ runs from banked NG+ DNA. The save
+ * doesn't store a run count, but each completed run awards a fixed reward: 110
+ * DNA for a full completion, 90 for the runs before the final chapter was
+ * reachable. So recover the count as the fewest 90-DNA runs (n) plus 110-DNA
+ * runs (m) that sum to the banked DNA (90n + 110m = dna, n minimal); the run
+ * count is n + m. Returns null when no whole-run combination fits.
+ *
+ * This assumes the current chapter is the New Game+ one — a safe assumption
+ * while the game remains unchanged, but an assumption nonetheless.
+ */
+export function estimateNgPlusRuns(dna: number): number | null {
+  const total = Math.round(dna);
+  if (total <= 0) return 0;
+  for (let n = 0; 90 * n <= total; n += 1) {
+    const rest = total - 90 * n;
+    if (rest % 110 === 0) return n + rest / 110;
+  }
+  return null;
+}
+
+/**
  * Format a tick count (ms) as a clock, dropping a leading zero hours component:
  * "44:53" under an hour, "1:02:03" over. Used for the "longest life" figure.
  */
@@ -227,6 +248,8 @@ export interface BadgeModel {
   generation: number;
   maxHealth: number;
   dna: number;
+  /** Estimated completed New Game+ runs (derived from DNA); null if indeterminate. */
+  ngPlusRuns: number | null;
   totalTimeMs: number;
   longestLifeMs: number;
   highestExploration: number;
@@ -264,6 +287,7 @@ export function buildBadgeModel(save: IncrelutionSave): BadgeModel {
   }));
 
   const perks = (save.newGamePlus?.perks ?? []).map(toNum);
+  const dna = toNum(save.newGamePlus?.dna);
 
   const exploration = save.exploration ?? [];
   const funnels: BadgeFunnel[] = FUNNELS.map((funnel) => ({
@@ -277,7 +301,8 @@ export function buildBadgeModel(save: IncrelutionSave): BadgeModel {
     maxHealth: toNum(save.maxHealth),
     // New Game+ DNA (carried across playthroughs), not the in-run automation
     // currency at top-level `dna`.
-    dna: toNum(save.newGamePlus?.dna),
+    dna,
+    ngPlusRuns: estimateNgPlusRuns(dna),
     totalTimeMs: toNum(save.tickClock),
     longestLifeMs: toNum(stats.longestLife),
     highestExploration: toNum(stats.highestExploration),

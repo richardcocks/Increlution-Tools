@@ -7,6 +7,7 @@ import {
   formatDuration,
   formatClock,
   formatUnlockRequirement,
+  estimateNgPlusRuns,
   IncrelutionSaveError,
   SKILL_NAMES,
 } from './increlutionSave';
@@ -109,6 +110,24 @@ describe('formatDuration', () => {
     expect(formatDuration(3273)).toBe('3s 273ms');
     // With days present, milliseconds are dropped to stay compact.
     expect(formatDuration(86_400_000 + 273)).toBe('1d');
+  });
+});
+
+describe('estimateNgPlusRuns', () => {
+  it('divides evenly by 110 for full-completion runs', () => {
+    expect(estimateNgPlusRuns(440)).toBe(4); // the sample save
+    expect(estimateNgPlusRuns(110)).toBe(1);
+    expect(estimateNgPlusRuns(0)).toBe(0);
+  });
+
+  it('mixes 90- and 110-DNA runs (fewest 90s) when 110 does not divide evenly', () => {
+    expect(estimateNgPlusRuns(200)).toBe(2); // 90 + 110
+    expect(estimateNgPlusRuns(420)).toBe(4); // 90 + 3*110
+    expect(estimateNgPlusRuns(180)).toBe(2); // 2*90
+  });
+
+  it('returns null when no whole-run combination fits', () => {
+    expect(estimateNgPlusRuns(100)).toBeNull();
   });
 });
 
