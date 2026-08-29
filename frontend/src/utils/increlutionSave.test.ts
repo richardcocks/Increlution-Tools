@@ -6,6 +6,7 @@ import {
   formatShortNumber,
   formatDuration,
   formatClock,
+  formatUnlockRequirement,
   IncrelutionSaveError,
   SKILL_NAMES,
 } from './increlutionSave';
@@ -101,6 +102,21 @@ describe('formatDuration', () => {
     // 2 days, 0 hours, 33 minutes, 27 seconds — the zero hours unit is dropped.
     expect(formatDuration((2 * 86400 + 33 * 60 + 27) * 1000)).toBe('2d 33m 27s');
     expect(formatDuration(0)).toBe('0s');
+  });
+
+  it('includes milliseconds when there are no days', () => {
+    expect(formatDuration(273)).toBe('273ms');
+    expect(formatDuration(3273)).toBe('3s 273ms');
+    // With days present, milliseconds are dropped to stay compact.
+    expect(formatDuration(86_400_000 + 273)).toBe('1d');
+  });
+});
+
+describe('formatUnlockRequirement', () => {
+  it('computes the automation unlock requirement as 0.999^dna', () => {
+    expect(formatUnlockRequirement(2750)).toBe('6.38%'); // matches the original badge
+    expect(formatUnlockRequirement(440)).toBe('64.4%');
+    expect(formatUnlockRequirement(0)).toBe('100.0%');
   });
 });
 

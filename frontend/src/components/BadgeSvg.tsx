@@ -1,5 +1,5 @@
 import { forwardRef } from 'react';
-import { formatShortNumber, formatDuration, formatClock } from '../utils/increlutionSave';
+import { formatShortNumber, formatDuration, formatClock, formatUnlockRequirement } from '../utils/increlutionSave';
 import type { BadgeModel } from '../utils/increlutionSave';
 import { ICONS } from './badgeIcons';
 import type { IconName } from './badgeIcons';
@@ -70,13 +70,15 @@ interface BadgeSvgProps {
 }
 
 export const BadgeSvg = forwardRef<SVGSVGElement, BadgeSvgProps>(function BadgeSvg({ model }, ref) {
-  const chips: { icon: IconName; value: string }[] = [
+  const chips: { icon: IconName; value: string; sub?: { icon: IconName; value: string } }[] = [
     { icon: 'heart', value: formatShortNumber(model.maxHealth) },
     { icon: 'clock', value: formatDuration(model.totalTimeMs) },
     { icon: 'heartPulse', value: formatClock(model.longestLifeMs) },
     { icon: 'user', value: String(model.generation) },
     { icon: 'explored', value: String(model.highestExploration) },
-    { icon: 'dna', value: formatShortNumber(model.dna) },
+    // DNA is New Game+ DNA; the sub-figure is the automation unlock requirement
+    // (0.999^dna), matching the game's New Game+ screen.
+    { icon: 'dna', value: formatShortNumber(model.dna), sub: { icon: 'lock', value: formatUnlockRequirement(model.dna) } },
   ];
 
   const headerY = 12;
@@ -139,6 +141,21 @@ export const BadgeSvg = forwardRef<SVGSVGElement, BadgeSvgProps>(function BadgeS
             <text x={x + 26} y={baseline} fontFamily={FONT} fontSize={17} fontWeight={700} fill={C.value}>
               {chip.value}
             </text>
+            {chip.sub && (
+              <>
+                <Icon name={chip.sub.icon} x={x + cellW - 62} y={baseline - 12} size={13} color={C.muted} />
+                <text
+                  x={x + cellW - 16}
+                  y={baseline}
+                  textAnchor="end"
+                  fontFamily={FONT}
+                  fontSize={12}
+                  fill={C.muted}
+                >
+                  {chip.sub.value}
+                </text>
+              </>
+            )}
           </g>
         );
       })}

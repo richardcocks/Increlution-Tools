@@ -164,19 +164,33 @@ export function formatShortNumber(value: number): string {
 /**
  * Format a tick count (milliseconds of game time) as a compact duration,
  * e.g. "2d 22h 35m 34s". Zero-valued units are omitted, matching the game.
+ * When the duration is under a day, milliseconds are included too, so short
+ * (e.g. speedrun) completion times keep their precision instead of collapsing
+ * to whole seconds (or "0s").
  */
 export function formatDuration(ms: number): string {
-  const totalSeconds = Math.floor(Math.max(0, ms) / 1000);
-  const days = Math.floor(totalSeconds / 86400);
-  const hours = Math.floor((totalSeconds % 86400) / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  const seconds = totalSeconds % 60;
+  const totalMs = Math.floor(Math.max(0, ms));
+  const days = Math.floor(totalMs / 86_400_000);
+  const hours = Math.floor((totalMs % 86_400_000) / 3_600_000);
+  const minutes = Math.floor((totalMs % 3_600_000) / 60_000);
+  const seconds = Math.floor((totalMs % 60_000) / 1000);
+  const millis = totalMs % 1000;
   const parts: string[] = [];
   if (days) parts.push(`${days}d`);
   if (hours) parts.push(`${hours}h`);
   if (minutes) parts.push(`${minutes}m`);
   if (seconds) parts.push(`${seconds}s`);
+  if (days === 0 && millis) parts.push(`${millis}ms`);
   return parts.length ? parts.join(' ') : '0s';
+}
+
+/**
+ * The game's automation-unlock requirement: 0.999^dna, i.e. a compounding 0.1%
+ * reduction per New Game+ DNA. Returned as a percentage string (e.g. "6.38%").
+ */
+export function formatUnlockRequirement(dna: number): string {
+  const fraction = Math.pow(0.999, Math.max(0, dna)) * 100;
+  return `${fraction >= 10 ? fraction.toFixed(1) : fraction.toFixed(2)}%`;
 }
 
 /**
