@@ -27,7 +27,7 @@ else
     echo "Service: STOPPED"
     echo "Health:  N/A"
 fi
-echo "Boot:    $(systemctl is-enabled increlution-editor-red 2>/dev/null || echo unknown)"
+boot=$(systemctl is-enabled increlution-editor-red 2>/dev/null); echo "Boot:    ${boot:-unknown}"
 if [ "$ACTIVE" = "red" ]; then
     echo "Traffic: ACTIVE <--"
 else
@@ -47,7 +47,7 @@ else
     echo "Service: STOPPED"
     echo "Health:  N/A"
 fi
-echo "Boot:    $(systemctl is-enabled increlution-editor-green 2>/dev/null || echo unknown)"
+boot=$(systemctl is-enabled increlution-editor-green 2>/dev/null); echo "Boot:    ${boot:-unknown}"
 if [ "$ACTIVE" = "green" ]; then
     echo "Traffic: ACTIVE <--"
 else
@@ -66,4 +66,4 @@ if systemctl is-active --quiet increlution-editor-staging; then
 else
     echo "Service: STOPPED"
 fi
-echo "Boot:    $(systemctl is-enabled increlution-editor-staging 2>/dev/null || echo unknown)"
+boot=$(systemctl is-enabled increlution-editor-staging 2>/dev/null); echo "Boot:    ${boot:-unknown}"
