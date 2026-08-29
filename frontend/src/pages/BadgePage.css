@@ -94,10 +94,19 @@
   overflow-x: auto;
 }
 
-.badge-preview svg {
+.badge-image {
+  display: block;
   max-width: 100%;
   height: auto;
   border-radius: 12px;
+}
+
+/* Live SVG kept in the DOM only as the rasterisation source; never shown. */
+.badge-offscreen {
+  position: absolute;
+  left: -99999px;
+  top: 0;
+  pointer-events: none;
 }
 
 .badge-back {
