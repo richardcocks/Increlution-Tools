@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import exampleSave from './__fixtures__/exampleSave.txt?raw';
+import CryptoJS from '../vendor/cryptojs-aes-3.1.2.js';
 import {
   decodeSave,
   buildBadgeModel,
@@ -12,16 +12,51 @@ import {
   SKILL_NAMES,
 } from './increlutionSave';
 
+// The game encrypts saves with this (public, client-embedded) password. We build
+// synthetic saves the same way the game does — encrypting JSON with the vendored
+// CryptoJS build — so the decoder is exercised end-to-end against a real-format
+// ciphertext, without committing a real player save.
+const SAVE_PASSWORD = 'gXVgN';
+const encodeSave = (data: unknown): string => CryptoJS.AES.encrypt(JSON.stringify(data), SAVE_PASSWORD).toString();
+
+const SKILL_LEVELS = [993, 980, 906, 981, 974, 960, 941, 991, 997, 891, 922, 24];
+const CHAPTER_GENERATIONS = [10, 31, 49, 78, 101, 120, 149, 183, 203, 248, 281];
+const chapterEntries = (count: number) =>
+  CHAPTER_GENERATIONS.slice(0, count).map((generation, i) => ({ tickClock: (i + 1) * 1_000_000, generation }));
+
+const exploration = Array.from({ length: 305 }, () => ({ timesCompleted: 0 }));
+exploration[161] = { timesCompleted: 7 }; // Funnel hourglass
+exploration[190] = { timesCompleted: 8 }; // Funnel shield
+// 228 (tooth) and 304 (titan core) stay at 0
+
+const sampleSave = encodeSave({
+  generation: 162,
+  tickClock: 312_069_868,
+  maxHealth: '667278',
+  skills: SKILL_LEVELS.map((instinctLevel) => ({ instinctLevel: String(instinctLevel) })),
+  exploration,
+  newGamePlus: { dna: '440', perks: ['3', '3', '0', '0', '1', '1', '1', '0', '2', '1'], penalties: [] },
+  stats: {
+    longestLife: 2_693_580,
+    highestExploration: 216,
+    chapterCompletions: {
+      current: [null, ...chapterEntries(7)], // this playthrough: chapters 1-7
+      last: [null, ...chapterEntries(11)],
+      best: [null, ...chapterEntries(11)],
+    },
+  },
+});
+
 describe('decodeSave', () => {
-  it('decodes a real Increlution save into a parsed object', () => {
-    const save = decodeSave(exampleSave);
+  it('decodes a save produced in the game format into a parsed object', () => {
+    const save = decodeSave(sampleSave);
     expect(save.skills).toHaveLength(SKILL_NAMES.length);
     expect(save.generation).toBe(162);
     expect(save.stats?.chapterCompletions?.best).toBeTruthy();
   });
 
   it('tolerates surrounding whitespace', () => {
-    expect(() => decodeSave(`\n  ${exampleSave}  \n`)).not.toThrow();
+    expect(() => decodeSave(`\n  ${sampleSave}  \n`)).not.toThrow();
   });
 
   it('rejects an empty save', () => {
@@ -39,7 +74,7 @@ describe('decodeSave', () => {
 });
 
 describe('buildBadgeModel', () => {
-  const model = buildBadgeModel(decodeSave(exampleSave));
+  const model = buildBadgeModel(decodeSave(sampleSave));
 
   it('extracts the headline stats', () => {
     expect(model.generation).toBe(162);
@@ -49,7 +84,6 @@ describe('buildBadgeModel', () => {
   });
 
   it('uses New Game+ DNA, not the in-run automation currency', () => {
-    // save.dna is ~32.8M (automation currency); newGamePlus.dna is 440.
     expect(model.dna).toBe(440);
   });
 
@@ -60,8 +94,7 @@ describe('buildBadgeModel', () => {
   });
 
   it('builds the chapter table from this run (current), indexed by chapter', () => {
-    // The sample save has completed chapters 1-7 this playthrough (current),
-    // even though best/last span all 11 across playthroughs.
+    // current has chapters 1-7, even though best/last span all 11.
     expect(model.chapters.length).toBe(7);
     expect(model.chapters[0].chapter).toBe(1);
     expect(model.chapters[model.chapters.length - 1].chapter).toBe(7);
@@ -85,10 +118,14 @@ describe('buildBadgeModel', () => {
       ['Titan Core', 0],
     ]);
   });
+
+  it('derives the New Game+ run count from DNA', () => {
+    expect(model.ngPlusRuns).toBe(4); // 440 / 110
+  });
 });
 
 describe('formatShortNumber', () => {
-  it('formats magnitudes like the game', () => {
+  it('formats magnitudes compactly', () => {
     expect(formatShortNumber(667278)).toBe('667K');
     expect(formatShortNumber(2_400_000)).toBe('2.40M');
     expect(formatShortNumber(15_100_000_000_000)).toBe('15.1T');
@@ -115,7 +152,7 @@ describe('formatDuration', () => {
 
 describe('estimateNgPlusRuns', () => {
   it('divides evenly by 110 for full-completion runs', () => {
-    expect(estimateNgPlusRuns(440)).toBe(4); // the sample save
+    expect(estimateNgPlusRuns(440)).toBe(4);
     expect(estimateNgPlusRuns(110)).toBe(1);
     expect(estimateNgPlusRuns(0)).toBe(0);
   });

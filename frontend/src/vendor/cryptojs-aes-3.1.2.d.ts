@@ -9,6 +9,7 @@ interface CryptoJSWordArray {
 interface CryptoJSStatic {
   AES: {
     decrypt(ciphertext: string, password: string): CryptoJSWordArray;
+    encrypt(message: string, password: string): { toString(): string };
   };
   enc: {
     Utf8: unknown;
