@@ -261,11 +261,25 @@ app.UseAuthorization();
 app.UseRateLimiter();  // Must be after auth so we can check if user is authenticated
 app.UseOutputCache();
 
+// Vite content-hashes everything under /assets, so those files can be cached forever.
+// index.html keeps a fixed name, so it must be revalidated or browsers keep running the
+// previous deploy.
+var spaStaticFileOptions = new StaticFileOptions
+{
+    OnPrepareResponse = ctx =>
+    {
+        ctx.Context.Response.Headers.CacheControl =
+            ctx.Context.Request.Path.StartsWithSegments("/assets")
+                ? "public, max-age=31536000, immutable"
+                : "no-cache";
+    }
+};
+
 // Serve static files (frontend) in production
 if (!app.Environment.IsDevelopment())
 {
     app.UseDefaultFiles();
-    app.UseStaticFiles();
+    app.UseStaticFiles(spaStaticFileOptions);
 }
 
 // Map endpoint groups
@@ -279,7 +293,7 @@ app.MapGameDataEndpoints();
 // SPA fallback for client-side routing (production only)
 if (!app.Environment.IsDevelopment())
 {
-    app.MapFallbackToFile("index.html");
+    app.MapFallbackToFile("index.html", spaStaticFileOptions);
 }
 
 app.Run();
